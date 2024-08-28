@@ -1,0 +1,62 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}
+    {% if bom %}
+        {{ product.name }} Difference in BOM Versions {{ drop }}
+    {% else %}
+        {{ product.name }} Difference in ISO Versions {{ drop }}
+    {% endif %}
+    {% endblock %}
+    {% block content %}
+    <script type="text/javascript" src='/static/isoDelta.js'></script>
+    <div class="general-container">
+            <h2 class="generalPageNewLook-title">
+            {% if bom %}
+                Difference Between ISO BOM Versions
+            {% else %}
+                Difference Between ISO Versions
+            {% endif %}
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/pages/viewpage.action?pageId=110792110" title="Comparing versions Info" target="_blank"><img src="/static/images/question.png"/></a>
+           </h2>
+           <div id=empty_form>
+            <table class='general-table'>
+                <tr>
+                    <th>Product</th>
+                    <th>{% if bom %}BOM{% else %}ISO{% endif %}</th>
+                    <th>Previous {% if bom %}BOM{% else %}ISO{% endif %}</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td><select id='products' style='height:70%;min-width:150px;margin:10px'></select></td>
+                    <td>
+                        <div>
+                        <label for='drops'>Drop:</label>
+                        <select id='drops' ></select>
+                        <label for='iso'>{% if bom %}BOM{% else %}ISO{% endif %}:</label>
+                        <select id='iso' ></select>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                        <label for='previous_drops'>Drop:</label>
+                        <select id='previous_drops' ></select>
+                        <label for='previous_iso'>{% if bom %}BOM{% else %}ISO{% endif %}:</label>
+                        <select id='previous_iso' ></select>
+                        </div>
+                    </td>
+                    <td><input type="button" value="Show Diff" id="get_diff"></td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="results" class="isoDiffResult">
+        </div>
+        <input type="hidden" name="isoVersion" value="{{ isoVersion }}">
+        <input type="hidden" name="drop" value="{{ drop }}">
+        <input type="hidden" name="preDrop" value="{{ preDrop }}">
+        <input type="hidden" name="product" value="{{ product }}">
+        <input type="hidden" name="previousIsoVersion" value="{{ previousIsoVer }}">
+        <input type="hidden" name="bom" value="{{ bom }}">
+ <div class="modal"></div>
+ {% endblock %}
+ {% endif %}

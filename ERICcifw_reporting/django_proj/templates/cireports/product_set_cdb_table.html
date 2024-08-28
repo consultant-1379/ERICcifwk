@@ -1,0 +1,90 @@
+{% load guardian_tags %}
+{% load setVar %}
+{% block content %}
+{% if cdbs %}
+        <table class="drop-cdbs status-summary">
+                <tr>
+                    {% for cdb in cdbs %}
+                    {% if cdb.state == "caution" %}
+                    <td> <p align="center">
+                        <b>{{ cdb.type }}</b>
+                        <br>
+                        <br>
+                        <a class="img"
+                            href="/{{drop}}/{{ productSetVersionId }}/{{ cdb.type }}/returnProdSetCautionStatusDetails/{{ cdb.testReport }}">
+                            <img id="{{ cdb.type }}_productSetCautionStatusISO" src="/static/images/{{cdb.state}}.png" alt="{{cdb.state}}" width="40" height="40"></a>
+                        <br>
+                        <br>
+                        Since: {{ cdb.finish }}
+                        </p>
+                    </td>
+                    {% endif %}
+                     {% if cdb.state == "passed_manual" %}
+                    <td> <p align="center">
+                        <b>{{ cdb.type }}</b>
+                        </br>
+                        <a class="img"
+                            href="/{{ drop }}/{{ productSetVersionId }}/{{ cdb.type }}/returnProdSetKGBreadyDetails/{{ cdb.testReport }}">
+                            <img id="{{ cdb.type }}_KGBProductSetreadyISO" src="/static/images/{{cdb.state}}.png" alt="{{cdb.state}}" width="40" height="40">
+                        </a>
+                        <br>
+                        <br>
+                        Since: {{ cdb.finish }}
+                        </p>
+                    </td>
+                    {% endif %}
+                    {% endfor %}
+                {% for cdb in cdbs %}
+                {% if cdb.state == "in_progress" or cdb.state == "failed" or cdb.state == "passed"%}
+                <td align=center>
+                        <p align="center">
+                        {% if cdb.state == "passed_manual" or cdb.state == "caution" %}
+                        {% else %}
+                          <b> {{ cdb.type }}</b>
+                        {% endif %}
+                            <br>
+                            <br>
+                            {% if cdb.state == "in_progress" %}
+                                {% if cdb.veLog != "None" %}
+                                    <a class="img"
+                                        href="{{ cdb.veLog }}">
+                                        <img src="/static/images/{{cdb.state}}.png" alt="{{cdb.state}}" width="40" height="40">
+                                    </a>
+                                {% else %}
+                                    <img src="/static/images/{{cdb.state}}.png" alt="{{cdb.state}}" width="40" height="40">
+                                    {% endif %}
+                                  <br>
+                                  <br>
+                                {% if cdb.start %}
+                                  Started: {{ cdb.start}}
+                                {% endif %}
+                            {% elif cdb.state == "failed" or cdb.state == "passed" %}
+                                <a class="img"
+                                    href="/{{ productSetVersionId }}/{{ cdb.type }}/returnpsreport/{{ cdb.testReport }}">
+                                    <img src="/static/images/{{cdb.state}}.png" alt="{{cdb.state}}" width="40" height="40">
+                                </a>
+                                <br>
+                                <br>
+                                {% if cdb.start %}
+                                  Started: {{ cdb.start}}
+                                {% endif %}
+                                </br>
+                                 {% if cdb.finish %}
+                                    Finished: {{ cdb.finish }}
+                                 {% endif %}
+
+                             {% endif %}
+                        </p>
+                    </td>
+                    {% endif %}
+               {% endfor %}
+            </tr>
+        </table>
+    {% else %}
+        <table class="drop-cdbs">
+            <tr>
+                <td><p><center>No status information currently found</center></p></td>
+            </tr>
+        </table>
+    {% endif %}
+{% endblock %}

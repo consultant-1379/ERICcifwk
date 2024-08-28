@@ -1,0 +1,98 @@
+{% extends "base_newlookandfeel.html" %}
+{% load rem_html_space %}
+
+{% block title %}CIFWK Visualisation Main Page{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Add New Sequence
+        <a class="img" href="/vis/WidgetRenders/new/add/" title="Add Chart Sequence for"><img src="/static/images/create.png"/></a>
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Sequence" title="Add Chart Sequence Help" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+<div class="generic-text">
+    <br>
+    <table class="general-table" id="addChartSequence-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        {% for item in charts %}
+        <tr>
+            {% if item.name == selected %}
+            <td class="selected">
+            {% else %}
+            <td>
+            {% endif %}
+            <a href="/vis/showChartMappings/{{ item.name }}/">{{ item.name }}</a></td>
+            {% if item.name == selected %}
+            <td class="selected">
+            {% else %}
+            <td>
+            {% endif %}
+            {{ item.description }}</td>
+            <td>
+        <a class="img" href="/vis/showWidgetDefinitions/{{ item.name }}/" title="Add Chart Sequence for {{ item.name }}"><img src="/static/images/create.png"/></a>
+        <a class="img" href="/vis/WidgetRenders/{{ item.id }}/edit/{{ item.name }}/" title="Edit Sequence"><img src="/static/images/edit.png"/></a>
+        <a class="img" href="#"onClick="checkAction('Do you really want to Delete this Chart View?', '/vis/deletetWidgetRender/{{ item.id }}/')" title="Delete Sequence"><img src="/static/images/delete.png"/></a>
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Mapping" title="Chart Mapping Help" target="_blank"><img src="/static/images/question.png"/></a>
+        </td>
+    {% endfor %}
+</table>
+
+</div>
+{% if selected %}
+<div class="generic-text">
+    <br>
+    <table id="addChartSequence-table">
+        <tr>
+            <td>
+                <h4>Add Chart Sequence for {{ selected }}
+                <a class="img" href="/vis/showWidgetDefinitions/{{ selected }}/" title="Add Chart Sequence for {{ selected }}"><img src="/static/images/create.png"/></a>
+                <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Mapping" title="Add Sequence Help" target="_blank"><img src="/static/images/question.png"/></a>
+                </h4>
+            </td>
+        </tr>
+    </table>
+   {% if mappings %}
+    <br>
+   {% for chart in mappings %}
+    <table id="addChartSequence-table">
+        <tr><td><h4>{{ selected }}: <a href="/vis/{{ selected }}/">URL to display sequence</a></h4></td><td></td><td></td></tr>
+        <tr><td>Chart Name:<td>{{ chart.widgetDefinition.name }}</td>
+        {% if  chart.widgetDefinition.widget.type == "TrendBarChart" or  chart.widgetDefinition.widget.type == "TrendAreaChart" %}
+            <td rowspan="6" width="8%"  bgcolor="#FFFFFF" class="centered-cell">
+            <a class="img" href="/vis/editWidgetDefinition/{{ chart.widgetDefinition.id }}/" title="Edit Chart {{ chart.widgetDefinition.name }}"><img src="/static/images/edit.png"/></a><br>
+            <a class="img" href="#"onClick="checkAction('Do you really want to Delete this Mapping?', '/vis/deleteMapping/{{ chart.id }}/{{ selected }}/')" title="Delete Chart Mapping"><img src="/static/images/delete.png"/></a>
+            </td>
+        {% else %}
+            <td rowspan="5" width="8%" bgcolor="#FFFFFF" class="centered-cell">
+            <a class="img" href="/vis/editWidgetDefinition/{{ chart.widgetDefinition.id }}/" title="Edit Chart {{ chart.widgetDefinition.name }}"><img src="/static/images/edit.png"/></a><br>
+            <a class="img" href="#"onClick="checkAction('Do you really want to Delete this Mapping?', '/vis/deleteMapping/{{ chart.id }}/{{ selected }}/')" title="Delete Chart Mapping"><img src="/static/images/delete.png"/></a>
+            </td>
+        {% endif %}
+        </tr>
+        <tr><td>Description:<td>{{ chart.widgetDefinition.description }}</td></tr>
+        <tr><td>Chart Type:<td>{{ chart.widgetDefinition.widget.type }}</td></tr>
+        <tr><td>View:<td>{{ chart.widgetDefinition.view|convert_space }}</td></tr>
+        {% if  chart.widgetDefinition.widget.type == "TrendBarChart" or  chart.widgetDefinition.widget.type == "TrendAreaChart" %}
+            <tr><td>Granularity<td>{{ chart.widgetDefinition.granularity }}</td></tr>
+        {% endif %}
+        <tr><td>Refresh<td>{{ chart.widgetDefinition.refresh }}</td></tr>
+        <br>
+   </table>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endif %}
+</div>
+{% endblock %}

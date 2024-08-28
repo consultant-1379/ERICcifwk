@@ -1,0 +1,50 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}CIFWK Visualisation Main Page{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Chart(s)
+        <a class="img" href="/vis/addWidget/" title="Add New Chart"><img src="/static/images/create.png"/></a>
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Charts/" title="Add Chart Help" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <div class="generic-text">
+        <table class="general-table" id="chart-table">
+            {% if widgets %}
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Options</th>
+                </tr>
+            </thead>
+                {% for widget in widgets %}
+                <tbody>
+                    <tr>
+                        <td>{{ widget.name }}</td>
+                        <td>{{ widget.type }}</td>
+                        <td>{{ widget.description }}</td>
+                        <td>
+                            <a class="img" href="/vis/addWidgetDefinition/{{ widget.id }}/" title="Add Chart Configuration to {{widget.name }}"><img src="/static/images/create.png"/></a>
+                            <a class="img" href="/vis/editWidget/{{ widget.id }}/" title="Edit Chart"><img src="/static/images/edit.png"/></a>
+                            <a class="img" href="#"
+                            onClick="checkAction('Do you really want to Delete {{ widget.name}}?', '/vis/deleteWidget/{{ widget.id }}/')" title="Delete Chart {{ widget.name }}"><img src="/static/images/delete.png"/></a>
+                            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Configuration" title="Add ChartConfiguration Help" target="_blank"><img src="/static/images/question.png"/></a>
+                        </td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            {% endif %}
+            </table>
+            <br>
+            <p/><b>For Infomation about CI Visualisation and Widgets Please <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Visualisation/" target="_blank">Visit This Confluence Page</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel=StyleSheet href="/static/style.css" type="text/css" />
+        <link rel=StyleSheet href="/static/jquery/datetimepicker/jquery.datetimepicker.css" type="text/css" />
+        <link rel=StyleSheet href="/static//jquery/dropdown/multiple-select.css" type="text/css" />
+        <link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+        <script type="text/javascript" src="/static/jquery/js/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/static/jquery/tickertape.js"></script>
+        <script type="text/javascript" src="/static/jquery/datetimepicker/jquery.datetimepicker.js"></script>
+        <script type="text/javascript" src="/static/jquery/dropdown/jquery.multiple.select.js"></script>
+        <script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+        <script type="text/javascript" src="/static/jquery/js/jquery.autoRefresh.js"></script>
+        <script type="text/javascript">
+            $(function () {
+                $("#accordion").accordion({
+                    collapsible:true,
+                    active:false,
+                    heightStyle: "content"
+                });
+
+                var icons = $( "#accordion" ).accordion( "option", "icons" );
+                $('.open').click(function () {
+                    $('.ui-accordion-header').removeClass('ui-corner-all').addClass('ui-accordion-header-active ui-state-active ui-corner-top').attr({
+                        'aria-selected': 'true',
+                        'aria-expanded': 'true',
+                        'tabindex': '0'
+                    });
+                    $('.ui-accordion-header-icon').removeClass(icons.header).addClass(icons.headerSelected);
+                    $('.ui-accordion-content').addClass('ui-accordion-content-active').attr({
+                        'aria-expanded': 'true',
+                        'aria-hidden': 'false'
+                    }).show();
+                    $(this).attr("disabled","disabled");
+                    $('.close').removeAttr("disabled");
+                });
+                $('.close').click(function () {
+                    $('.ui-accordion-header').removeClass('ui-accordion-header-active ui-state-active ui-corner-top').addClass('ui-corner-all').attr({
+                        'aria-selected': 'false',
+                        'tabindex': '-1'
+                    });
+                    $('.ui-accordion-header-icon').removeClass(icons.headerSelected).addClass(icons.header);
+                    $('.ui-accordion-content').removeClass('ui-accordion-content-active').attr({
+                        'aria-expanded': 'false',
+                        'aria-hidden': 'true'
+                    }).hide();
+                    $(this).attr("disabled","disabled");
+                    $('.open').removeAttr("disabled");
+                });
+                $('.ui-accordion-header').click(function () {
+                    $('.open').removeAttr("disabled");
+                    $('.close').removeAttr("disabled");
+                });
+
+                });
+                function initMenu() {
+                    $('#menu ul').hide(); // Hide the submenu
+                    if ($('#menu li').has('ul')) $('#menu ul').prev().addClass('expandable'); // Expand/collapse a submenu when it exists
+                    $('.expandable').click(
+                    function() {
+                        $(this).next().slideToggle();
+                        $(this).toggleClass('expanded');
+                    }
+                    );
+                }
+                function tickerTapeControl() {
+                    $('div.tickerTape marquee').marquee('pointer').mouseover(function () {
+                           $(this).trigger('stop');
+                            }).mouseout(function () {
+                            $(this).trigger('start');
+                            }).mousemove(function (event) {
+                                 if ($(this).data('drag') == true) {
+                                     this.scrollLeft = $(this).data('scrollX') + ($(this).data('x') - event.clientX);
+                             }
+                            }).mousedown(function (event) {
+                               $(this).data('drag', true).data('x', event.clientX).data('scrollX', this.scrollLeft);
+                                      }).mouseup(function () {
+                                $(this).data('drag', false);
+                             }).css('cursor','pointer');
+                }
+
+                // When document ready, call initMenu() function
+                $(document).ready(function() {
+                      $(".tablesort").tablesorter({widgets: ['zebra']});
+                      initMenu();
+                      tickerTapeControl();
+                   });
+            </script>
+            <script type="text/javascript">
+                    var refreshTimer;
+
+                    function enableTimer()
+                    {
+                            refreshTimer = setTimeout(function(){ location.reload(true); }, 60000);
+                            window.location.hash = "#autoreload";
+                    }
+
+                    function disableTimer()
+                    {
+                            clearTimeout(refreshTimer);
+                            window.location.hash = "";
+                    }
+
+                    $(function() {
+
+                                $('#refreshButton').iphoneSwitch(
+                                        (window.location.hash == "#autoreload" ? "on" : "off"),
+                                        enableTimer,
+                                        disableTimer
+                                );
+
+                                if (window.location.hash == "#autoreload")
+                                        enableTimer();
+                        });
+
+                </script>
+        {% spaceless %}
+                <title>{% block title %}{% endblock %}</title>
+            </head>
+            <body>
+                <div id="wrapper">
+                     <div id="user-log">
+                          {% block user %}
+                            {% if user.is_authenticated %}
+                            Welcome, {{ user.username }} | <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Continuous+Integration%28CI%29+Portal" target="_blank" title="CI Portal Help Documentation">Documentation</a> | <a href="/logout" title="Logout of the CI Portal">Logout</a>
+                            {% else %}
+                                {% if request.path == '/login/' %}
+                                    <a href="/login" title="Login: sigum & LAN password">Login</a>
+                                {% else %}
+                                    <a href="/login?next={{request.path}}" title="Login: sigum & LAN password">Login</a>
+                                {% endif %}
+                            {% endif %}
+                          {% endblock user %}
+                      </div>
+
+                    <div id="title">
+                        <div id="text-container">
+                            PDU NAM Continuous Integration Portal
+                        </div>
+                        <div id="logo-container">
+                             <img src="/static/images/econ.svg" alt="Ericsson Logo" width="30px" height="40px" />
+                        </div>
+                    </div>
+                    {% load tickertape %}
+                    {% autoescape off %}
+                    {% getTickerTapeMessage %}
+                    {% endautoescape %}
+                    <div id="main" class="clearfix">
+                        <div id="nav">
+                            <ul id="menu">
+                                <li><a  href="/">Quick Links</a></li>
+                                <li><a id="prodset_link" href="/ps">Product Sets</a></li>
+                                <li><a id="product_link" href="/releaseProducts">Products</a></li>
+                                {% block releases %}{% endblock %}
+                                <li><a id="cpl_link" href="/cireports/allArtifacts/">Complete Packages </br> & Testware List</a></li>
+                                <li><a href="#">Deployments</a>
+                                <ul>
+                                    <!--<li><a href="/dmt/appTemplate">Cloud Application Templates</a></li>-->
+                                    <li><a href="/dmt/mgtsvrs/">Manage Management Servers</a></li>
+                                    <li><a href="/dmt/clusters/">Manage Deployments</a></li>
+                                    <li><a href="/dmt/nassvrs/">Manage NAS</a></li>
+                                    <li><a href="/dmt/storage/">Manage SAN</a></li>
+                                    <li><a href="/dmt/enclosure/">Manage Enclosure(s)</a></li>
+                                    <li><a href="/dmt/ViewUploadSED/">Manage SED</a></li>
+                                    <li><a href="/dmt/changeClusterGroup/">Change Deployment Group</a></li>
+                                    <li><a href="/dmt/searchInventory/">Search Inventory</a></li>
+                                    <li><a href="/visualisation/baseline/">Buildlog</a></li>
+                                    <li><a href="/cloudnative/buildlog/">Cloud Native ENM Buildlog</a></li>
+                                    <li><a href="/dmt/searchInstallGroup/">Deployment Install Group Inventory</a></li>
+                                    <li><a href="/dmt/populate/deployment/">Upload Pre-Populated SED</a></li>
+                                    <li><a href="/dmt/sshkey/">SSH Key</a></li>
+                                    <li><a href="/dmt/uploadSnapshot/">Pre-Commit Staging Area</a></li>
+                                    <li><a href="/dmt/displayDeploymentData/">Default Autodeployment Versions</a></li>
+                                </ul>
+                                </li>
+                                <li><a href="#">Visualisation</a>
+                                <ul>
+                                    <li><a href="/vis/showWidgets">Chart(s)</a></li>
+                                    <li><a href="/vis/showWidgetDefinitions/">Chart Configuration(s)</a></li>
+                                    <li><a href="/vis/showChartMappings/">Sequence Configuration</a></li>
+                                    <li>
+                                    <a href="/visualisation/serverutilization">Server Utilization</a>
+                                    </li>
+                                </ul>
+                                </li>
+                                <li>
+                                <a href="https://taftm.lmera.ericsson.se/">Test Management</a>
+                                </li>
+                                <li><a href="#">Framework</a>
+                                <ul>
+                                    <li><a href="/fwk/links/">TV Teams</a></li>
+                                    <li><a href="/admin">Admin</a></li>
+                                    <li><a href="/femjob">Create Jobs</a></li>
+                                    <li><a href="/fwk/changeLog">Change Log</a></li>
+                                    <li><a href="/TickerTapeHistory">Ticker Tape History</a></li>
+                                    <li><a href="/preRegisterArtifact">Pre Register Artifact</a></li>
+                                </ul>
+                                </li>
+                                <li><a href="#">Metrics</a>
+                                <ul>
+                                    <li><a target="_blank" href="https://mtportal.seli.wh.rnd.internal.ericsson.com/metrics/#ci-metrics">ENM Metrics</a></li>
+                                    <li><a href="/metrics/CloudMetrics/">Cloud Metrics</a></li>
+                                    <li><a href="/metrics/KgbMetrics/">KGB Metrics</a></li>
+                                </ul>
+                                </li>
+                                <li><a href="#">Fast Commit</a>
+                                <ul>
+                                    <li><a href="/dockerimages/">Docker Images</a></li>
+                                    <li>
+                                        <a target="_blank" href="https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus/content/sites/tor/docker/snapshot/index.html">
+                                            Documentation
+                                        </a>
+                                    </li>
+                                </ul>
+                                </li>
+                                <li><a target="_blank" href="https://mtportal.seli.wh.rnd.internal.ericsson.com/metrics/#maintrack-radiator">Maintrack Radiator</a></li>
+                                <li><a href="#">Diff Tools</a>
+                                <ul>
+                                    <li><a href="/compareISOs/">ISO Diff Tool</a>
+                                    <li><a href="/compareBOMs/">BOM Diff Tool</a>
+                                    <li><a href="/compareProductSets/">Product Set Diff Tool</a>
+                                </ul>
+                                <li><a href="#">Cloud</a>
+                                <ul>
+                                    {% load tags %}
+                                    {% getSPPLinks %}
+                                    <li><a href="https://atvcloud4.athtem.eei.ericsson.se/users/login">Install Manager</a></li>
+                                </ul>
+                                <li><a href="#">Excellence</a>
+                                    <ul>
+                                        <!--<li><a href="/excellence/showCategories/">Categories</a></li>
+                                        <li><a href="/excellence/showQuestions/">Questions</a></li>!-->
+                                        <li><a href="/excellence/showOrganisations/">Organisations</a></li>
+                                        <li><a href="/excellence/takeQuestionnaire/">New Assessment</a></li>
+                                        <li><a href="/excellence/searchQuestionnaires/">Assessment History</a></li>
+                                    </ul>
+                                </li>
+                                {% block fem %}{% endblock %}
+                                <li><a href="https://gerrit-gamma.gic.ericsson.se">Gerrit</a></li>
+                                <li><a href="https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus/">Nexus</a></li>
+                                <li><a href="/glossary">Glossary</a></li>
+                            </ul>
+                        </div>
+                        <div id="content" class="tablesort">
+                            <span id="refreshButton" class="refreshButton"></span><!-- style=" position:absolute; right:90px; z-index:-1;" ></span-->
+                            {% block content %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+                <br><br>
+                <div id='footer'>
+                    CI Framework: CXP 903 0099 Version {% getCifwkVersion %} <br/>
+                    Having issues? <a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/CIS/?selectedTab=com.atlassian.jira.jira-projects-plugin:summary-panel">Raise a Ticket</a>
+                </div>
+        {% endspaceless %}
+            </body>
+        </html>

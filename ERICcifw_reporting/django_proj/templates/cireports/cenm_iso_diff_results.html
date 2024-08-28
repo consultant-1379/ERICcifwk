@@ -1,0 +1,234 @@
+<script type="text/javascript">
+$(document).ready(function () {
+    $(".subAccordion").each(function(){
+        accordionId = "#" + $(this).attr('id');
+        $(accordionId).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+
+    $(".clickableText").each(function(){
+        elementId = "#" + $(this).attr('id');
+        addGerritLink(elementId);
+    });
+});
+
+function addGerritLink(elementId){
+    $(elementId).mouseover(function() {
+        $(elementId).css("text-decoration", "underline");
+    });
+
+    $(elementId).mouseleave(function() {
+         $(elementId).css("text-decoration", "None");
+    });
+}
+
+function skip(href) {
+    window.location.href = href;
+}
+</script>
+<div class="isoDiffResult">
+    <h2 class="sub-title"> CENM Diff Result Between product set {{ currentPS }} in Drop {{ drop }} and product {{ previousPS }} in Drop {{ preDrop }}</h2>
+    {% if csarChanges == None and integrationChartChanges == None and cnImageChanges == None %}
+        <p>No CSAR Diff Found</p>
+    {% endif %}
+    {% if csarChanges %}
+    <div id="accordionCsarChanges">
+        <h2>CSAR Changes</h2>
+        <div>
+            <br>
+            {% for csarName, csarValue in csarChanges.items %}
+                {%if csarValue %}
+                    <div class="subAccordion" id="accordion{{ csarName.product_name }}Changes">
+                        <h3 class="clickableText" id="{{ csarName.product_name }}Link"><a href="https://gerrit-gamma.gic.ericsson.se/gitweb?p=OSS/com.ericsson.oss.containerisation/{{ csarName.repo_name }}.git;a=shortlog;h=refs/heads/master" onclick=skip(this.href)>{{ csarName.product_name }}  Changes</a></h3>
+                        <div>
+                            <br>
+                            <table class='general-table'>
+                                <tr>
+                                    <th>New Version - CENM {{ currentPS }}</th>
+                                    <th>Previous Version - CENM {{ previousPS }}</th>
+                                </tr>
+                                <tr>
+                                    {% for csar in csarValue %}
+                                        {%if csar != None %}
+                                            {%if csar.object.product_set_version.product_set_version == currentPS %}
+                                                <td>{{ csar.object.version }}</td>
+                                            {% endif %}
+                                            {%if csar.object.product_set_version.product_set_version == previousPS %}
+                                                <td>{{ csar.object.version }}</td>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if forloop.first %}
+                                                <td>No CSAR Found</td>
+                                            {% endif %}
+                                            {% if forloop.last %}
+                                                <td>No CSAR Found</td>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            </table>
+                            <br>
+                            <br>
+                            <table class='general-table'>
+                                <tr>
+                                    <th>JIRA</th>
+                                    <th>Commit Message</th>
+                                    <th>User</th>
+                                </tr>
+                                {% for csar in csarValue %}
+                                    {%if csar.commitMsg.jira and csar.commitMsg.subject and csar.commitMsg.author.name %}
+                                        <tr>
+                                            <td>{{ csar.commitMsg.jira }}</td>
+                                            <td>{{ csar.commitMsg.subject }}</td>
+                                            <td>{{ csar.commitMsg.author.name }}</td>
+                                        </tr>
+                                    {% elif csar.commitMsg %}
+                                        <tr>
+                                            <td>{{ csar.commitMsg }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if integrationChartChanges %}
+    <div id="accordionIntegrationChartChanges">
+        <h2>Integration Chart Changes</h2>
+        <div>
+            <br>
+            {% for integrationChartName, integrationChartValue in integrationChartChanges.items %}
+            {%if integrationChartValue %}
+            <div class="subAccordion" id="accordion{{ integrationChartName.product_name }}Changes">
+                <h3 class="clickableText" id="{{ integrationChartName.product_name }}Link"><a href="https://gerrit-gamma.gic.ericsson.se/gitweb?p=OSS/com.ericsson.oss.containerisation/{{ integrationChartName.product_name }}.git;a=shortlog;h=refs/heads/master" onclick=skip(this.href)>{{ integrationChartName.product_name }} Changes</a></h3>
+                <div>
+                    <br>
+                    <table class='general-table'>
+                        <tr>
+                            <th>New Version - CENM {{ currentPS }}</th>
+                            <th>Previous Version - CENM {{ previousPS }}</th>
+                        </tr>
+                        <tr>
+                        {% for integrationChart in integrationChartValue %}
+                        {%if integrationChart != None %}
+                            {%if integrationChart.object.product_set_version.product_set_version == currentPS %}
+                                <td>{{ integrationChart.object.version }}</td>
+                            {% endif %}
+                            {%if integrationChart.object.product_set_version.product_set_version == previousPS %}
+                                <td>{{ integrationChart.object.version }}</td>
+                            {% endif %}
+                        {% else %}
+                            {% if forloop.first %}
+                                <td>No Integration Chart Found</td>
+                            {% endif %}
+                            {% if forloop.last %}
+                                <td>No Integration Chart Found</td>
+                            {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                    <table class='general-table'>
+                        <tr>
+                            <th>JIRA</th>
+                            <th>Commit Message</th>
+                            <th>User</th>
+                        </tr>
+                        {% for integrationChart in integrationChartValue %}
+                        {%if integrationChart.commitMsg.jira and integrationChart.commitMsg.subject and integrationChart.commitMsg.author.name %}
+                        <tr>
+                            <td>{{ integrationChart.commitMsg.jira }}</td>
+                            <td>{{ integrationChart.commitMsg.subject }}</td>
+                            <td>{{ integrationChart.commitMsg.author.name }}</td>
+                        </tr>
+                        {% elif integrationChart.commitMsg %}
+                        <tr>
+                            <td>{{ integrationChart.commitMsg }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if cnImageChanges %}
+    <div id="accordionImageChanges">
+        <h2>Service Group Changes</h2>
+        <div>
+            <br>
+            {% for imageKey, imageValue in cnImageChanges.items %}
+            <div class="subAccordion" id="accordion{{ imageKey }}Changes">
+                <h3 class="clickableText" id="{{ imageKey }}Link"><a href="https://gerrit-gamma.gic.ericsson.se/gitweb?p=OSS/com.ericsson.oss.containerisation/{{ imageKey }}.git;a=shortlog;h=refs/heads/master" onclick=skip(this.href)>{{ imageKey }} Changes</a></h3>
+                <div>
+                    <br>
+                    <table class='general-table'>
+                        <tr>
+                            <th>New Version - CENM {{ currentPS }}</th>
+                            <th>Previous Version - CENM {{ previousPS }}</th>
+                        </tr>
+                        <tr>
+                        {% for image in imageValue %}
+                        {%if image != None %}
+                            {%if image.currentVersion %}
+                                {%if forloop.first %}
+                                    <td>{{ image.currentVersion }}</td>
+                                {% endif %}
+                            {% endif %}
+                            {%if image.currentVersion %}
+                                {%if forloop.last %}
+                                    <td>{{ image.currentVersion }}</td>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            {% if forloop.first %}
+                                <td>No Image Found</td>
+                            {% endif %}
+                            {% if forloop.last %}
+                                <td>No Image Found</td>
+                            {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        </tr>
+                    </table>
+                    <br>
+                    <br>
+                    <table class='general-table'>
+                        <tr>
+                            <th>JIRA</th>
+                            <th>Commit Message</th>
+                            <th>User</th>
+                        </tr>
+                        {% for image in imageValue %}
+                        {%if image.commitMsg.jira and image.commitMsg.subject and image.commitMsg.author.name %}
+                        <tr>
+                            <td>{{ image.commitMsg.jira }}</td>
+                            <td>{{ image.commitMsg.subject }}</td>
+                            <td>{{ image.commitMsg.author.name }}</td>
+                        </tr>
+                        {% elif image.commitMsg %}
+                        <tr>
+                            <td>{{ image.commitMsg }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>

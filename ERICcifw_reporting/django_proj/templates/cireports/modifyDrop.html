@@ -1,0 +1,131 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+{% block title %}{{ product.name }} Drop {{ drop.name }} Current Information {% endblock %}
+{% block content %}
+<script type="text/javascript">
+    $(document).ready(function () {
+            $("#limitedReason").hide();
+            $("#limitedReasons").hide();
+            $("#action").change(function () {
+                var x = document.forms["ModifyDropForm"]["action"].value;
+                if (x == "limited"){
+                     $("#limitedReason").show();
+                     $("#limitedReasons").show();
+                   }
+                 else {
+                    $("#limitedReason").hide();
+                    $("#limitedReasons").hide();
+                    }
+                });
+    });
+    function validateForm() {
+        var x = document.forms["ModifyDropForm"]["action"].value;
+        var y = document.forms["ModifyDropForm"]["reason"].value;
+        var z = document.forms["ModifyDropForm"]["limitedReason"].value;
+        if (x == null || x == "-") {
+            alert("Please select an action");
+            return false;
+        }
+        if (y == null || y == "") {
+            alert("The reason for modifying this drop must be completed");
+            return false;
+        }
+        if (x == "limited"){
+            if ( z == "None"){
+                alert("Please Select From Drop Down Menu");
+                return false;
+
+            }
+        }
+
+    }
+</script>
+ <div class="general-container">
+     <h2 class="generalPageNewLook-title">{{ product.name }} Drop {{ drop.name }} Current Information <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Opening,+Closing+and+Limiting+Drops" title="Drop Info" target="_blank"><img src="/static/images/question.png"/></a></h2>
+     This drop <b><a href="/{{ product.name }}/drops/{{ drop.name }}">{{ drop.name }}</a></b> is currently
+     {% if not frozen%}
+       {% if drop.status == "limited"%}
+            <font color = "orange"><b>LIMITED</b></font>
+       {% elif drop.status == "closed"%}
+            <font color = "red"><b>CLOSED</b></font>
+       {% else %}
+            <font color = "green"><b>OPEN</b></font>
+       {% endif %}
+    {% else %}
+         <b>FROZEN</b>
+    {% endif %}
+    <br> <br>
+     <table  class='general-table'>
+            <tr>
+                <td> Planned release date: </td><td> {{ drop.planned_release_date }} </td>
+            </tr>
+            <tr>
+                <td> Actual release date: </td><td> {{ drop.actual_release_date }} </td>
+            </tr>
+     </table>
+    {% if not frozen%}
+        <form enctype="multipart/form-data" name="ModifyDropForm" onsubmit="return validateForm()" method="post" action="">{% csrf_token %}
+           <table  class='general-table'>
+           To edit Drop {{ drop.name }} please complete below
+           <th>Action</th><th>Reason</th><th id="limitedReasons" >Limited Reasons</th>
+                <tr>
+                <td>
+                    <select id="action" name="action">
+                        <option value="-"></option>
+                        {% if drop.status == "limited"%}
+                            <option value="open">open</option>
+                            <option value="closed">close</option>
+                        {% elif drop.status == "closed"%}
+                            <option value="open">open</option>
+                            <option value="limited">limited</option>
+                        {% else %}
+                            <option value="limited">limited</option>
+                            <option value="closed">close</option>
+                        {% endif %}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="reason" size="55">
+                </td>
+                <td>
+                     <select id="limitedReason" name="limitedreason">
+                     <option value="None">Please Select</option>
+                     {% for reason in limitedReasons %}
+                     <option value="{{reason}}" > {{reason}}</option>
+                    {% endfor %}
+                 </select>
+                </td>
+                </tr>
+        </table>
+        <br>
+        <input name="Submit" type="submit" value="Submit" title="Submit">
+        </form>
+    {% else %}
+           <br> Modifying the drop status can only be done if the Release Dates are in the future
+    {% endif %}
+    <br>
+    <div id="accordion">
+        <h4> Drop Activity </h4>
+        <div>
+            {% if dropActivities %}
+                <table  class='general-table'>
+                    <th>Action</th><th>Reason</th><th>Limted Reason</th><th>Edit</th><th>User</th><th>Date</th>
+                {% for activity in dropActivities %}
+                    <tr>
+                        <td> {{ activity.action }} </td>
+                        <td> {{ activity.desc }} </td>
+                        <td> {{ activity.limitedReason }} </td>
+                        <td><a href="/{{ product.name }}/modifydrop/{{ drop.name }}/{{ activity.id }}/"><img src="/static/images/edit.png"/ width="25" height="25"></a></td>
+                        <td> {{ activity.user }} </td>
+                        <td> {{ activity.date }} </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                No information found in the database
+            {% endif %}
+        </table>
+       </div>
+     </div>
+  </div>
+ {% endblock %}
+{% endif %}

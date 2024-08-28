@@ -1,0 +1,15 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product }} Delivery Information {% endblock %}
+    {% block content %}
+        <div class="general-container">
+            <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;"> {{ product }} Delivery Failure Information</h2>
+            <br>
+            {% if info %}
+                {{ info|linebreaks }}
+            {% endif %}
+            Questions ?
+            <br>Please contact <b>CI Execution</b> for further information
+        </div>
+    {% endblock %}
+{% endif %}

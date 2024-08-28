@@ -1,0 +1,56 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Make CN Delivery{% endblock %}
+
+{% block content %}
+<link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+<script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src='/static/cnDeliveryQueue_createCNDeliveryQueue.js'></script>
+<div id="hidden_drop_div" style="display:none">{{ drop }}</div>
+<div id="hidden_product_div" style="display:none">{{ product }}</div>
+<div id="hidden_user_div" style="display:none">{{ request.user.username }}</div>
+<div class="delivery-form-container">
+    <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;" >
+          Create cENM Delivery Group
+            <a class="img" href="" title="Delivery Queue Help" target="_blank">
+                <img src="/static/images/question.png"/>
+            </a>
+    </h2>
+    <div id='empty_drop_team_dg_form'>
+            <br>
+            <label for='drop'>Drop:</label>
+            <select id='drop' class="delivery_form_drop"></select>
+            <label for='team'>Group Creators Team:</label>
+            <input id='team' class="delivery_form_creator">
+            <br>
+    </div>
+    <br>
+    <div id='empty_sg_form'>
+        <input type="button" value="Add Service Group" style="cursor:pointer;" class="btn-default" id="add_cnImage">
+    </div>
+    <br><br>
+    <div id="empty_integration_chart_form">
+        <input type="button" value="Add Integration Chart" class="btn-default" id="add_integration_chart">
+    </div>
+    <br><br>
+    <div id="empty_pipeline_form">
+        <input type="button" value="Add Pipeline" class="btn-default" id="add_pipeline">
+    </div>
+    <br><br>
+    <div id="empty_enmdg_form">
+        <input type="button" value="Add Impacted ENM DG" class="btn-default" id="add_enmdg">
+    </div>
+    <br><br>
+    <div id="empty_jira_form">
+        <input type="button" value="Add JIRA Ticket" class="btn-default" id="add_jira">
+    </div>
+    <br><br>
+    <span class="generic-text"> <label for='set_missingDep'>This Group has Missing Dependencies:</label><input type="checkbox" name="missing" value="missing" id="set_missingDep"></span>
+    <br>
+    <textarea id='missing_dep_comment' name="Comment for Missing Dependencies" class='missing_dep_comment' placeholder="Please input the reason for having missing dependencies" rows="4" cols="100"></textarea>
+    <br>
+    <span class="generic-text"> <label for='set_readiness'>Readiness Check:</label><input type="checkbox" name="readiness" value="readiness" id="set_readiness"></span>
+    <br>
+    <input type="button" class="btn-default" value="Add To Delivery Queue" id="add_to_queue">
+</div>
+{% endblock %}

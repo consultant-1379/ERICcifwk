@@ -1,0 +1,178 @@
+#!/bin/bash -a
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+CIFWKDB="cireports"
+#
+# cifwkError:
+# Display relevant cifwkError information and send Email
+#
+cifwkError() {
+    printLog " ! [$(getLogTime)] $*"
+    [ ! -z "${LOG_FILE}" ] && log "Please see ${LOG_FILE} for more information"  
+    exit 1
+}
+
+#
+# checkMysql:
+# Check that we can connect to mysql without a password
+# There should be a ~/.my.cnf file with the correct
+# username and password in it to make DB connections
+# Also populate the TBLS variable with only the cireports tables from the DB
+#
+checkMysql() {
+    log "Checking mysql connection to ${CIFWKDB}.. "    
+    TBLS=`$_MYSQL --skip-column-names ${CIFWKDB} <<EOF | $_EGREP -v "^auth_" | $_EGREP -v "^django_"
+    SHOW TABLES
+EOF
+    `
+    [ $? -ne 0 ] && cifwkError "Could not connect to the database - are you sure you have a username and password configured in ~/.my.cnf?"
+}
+
+#
+# dumpSchema:
+# Function to dump the Schema information from the DB
+# Takes either 2 or 3 parameters
+#    1) The database to connect to
+#    2) The file to dump the DB info into
+#    3) Other connection info (This is a optional parameter)
+#
+dumpSchema() {
+
+    DB=$1
+    FILE=$2
+    IGNORE="--ignore-table=${DB}.auth_group_permissions --ignore-table=${DB}.auth_user_groups --ignore-table=${DB}.auth_user_user_permissions --ignore-table=${DB}.auth_group --ignore-table=${DB}.auth_permission --ignore-table=${DB}.django_admin_log --ignore-table=${DB}.django_content_type --ignore-table=${DB}.django_session --ignore-table=${DB}.django_site --ignore-table=${DB}.depmodel_dependency --ignore-table=${DB}.depmodel_dependencytype --ignore-table=${DB}.auth_user"
+     log "creating schema for ${DB}.. "
+
+    $_MYSQLDUMP --no-defaults --user=${DBTESTUSR} --no-data ${DB} ${IGNORE}> ${FILE} 2>> ${LOG_FILE}
+    [ $? -ne 0 ] && cifwkError "dumpSchema failed"
+    $_CAT ${FILE} |$_GREP -v "\-\- Host:"|$_GREP -v "\-\- Dump completed" > ${FILE}.$$
+    mv ${FILE}.$$ ${FILE}
+    dropTestDB ${DB}
+
+}
+
+#
+# createTestDB:
+# Create a Test Database
+# Takes one parameter
+#    1) The database to create
+#
+createTestDB() {
+    DB=$1
+    CIFWKDB_DDL=$2
+
+    # Drop the user implicitly - if it doesn't exist we'll ignore the error
+    $_MYSQL <<EOF > /dev/null 2>&1
+DROP USER ${DBTESTUSR}@localhost;
+EOF
+
+    log "Creating database ${DB}"
+    $_MYSQL -v -v -v <<EOF >> ${LOG_FILE} 2>&1
+DROP DATABASE IF EXISTS ${DB};
+
+CREATE DATABASE ${DB};
+CREATE USER ${DBTESTUSR}@localhost;
+GRANT ALL PRIVILEGES ON ${DB}.* TO ${DBTESTUSR}@localhost;
+EOF
+    [ $? -ne 0 ] && cifwkError "Failed to create ${DB}"
+
+log "Importing SQL ${CIFWKDB_DDL} to ${DB}"
+    $_MYSQL --no-defaults -v -v -v -v -v --user=${DBTESTUSR} ${DB} < ${CIFWKDB_DDL} >> ${LOG_FILE} 2>&1
+        [ $? -ne 0 ] && cifwkError "Failed to load ${DB}"
+
+}
+
+runSyncdb() {
+    SYNCDB_SCHEMA=$1
+    $_PYTHON ${CIFWK_ROOT}/django_proj/manage.py syncdb --database=validatedb --noinput
+    [ $? -ne 0 ] && cifwkError "Failed to create "
+}
+
+#
+# dropTestDB:
+# Drop the Test Database
+# Takes one parameter
+#    1) The database to delete
+#
+dropTestDB() {
+    DB=$1
+    log "Dropping database ${DB}"
+    $_MYSQL -v -v -v <<EOF >> ${LOG_FILE} 2>&1
+    DROP USER ${DBTESTUSR}@localhost;
+    DROP DATABASE ${DB};
+EOF
+    [ $? -ne 0 ] && cifwkError "Failed to drop ${DB}"
+}
+
+
+#
+# diffSchema:
+# compare the current DB schema installed with that of the one to be installed 
+# Takes 2 parameters
+#    1) A File containing the current schema in the DB
+#    2) A File containing the latest schema to be upgraded to
+#
+diffSchema() {
+        
+    log "Comparing schemas ..."
+    log "          1) ${1}"
+    log "          2) ${2}"
+    LOADED_SCHEMA=$1
+    SYNCDB_SCHEMA=$2
+
+    for SCHEMA in $LOADED_SCHEMA $SYNCDB_SCHEMA ; do
+        # Strip out
+        #  - the AUTO_INCREMENT values
+        #  - PARTITION numbers 
+        #    we have to remove "," from the end of line
+        $_CAT $SCHEMA | $_SED -e 's/auto_increment/AUTO_INCREMENT/g' -e 's/AUTO_INCREMENT=[0-9]* //' -e 's/,$//' | \
+            $_EGREP -v 'PARTITION P[0-9]*' | \
+            $_EGREP -v 'Dump completed on' > $SCHEMA.filtered
+    done
+
+    $_DIFF $LOADED_SCHEMA.filtered $SYNCDB_SCHEMA.filtered >> /tmp/schemaDiffs.$$ 2>&1
+    [ $? -ne 0 ] && SCHEMA_CHANGE=1
+}
+
+#
+# Get the options passed to the script and assign them out
+#
+while getopts  "r:l:" flag
+do
+    case "$flag" in
+        r) CIFWK_ROOT="${OPTARG}";;
+        l) LOG_FILE="${OPTARG}";;
+        *) printf "Usage: %s  -r cifwk root directory -l log file\n" $0
+        exit 1;;
+    esac
+done
+
+CIFWKDB_DDL="${CIFWK_ROOT}/sql/cifwk.sql"
+DBTESTUSR="schtestusr"
+SCHEMA_CHANGE=0 
+LOADED_SCHEMA=/tmp/loaded.sql.$$
+SYNCDB_SCHEMA=/tmp/syncdb.sql.$$
+
+checkMysql
+log "Check cifwk.dll"
+createTestDB cifwkdb_schtest ${CIFWKDB_DDL}
+dumpSchema cifwkdb_schtest ${LOADED_SCHEMA}
+createTestDB cifwkdb_schtest_syncdb ${CIFWKDB_DDL}
+runSyncdb ${SYNCDB_SCHEMA}
+dumpSchema cifwkdb_schtest_syncdb ${SYNCDB_SCHEMA} 
+diffSchema ${LOADED_SCHEMA} ${SYNCDB_SCHEMA}
+[ ${SCHEMA_CHANGE} -ne 0 ] && cifwkError "cifwk.sql file does not match applications"
+#Cleanup
+$_RM /tmp/schemaDiffs.$$
+$_RM ${LOADED_SCHEMA}
+$_RM ${SYNCDB_SCHEMA}
+$_RM $LOADED_SCHEMA.filtered
+$_RM $SYNCDB_SCHEMA.filtered
+
+log "cifwk.sql file matches applications"
+
+exit 0

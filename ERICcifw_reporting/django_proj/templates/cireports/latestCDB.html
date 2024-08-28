@@ -1,0 +1,131 @@
+{% load nexusUrl %}
+{% if product %}
+    {% block content %}
+        <script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("table").tablesorter();
+            });
+        </script>
+        <table id="cdb-latest" class="drop-table">
+            {% if packages %}
+                <thead>
+                {# Set up the headers for the table based on if they are activated for the product or not #}
+                    <tr>
+                        {% if product.pkgName %}<th colspan="3">Name</th>{% endif %}
+                        {% if product.pkgNumber %}<th>Number</th>{% endif %}
+                        {% if product.pkgVersion %}<th>Version</th>{% endif %}
+                        {% if product.pkgRState %}<th>RState</th>{% endif %}
+                        {% if product.platform %}<th>Platform</th>{% endif %}
+                        {% if product.category %}<th>Media Category</th>{% endif %}
+                        {% if product.intendedDrop %}<th>Intended Drop</th>{% endif %}
+                        {% if product.deliveredTo %}<th>Delivered to</th>{% endif %}
+                        {% if product.date %}<th>Date Created</th>{% endif %}
+                        {% if product.kgbTests %}<th>Known Good Baseline</th>{% endif %}
+                        {% if product.cidTests %}<th>Combined Integration Deployment</th>{% endif %}
+                        {% if product.cdbTests %}<th>Customer Deployment Baseline</th>{% endif %}
+                        {% if product.obsolete %}<th class="obsolete">Action</th>{% endif %}
+                    </tr>
+                </thead>
+                {# Loop through each Package delivered for this drop and display the associated information #}
+                {% for item in packages %}
+                    <tr>
+                        {# Package Name Column #}
+                        {% if product.pkgName %}
+                            <td align=center colspan="3"><a href="/{{ product }}/packages/{{ item.package_revision.package.name }}">{{ item.package_revision.package.name }}</a></td>
+                        {% endif %}
+
+                        {# Package Number Column #}
+                        {% if product.pkgNumber %}
+                            <td align=center>{{ item.package_revision.package.package_number }}</td>
+                        {% endif %}
+
+                        {# Package Version Column #}
+                        {% if product.pkgVersion %}
+                            <td align=center><a href="{{ item.package_revision|nexusUrl:product.name}}">{{ item.package_revision.version }}</a></td>
+                        {% endif %}
+
+                        {# Package Rstate Column #}
+                        {% if product.pkgRState %}
+                            <td align=center>{{ item.package_revision.getRState }}</td>
+                        {% endif %}
+
+                        {# Platform Column #}
+                        {% if product.platform %}
+                            {% if item.package_revision.platform = None %}
+                                <td align=center></td>
+                            {% else %}
+                                {% if item.package_revision.platform = "i386"%}
+                                    <td align=center>x86</td>
+                                {% else %}
+                                    <td align=center>{{ item.package_revision.platform }}</td>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+
+                        {# Category Column #}
+                        {% if product.category %}
+                            {% if item.package_revision.infra %}
+                                <td align=center><span style="display:none">_</span>{{ item.package_revision.category }}<br>Infrastructure</td>
+                            {% else %}
+                                <td align=center>{{ item.package_revision.category }}</td>
+                            {% endif %}
+                        {% endif %}
+
+                        {# Intended Drop Column #}
+                        {% if product.intendedDrop %}
+                            <td align=center>{{ item.package_revision.autodrop }}</td>
+                        {% endif %}
+
+                        {# Drop that Package was delivered to #}
+                        {% if product.deliveredTo %}
+                            <td align=center>{{ item.drop.name }}</td>
+                        {% endif %}
+
+                        {# Date the package was created #}
+                        {% if product.date %}
+
+                            <td align=center>{{ item.package_revision.date_created }}</td>
+                        {% endif %}
+                        {# KGB Test Results #}
+                        {% if product.kgbTests %}
+                            {% if item.package_revision.kgb_test == "not_started" %}
+                                <td align=center><p align="center"><img src="/static/images/{{item.package_revision.kgb_test}}.png" alt="{{item.package_revision.kgb_test}}" width="40" height="40"><span style="display:none">{{item.package_revision.kgb_test}}</span></p></td>
+                            {% else %}
+                                <td align=center class="compile"><p align="center"><a href="/{{ product }}/returnresults/{{ item.package_revision.package.name }}/{{ item.package_revision.version }}/kgb/{{ item.package_revision.m2type }}"><img src="/static/images/{{item.package_revision.kgb_test}}.png" alt="{{item.package_revision.kgb_test}}" width="40" height="40"></a><span style="display:none">{{item.package_revision.kgb_test}}</span></p></td>
+                            {% endif %}
+                        {% endif %}
+                        {# CID Test Results #}
+                        {% if product.cidTests %}
+                            {% if item.package_revision.cid_test == "not_started" %}
+                                <td align=center><p align="center"><img src="/static/images/{{item.package_revision.cid_test}}.png" alt="{{item.package_revision.cid_test}}" width="40" height="40"><span style="display:none">{{item.package_revision.cid_test}}</span></p></td>
+                            {% else %}
+                                <td align=center class="compile"><p align="center"><a href="/{{ product }}/returnresults/{{ item.package_revision.package.name }}/{{ item.package_revision.version }}/cid/{{ item.package_revision.m2type }}"><img src="/static/images/{{item.package_revision.cid_test}}.png" alt="{{item.package_revision.cid_test}}" width="40" height="40"></a><span style="display:none">{{item.package_revision.cid_test}}</span></p></td>
+                            {% endif %}
+                        {% endif %}
+
+                        {# CDB Test Results #}
+                        {% if product.cdbTests %}
+                            {% if item.overall_status.state == "" or item.overall_status.state == None %}
+                                <td align=center><p align="center"><img src="/static/images/not_started.png" alt="not_started" width="40" height="40"><span style="display:none">not_started</span></p></td>
+                            {% else %}
+                                <td align=center><p align="center"><img src="/static/images/{{item.overall_status}}.png" alt="{{item.overall_status}}" width="40" height="40"><span style="display:none">{{item.overall_status}}</span></p></td>
+                            {% endif %}
+                        {% endif %}
+                        {# Option to remove this version of the package from this Drop #}
+                        {% if product.obsolete %}
+                            <td align=center>
+                                <a  href="/{{ product}}/drops/{{ drop.name }}/obsoleteVersion/?id={{ item.id }}&package={{ item.package_revision.package.name }}&version={{ item.package_revision.version }}&platform={{ item.package_revision.platform }}"
+                                 title="Obsolete">Obsolete</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td><p>No deliveries found for {{ drop.name }}</p></td></tr>
+            {% endif %}
+        </table>
+
+    {% endblock %}
+{% endif %}
+

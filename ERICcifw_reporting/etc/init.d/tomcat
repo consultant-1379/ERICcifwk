@@ -1,0 +1,141 @@
+#!/bin/bash
+#
+# sshd          Start up the Tomcat server daemon
+#
+# chkconfig: 2345 55 25
+# description: Tomcat server
+#
+# processname: tomcat
+
+### BEGIN INIT INFO
+# Provides: tomcat
+# Required-Start: $local_fs $network $syslog
+# Required-Stop: $local_fs $syslog
+# Should-Start: $syslog
+# Should-Stop: $network $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start up the Tomcat server daemon
+# Description:
+### END INIT INFO
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+# use the name of the symlink to identify what we are running
+prog=$(basename $0)
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; pwd)
+
+#export JAVA_HOME=/proj/lciadm100/tools/jdk1.6.0_31
+export JAVA_HOME=/proj/lciadm100/tools/jdk/jdk1.7.0_03
+export CATALINA_HOME=/proj/lciadm100/tools/apache-tomcat-6.0.35
+
+if [ $prog = "avs-tomcat" ] ; then
+    export CATALINA_BASE=${BASEDIR}/avs-tomcat
+else
+    export CATALINA_BASE=${CATALINA_BASE_BASE}/jenkins
+fi
+
+runlevel=$(set -- $(runlevel); eval "echo \$$#" )
+
+start()
+{
+    echo -n $"Starting $prog: "
+    ${CATALINA_HOME}/bin/startup.sh && success || failure
+    RETVAL=$?
+    echo
+    return $RETVAL
+}
+
+stop()
+{
+    echo -n $"Stopping $prog: "
+    /proj/lciadm100/tools/tomcat/latest/bin/shutdown.sh && success || failure
+    RETVAL=$?
+    echo
+}
+
+reload()
+{
+    echo -n $"Reloading $prog: "
+    stop
+    sleep 3
+    start
+}
+
+restart() {
+    stop
+    sleep 3
+    start
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    PID=$(ps -ef | grep tomcat | grep "Dcatalina.base=${CATALINA_BASE}" | awk '/java/ {print $2}')
+    if [ ! -z ${PID} ] ; then
+        echo "${prog} running - ${PID}"
+        return 0
+    else
+        echo "${prog} is not running"
+        return 1
+    fi
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+start)
+rh_status_q && exit 0
+start
+;;
+stop)
+if ! rh_status_q; then
+exit 0
+fi
+stop
+;;
+restart)
+restart
+;;
+reload)
+rh_status_q || exit 7
+reload
+;;
+force-reload)
+force_reload
+;;
+condrestart|try-restart)
+rh_status_q || exit 0
+if [ -f $lockfile ] ; then
+do_restart_sanity_check
+if [ $RETVAL -eq 0 ] ; then
+stop
+# avoid race
+sleep 3
+start
+else
+RETVAL=6
+fi
+fi
+;;
+status)
+rh_status
+RETVAL=$?
+if [ $RETVAL -eq 3 ] ; then
+RETVAL=2
+fi
+;;
+*)
+echo $"Usage: $0 {start|stop|restart|reload|force-reload|condrestart|try-restart|status}"
+RETVAL=2
+esac
+exit $RETVAL

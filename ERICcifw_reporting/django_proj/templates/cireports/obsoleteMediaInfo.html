@@ -1,0 +1,53 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Obsolete Package History{% endblock %}
+{% block content %}
+        <div class="artifact-container">
+            <h2 class="generalPageNewLook-title">{{ productSet }} Obsolete Package History for {{ drop }}</h2>
+            <div class="layout-bar"> <a href="/{{ productSet }}/dropMedia/{{ drop }}">Drop:{{ drop }}</a></div>
+            <br>
+            {% if obInfo %}
+            <!--Headers-->
+            <table class="artifact-table">
+                <thead>
+                    <tr>
+                        <th colspan="3">Name</th>
+                        <th>Number</th>
+                        <th>Version</th>
+                        <th>RState</th>
+                        <th>Build Date</th>
+                        <th><font color="red">Obsoleted by</font></th>
+                        <th colspan="3"><font color="red">Reason</font></th>
+                        <th><font color="red">Date Obsoleted</font></th>
+                    </tr>
+                </thead>
+                {% for item in obInfo %}
+                <tr>
+                    <!--Media Name-->
+                    <td align=center colspan="3"><a href="/{{item.dropMediaArtifactMapping.mediaArtifactVersion.drop.release.product.name }}/{{item.dropMediaArtifactMapping.mediaArtifactVersion.drop.name }}/media/">{{ item.dropMediaArtifactMapping.mediaArtifactVersion.mediaArtifact.name }}</a></td>
+                    <!--Media Number-->
+                    <td align=center>{{ item.dropMediaArtifactMapping.mediaArtifactVersion.mediaArtifact.number}}</td>
+                    <!--Version-->
+                    <td align=center><a href="/{{item.dropMediaArtifactMapping.mediaArtifactVersion.drop.release.product.name }}/{{item.dropMediaArtifactMapping.mediaArtifactVersion.drop.name }}/mediaContent/{{item.dropMediaArtifactMapping.mediaArtifactVersion.mediaArtifact.name}}/{{ item.dropMediaArtifactMapping.mediaArtifactVersion.version }}/">{{ item.dropMediaArtifactMapping.mediaArtifactVersion.version }}</a></td>
+                    <!--RState-->
+                     <td align=center>{{item.dropMediaArtifactMapping.mediaArtifactVersion.getRState}}</td>
+                    <!-- Create Date -->
+                    <td align=center>{{ item.dropMediaArtifactMapping.dateCreated }}</td>
+                    <!--Signum of user who made obsoletion-->
+                    <td align=center><a href="mailto:{{ item.signum }}?Subject=Query regarding the obsoletion of {{ item.dropMediaArtifactMapping.mediaArtifactVersion.mediaArtifact.name }} {{ item.dropMediaArtifactMapping.mediaArtifactVersion.version }}">{{ item.signum }}</a></td>
+                    <!--Reason for obsoletion-->
+                    <td align=center colspan="3">{{ item.reason }}</td>
+                    <!--Time and date of obsoletion-->
+                    <td align=center>{{ item.time_obsoleted }}</td>
+
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <br>
+                <br>
+                <br>
+                <!--Error message if no information or obsolete media are present-->
+                <div align=center>No information found for {{ productSet }} {{ drop }}.</div>
+            {% endif %}
+     </div>
+{% endblock %}

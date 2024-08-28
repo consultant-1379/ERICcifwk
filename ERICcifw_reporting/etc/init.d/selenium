@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# selenium     Startup script for the Selenium service
+#
+# chkconfig: 345 20 80
+#            |   |  |
+#            |   |  +--Stop priority
+#            |   +-----Start priority
+#            +---------Default runlevels
+# description: Selenium is a portable software testing framework for web applications.
+# processname: selenium
+# logfile: /var/log/selenium.log
+#
+
+# Source CI Framework global environment, if available.
+_ECHO=echo
+_PGREP=pgrep
+_DIRNAME=dirname
+_PWD=pwd
+thisDir="$(cd "$(${_DIRNAME} "$0")" && ${_PWD})"
+ciGlobalEnv=${thisDir}/../global.env
+if [ -e ${ciGlobalEnv} ]; then
+    . ${ciGlobalEnv}/global.env
+fi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+retval=0
+prog="selenium"
+desc="Selenium server"
+
+pidfile=/var/run/${prog}.pid
+logfile=${logfile-/var/log/selenium.log}
+runas=root
+
+_JAVA=${_JAVA-/usr/bin/java}
+selenium_dir=/proj/lciadm100/tools/selenium
+jarfile="${selenium_dir}/selenium.jar"
+maxmem="-Xmx500m"
+stacksize="-Xss1024k"
+javaopts="-d64 $maxmem $stacksize -jar $jarfile"
+
+start() {
+    $_ECHO -n "Starting ${desc}: "
+    if [ -e ${pidfile} ]; then
+        $_ECHO -n $"${desc} is already running."
+        failure $"${desc} already running."
+        $_ECHO
+        return 1
+    fi
+    daemon --user ${runas} --pidfile ${pidfile} "$_JAVA ${javaopts} >>${logfile} 2>&1 &"
+    retval=$?
+    if [ $retval = 0 ]; then
+        $_PGREP -f ${jarfile} > ${pidfile}
+    fi
+}
+
+stop() {
+    $_ECHO -n "Stopping ${desc}: "
+    killproc -p ${pidfile}
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    
+    restart|reload)
+        stop
+        sleep 1
+        start
+        ;;
+    *)
+        $_ECHO "Usage: ${0} {start|stop|restart|reload}" >&2
+        exit 1
+        ;;
+esac

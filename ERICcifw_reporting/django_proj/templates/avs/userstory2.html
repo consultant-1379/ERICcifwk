@@ -1,0 +1,48 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    {% for story,tcData in usData.items %}
+        <div id="generic-title">
+            <div id="text-container">
+                AVS: Story {{ story.name }}
+            </div>
+        </div>
+        <div class="generic-text">
+            <br>
+            <h3><b>Description:</b>&nbsp;&nbsp;{{ story.title }}</h3>
+            <h3><b>Downloads:</b>&nbsp;&nbsp;<a href="/avs/stories/{{ story.name }}/zip">Java Code Skeletons as Zip</a> | <a href="/avs/stories/{{ story.name }}/mm">Mind Map for Editing</a></h3>
+            <p/>
+            {% for tc,apData in tcData.items %}
+                <hr>
+                <h3><b>{{ tc.tcId }}</b></h3>
+                <table id="avsEpics-table">
+                    <tr><td width="15%"><b>Title</b></td><td>{{ tc.title }}</td></tr>
+                    <tr><td><b>Description</b></td><td>{{ tc.desc }}</td></tr>
+                    <tr><td><b>Priority</b></td><td>{{ tc.priority }}</td></tr>
+                    <tr><td><b>Groups</b></td><td>{{ tc.groups }}</td></tr>
+                    <tr><td><b>Context</b></td><td>{{ tc.context }}</td></tr>
+                    <tr><td><b>VUsers</b></td><td>{{ tc.vusers }}</td></tr>
+                    <tr><td><b>Pre-check</b></td><td>{{ tc.pre }}</td></tr>
+                    <tr><td>&nbsp;</td><td></td></tr>
+                    {% for ap,vpData in apData.items %}
+                        <tr>
+                            <td><b>Action Point</b></td>
+                            <td>{{ ap.desc }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Verification Point</b></td>
+                            <td>
+                                {% for vp in vpData %}
+                                    {{ vp.desc }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                   {% endfor %}
+                </table>
+                <p/>
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% endblock %}

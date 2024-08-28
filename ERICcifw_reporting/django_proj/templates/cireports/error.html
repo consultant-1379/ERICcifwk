@@ -1,0 +1,11 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}CI Portal Issue{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Error</h2>
+    <h5>{{ error }}</h5>
+    <FORM><INPUT Type="button" VALUE="Return To Previous" onClick="history.go(-1);return true;"></FORM>
+</div>
+{% endblock %}
+

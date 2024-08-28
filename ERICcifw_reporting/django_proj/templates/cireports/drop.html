@@ -1,0 +1,123 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Drop {{ drop.name }} {% endblock %}
+    {% block content %}
+    <script type="text/javascript" src='/static/tablesorterFunction.js'></script>
+    <script type="text/javascript" src='/static/drop.js'></script>
+    <script>
+        function checkAction(link) {
+            window.location = link;
+        }
+    </script>
+    <div id="hidden_product_div" style="display:none">{{ product }}</div>
+    <div id="hidden_drop_div" style="display:none">{{ drop.name }}</div>
+    <div class="artifact-container">
+    {% if frozen %}
+        {% if iso %}
+            <script type="text/javascript">
+                $(document).ready(function() {
+                        window.setTimeout(function() {
+                            window.location.href = '/{{ product }}/{{ drop.name }}/mediaContent/{{iso.mediaArtifact.name}}/{{iso.version}}';
+                            }, 5000);
+                        });
+                    </script>
+         {% endif %}
+            <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">
+                    <img src="/static/images/warning.png" alt="Warning" height="40" width="40"> Drop {{ drop.name }} is Frozen <img src="/static/images/warning.png" alt="Warning" height="40" width="40">
+            </h2>
+            <div id="delivery-form-text">
+                {% if iso %}
+                <div>
+                    You will be redirected to the content of the last ISO build for this drop shortly.
+                </div>
+                {% else %}
+                <div>
+                    No ISO was built for this drop.
+                </div>
+                <div style="display: inline"/>
+                {% endif %}
+            </div>
+
+     {% endif %}
+     {% if iso == None %}
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">
+                {{ product.name }} Drop {{ drop.name }}
+                   <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+Drop" title="Drop Info" target="_blank"><img src="/static/images/question.png"/></a>
+                {# Drop Status #}
+                    <input type="image" title="Update Drop Information" onClick="checkAction('/{{ product}}/modifydrop/{{ drop.name }}/')" src="/static/images/edit.png"/>
+        </h2>
+        <div class="layout-bar">
+            {% if product.name == "ENM"%}
+               <a href="/{{ product.name }}/queue/{{ drop.name }}">Delivery Queue</a> |
+            {% endif %}
+              <a href="/{{ product }}/drop/{{ drop.name }}/latestCDB/">Latest Status</a> | <a href="/{{ product }}/{{ drop.name }}/media/">Historic Media Artifact Versions</a> | <a href="/{{ product }}/drops/{{ drop.name }}/obsoleteInfo">Obsoletion History</a> | <a href="javascript:void(0);" id="showfilter">Show Drop Filter</a>
+        </div>
+        {% if drop.status == "closed"%}
+            <div style="background-color:red">
+                <h1><p><img align="center" src="/static/images/failed.png" alt="Stop"  width="40" height="40"> {{ dropActivity.desc }}</p></h1>
+            </div>
+        {% elif drop.status == "limited"%}
+            <div style="background-color:orange">
+                <h1><p><img align="center" src="/static/images/warning.png" alt="Warning" width="40" height="40"> {{ dropActivity.desc }}</p></h1>
+            </div>
+        {% endif %}
+        <div id="generic-text">
+            <div id="outerdrop-filter">
+                <div class="drop-filter" id="labeldiv">
+                    <label>Select Label</label>
+                    <select id="labels">
+                    </select>
+                </div>
+                <div class="drop-filter" id="parentdiv">
+                    <label id="parentSelectAllLabel"></label>
+                    <input type="checkbox" id="allparents"/>
+                    <br>
+                    <br>
+                    <label id="parentLabel"></label>
+                    <br>
+                    <select id="parents" multiple style="height:100px; width:95%;margin:10px">
+                    </select>
+                </div>
+                <div class="drop-filter" id="childdiv">
+                    <label id="childSelectAllLabel"></label>
+                    <input type="checkbox" id="allchildren"/>
+                    <br>
+                    <br>
+                    <label id="childLabel"></label>
+                    <br>
+                    <select id="children" multiple style="height:100px; width:95%;margin:10px">
+                    </select>
+                </div>
+
+                <div id="drop-filter" style="float:left;margin:10px; width:10%; border: none; box-shadow:none;">
+                    <input type="button" id="filter_button" value="Filter Drop Page">
+                </div>
+                <div id="drop-filter-clear" style="float:left;margin:10px; width:10%; border: none; box-shadow:none;">
+                    <input type="button" id="clear_filter_button" value="Remove Drop Filter">
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+    <div id="drop-artifacts">
+    <div class="tablinksborder">
+       <ul class="tab">
+          <li><a id="packages-tab" class="tablinks" href="javascript:void(0);">Packages</a></li>
+          <li><a id="testware-tab" class="tablinks" href="javascript:void(0);">Testware</a></li>
+      </ul>
+   </div>
+  <div id="packages" class="tabcontent">
+    <table id="drop-packages" class="drop-table">
+        <tr><td> Loading Data ... </td></tr>
+    </table>
+ </div>
+ <div id="testware" class="tabcontent">
+    <table id="drop-testware" class="drop-table">
+        <tr><td> Loading Data ... </td></tr>
+    </table>
+ </div>
+</div>
+{% endif %}
+<script type="text/javascript" src='/static/toggleTabsOnClick.js'></script>
+    {% endblock %}
+{% endif %}

@@ -1,0 +1,14 @@
+#! /bin/bash
+# Restarts each night
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+export PYTHONPATH=/proj/lciadm100/cifwk/latest/lib/python:/proj/lciadm100/cifwk/latest/django_proj/:/proj/lciadm100/cifwk/ERICcifwk/latest/lib/python
+
+$_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/eiffel_monitor_daemon.py stop
+$_SLEEP 2
+$_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/eiffel_monitor_daemon.py start
+$_SLEEP 2
+$_ECHO "Message Bus Consumer restarted on `$_HOSTNAME`" | $_MAILX -S smtp=$SMTP_SERVER -s "Message Bus Consumer restarted on `$_HOSTNAME`" PDLCIAXISC@pdl.internal.ericsson.com

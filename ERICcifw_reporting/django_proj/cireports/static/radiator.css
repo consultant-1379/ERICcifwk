@@ -1,0 +1,97 @@
+html {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    /*    background: #414141;*/
+    font-family: "Arial";
+    color: #333;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+#wrapper {
+    width: 95%;
+    margin-left: auto ;
+    margin-right: auto ;
+}
+
+#title {
+    /*background: url("/static/images/ebgheader.png") no-repeat scroll right bottom transparent;*/
+    float: left;
+    width: 100%;
+    padding-top: 1em;
+    margin: 0em;
+    margin-bottom: 0.1em;
+    border-bottom: 1px solid #333;
+}
+
+#title #text-container {
+    padding: 0em;
+    margin-left: 0em;
+    padding-bottom: 0.2em;
+    float: left;
+    font-size: 5em;
+    font: "Arial";
+    width: 80%;
+}
+
+#title #logo-container {
+    float: right;
+    text-align: right;
+    display: block;
+}
+
+#content {
+    float: left;
+    clear: left;
+    text-align: center;
+    width: 100%;
+}
+
+.element {
+    float: center;
+    /*border: 1px solid #00285f; */
+    margin: 0em;
+}
+
+#content table {
+    float: center;
+    position: relative;
+    text-align: center;
+    width: 100%;
+    font-weight: bold;
+}
+
+#content td {
+    border-bottom: 1px solid #ccc;
+}
+
+#content td {
+    font-weight: bold;
+    padding-right, padding-left: 0.1em;
+    margin-right, margin-left: 0px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #333;
+    shape-rendering: crispEdges;
+}
+
+.bar {
+    fill: steelblue;
+}
+
+.x.axis path {
+    display: none;
+}
+
+.element svg {
+    font-size: 1.2em;
+    font: "Arial";
+}
+

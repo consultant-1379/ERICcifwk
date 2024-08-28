@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+function usage() {
+    cat <<EOF
+USAGE: $0 -a appname -t templatename -f <action>
+where:
+  appname: the name of the vApp you want to create and deploy
+  templatename: the name of the template to instantiate
+  action: deploy | teardown | quarantine
+
+If you do not provide an appname one will be generated based on
+a number of environment variables.
+EOF
+    exit 2
+}
+
+getAppName() {
+    # Are we running under Jenkins?
+    if [ ! -z "${JENKINS_SERVER_COOKIE}" ] ; then
+        echo "CIFWK_${JOB_NAME}_${BUILD_ID}_${BUILD_NUMBER}"
+    else
+        echo "CIFWK_$(date "+%Y-%m-%d_%H:%M:%S")_$$"
+    fi
+}
+
+stopVpn() {
+    $_SUDO ${BASEDIR}/bin/vpn -g ALL -f stop || error "Could not stop VPN"
+}
+
+startVApp() {
+    $_CICMD makeandstartapp --tpl ${TEMPLATE} --app ${APPNAME} || error "Could not start vApp ${APPNAME} using template ${TEMPLATE}"
+    COUNT=0
+    LIMIT=600
+    GWIP=
+    while [ -z "${GWIP}" ] && [ $COUNT -lt ${LIMIT} ] ; do
+        log "checking for gateway ..."
+        GWIP=$($_CICMD getgatewayip --appName ${APPNAME} 2> /dev/null)
+        COUNT=$(expr $COUNT + 1)
+    done
+    [ -z "${GWIP}" ] && error "Did not acquire the gateway IP after ${LIMIT} tries"
+}
+
+destroyVApp() {
+    $_CICMD deletenode --name ${APPNAME} || error "Could not delete ${APPNAME}"
+}
+
+startVPN() {
+    $_SUDO ${BASEDIR}/bin/vpn -g ${GWIP} -f start || error "Could not start VPN towards ${GWIP}"
+}
+
+while getopts "a:t:f:" arg ; do
+    case $arg in
+        t) TEMPLATE="$OPTARG"
+        ;;
+        a) APPNAME="$OPTARG"
+        ;;
+        f) ACTION="$OPTARG"
+        ;;
+        \?) usage
+        ;;
+    esac
+done
+
+[ -z "${ACTION}" ] && usage
+[ -z "${TEMPLATE}" ] && usage
+[ -z "${APPNAME}" ] && APPNAME=$(getAppName)
+
+case "${ACTION}" in
+    "deploy")
+        stopVpn
+        startVApp
+        startVPN
+        ;;
+    "teardown")
+        stopVpn
+        destroyVApp
+        ;;
+    "quarantine")
+        error "Not implemented yet"
+        ;;
+esac        

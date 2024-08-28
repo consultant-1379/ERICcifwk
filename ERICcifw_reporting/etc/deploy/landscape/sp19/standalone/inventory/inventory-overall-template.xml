@@ -1,0 +1,118 @@
+<INCLUDE NODE: MS>
+<litp:inventory xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:litp="http://www.ericsson.com/litp" xsi:schemaLocation="http://www.ericsson.com/litp litp.xsd" id="inventory" version="0.19">
+  <require></require>
+  <litp:deployment id="deployment1">
+    <require></require>
+    <litp:generic-system-pool id="systems">
+      <require></require>
+      <litp:vm-pool id="vm_pool">
+        <mac_end><END_MAC></mac_end>
+        <mac_start><START_MAC></mac_start>
+        <path>/var/lib/libvirt/images</path>
+        <require></require>
+        <litp:vm-host-assignment id="hyper_visor">
+            <host>/inventory/deployment1/ms1/ms_node/libvirt/vmservice</host>
+          <require></require>
+        </litp:vm-host-assignment>
+      </litp:vm-pool>
+      <litp:generic-system id="blade">
+        <boot_dev>eth0</boot_dev>
+        <bridge_enabled>True</bridge_enabled>
+        <bridge_stp>off</bridge_stp>
+        <bridge_stp_fdelay>0</bridge_stp_fdelay>
+        <domain></domain>
+        <hostname><NODE_HOSTNAME_LWR></hostname>
+        <macaddress><NODE_MAC></macaddress>
+        <require></require>
+        <litp:generic-bios id="bios">
+          <require></require>
+        </litp:generic-bios>
+        <litp:hba id="hba0">
+          <require></require>
+          <litp:hbaport id="hbaport0">
+            <index>0</index>
+            <require></require>
+            <wwpn>A0</wwpn>
+          </litp:hbaport>
+          <litp:hbaport id="hbaport1">
+            <index>1</index>
+            <require></require>
+            <wwpn>A1</wwpn>
+          </litp:hbaport>
+        </litp:hba>
+        <litp:nic id="nic0">
+          <require></require>
+          <litp:nicport id="p0">
+            <index>0</index>
+            <macaddress><NODE_MAC></macaddress>
+            <require></require>
+          </litp:nicport>
+        </litp:nic>
+      </litp:generic-system>
+    </litp:generic-system-pool>
+    <litp:ip-address-pool id="network">
+      <require></require>
+      <litp:ip-address-pool id="range1">
+        <broadcast><NODE_BROADCAST></broadcast>
+        <cidr><NODE_CIADDR></cidr>
+        <gateway><NODE_GATEWAY></gateway>
+        <netmask><NODE_NETMASK></netmask>
+        <network><NODE_NETWORK></network>
+        <require></require>
+        <subnet><NODE_SUBNET></subnet>
+        <Append Here File: ip-address-all>
+      </litp:ip-address-pool>
+      <litp:ip-address id="<NODE_IP_UNSCORE>">
+        <address><NODE_IP></address>
+        <bootproto>static</bootproto>
+        <broadcast><NODE_BROADCAST></broadcast>
+        <cidr><NODE_CIADDR></cidr>
+        <gateway><NODE_GATEWAY></gateway>
+        <interface_id>0</interface_id>
+        <ipv6_autocon>False</ipv6_autocon>
+        <net_name>mgmt</net_name>
+        <netmask><NODE_NETMASK></netmask>
+        <network><NODE_NETWORK></network>
+        <require></require>
+        <stack>4</stack>
+        <subnet><NODE_SUBNET></subnet>
+      </litp:ip-address>
+    </litp:ip-address-pool>
+    <litp:tipc-address-pool id="tipc">
+      <cluster>1</cluster>
+      <netid><NODE_NETID></netid>
+      <require></require>
+      <start>1</start>
+      <vlan></vlan>
+      <zone>1</zone>
+      <Append Here File: tipc-address-all>
+    </litp:tipc-address-pool>
+    <litp:ntp-service id="ntp_1">
+      <external>True</external>
+      <ipaddress><NODE_NTP_IPADDRESS></ipaddress>
+      <name>ntp_1</name>
+      <require></require>
+    </litp:ntp-service>
+    <litp:repository-service id="yum_repo1">
+      <external>True</external>
+      <name>site_yum_repo_litp</name>
+      <protocol>file</protocol>
+      <require></require>
+      <uri>/var/www/html/litp</uri>
+    </litp:repository-service>
+    <litp:repository-service id="yum_repo2">
+      <external>True</external>
+      <name>site_yum_repo_custom</name>
+      <protocol>file</protocol>
+      <require></require>
+      <uri>/var/www/html/custom</uri>
+    </litp:repository-service>
+    <litp:repository-service id="yum_repo3">
+      <external>True</external>
+      <name>site_yum_repo_rhel</name>
+      <protocol>file</protocol>
+      <require></require>
+      <uri>/var/www/html/rhel</uri>
+    </litp:repository-service>
+  </litp:deployment>
+</litp:inventory>

@@ -1,0 +1,70 @@
+{% extends "base_newlookandfeel.html" %}
+{% load replaceCommaWithLinebreak %}
+{% if product %}
+    {% block title %}{{ product }} Queue for Drop {{ drop }} {% endblock %}
+    {% block content %}
+        <link rel=StyleSheet href="/static/deliveryQueue.css" type="text/css" />
+        <script type="text/javascript" src='/static/cnDeliveryQueue.js'></script>
+        <div id="hidden_product_div" style="display:none">{{ product }}</div>
+        <div id="hidden_group_div" style="display:none">{{ deliveryGroupId }}</div>
+        <div id="hidden_cnDropStatus_div" style="display:none">{{ cnDropStatus }}</div>
+        <div id="hidden_cnDropObj_div" style="display:none">{{ cnDropObj }}</div>
+        <div id="hidden_drop_div" style="display:none">{{ drop }}</div>
+        <div id="hidden_userPerms_div" style="display:none">{{ userPerms }}</div>
+        <div id="hidden_adminPerms_div" style="display:none">{{ adminPerms }}</div>
+        <div class="delivery-queue-container">
+            <div class="delivery-queue-title">
+                {{ product }} Queue for Drop {{ drop }}
+                {% if cnDropStatus == 'frozen' %}:
+                    This Drop was Frozen on:  {{ cnDropObj.active_date }}
+                {% endif %}
+            </div>
+            <div class="layout-bar">
+                {% if cnDropStatus != 'frozen' %}
+                |   <a href="cloudNative/createDeliveryGroup/{{ product }}/{{ drop }}/"> Create New Delivery Group</a>
+                {% else %}
+                |   <span title="Drop is frozen. You can't create a new delivery group"> Create New Delivery Group</span>
+                {% endif %}
+            </div>
+            <div>
+                <div id='tabSection' style="display:none" data-tabSection="{{ tabItem }}"></div>
+                <div class="tablinksborder">
+                    <ul class="tab">
+                        <li><a id="queued-tab"  href="javascript:void(0);" class="tablinks" onclick="openItem('queued')">Queued</a></li>
+                        <li><a id="delivered-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('delivered')">Delivered</a></li>
+                        <li><a id="obsoleted-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('obsoleted')">Obsoleted</a></li>
+                        <li><a id="deleted-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('deleted')">Deleted</a></li>
+                    </ul>
+                </div>
+                    <div id="queued" class="tabcontent">Loading...</div>
+                    <div id="delivered" class="tabcontent">Loading...</div>
+                    <div id="obsoleted" class="tabcontent" >Loading...</div>
+                    <div id="deleted" class="tabcontent" >Loading...</div>
+                </div>
+            </div>
+        </div>
+    <div class="modal"></div>
+<script type="text/javascript">
+   function openItem(name) {
+       var i, tabcontent, tablinks;
+       tabcontent = document.getElementsByClassName("tabcontent");
+       for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+       }
+       tablinks = document.getElementsByClassName("tablinks");
+       for (i = 0; i < tablinks.length; i++) {
+           tablinks[i].className = tablinks[i].className.replace(" active", "");
+       }
+       document.getElementById(name).style.display = "block";
+       document.getElementById(name + "-tab").className += " active";
+   }
+   function checkFormAction(msg, formId) {
+       var go = confirm(msg);
+       if (go == true) {
+           document.getElementById(formId).submit();
+           $("body").addClass('loading');
+       }
+}
+</script>
+    {% endblock %}
+{% endif %}

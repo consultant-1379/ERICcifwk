@@ -1,0 +1,182 @@
+{% extends "angularVis/base.html" %}
+{% block title %}Deployment Server Utilisation{% endblock %}
+{% load staticfiles %}
+{% block ng_app %}app.components.dmt{% endblock %}
+{% block content %}
+<div ng-controller="UtilizationController as utilization">
+    <div class="row-fluid">
+        <h1 class="eric-sub-title">DMT Server Utilization</h1>
+        <ol class="breadcrumb">
+            <li><a href="" ng-click="utilization.checkFilter('checks')" id="showTestcases">Server Checks </a></li>
+            <li><a href="" ng-click="utilization.checkFilter('groups')" id="addGroup">Groups</a></li>
+            <li><a href="" ng-click="utilization.checkFilter('mappings')" id="showMappings">Group/Server Mappings </a></li>
+            <li><a href="" ng-click="utilization.checkFilter('filter')" id="showFilters">Filters </a></li>
+        </ol>
+    </div>
+    <div class="row-fluid">
+        <div class="col-md-12 well well-sm" ng-show="utilization.showDivs.checks == true" id="testcaseDiv">
+            <h1 class="eric-sub-title">Current Checks</h1>
+            <div class="table-responsive">
+                <table class="table table-bordered table-condensed table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Checks</th>
+                            <th>Enabled</th>
+                            {% if user.is_authenticated %}
+                                <th></th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                        <tr ng-repeat="testcases in utilization.testcaseDescriptions">
+                            <td>{[{ testcases.testcase_description }]}</td>
+                            <td>{[{ testcases.testcase }]}</td>
+                            <td>{[{ testcases.enabled }]}</td>
+                            {% if user.is_authenticated %}
+                                <td>
+                                    <a class="img" href='' ng-click="utilization.editServerUtilisationCheck(testcases.id,testcases.testcase_description,testcases.testcase,testcases.enabled)">
+                                      <img src="/static/images/edit.png" title="Modify Test Case"/>
+                                    </a>
+                                    <a class="img" href='' ng-click="utilization.deleteServerUtilisationCheck(testcases.id,testcases.testcase_description,testcases.testcase,testcases.enabled)">
+                                        <img src="/static/images/delete.png" title="Delete Testcase"/>
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                </table>
+            </div>
+            <h1 class="eric-sub-title">Add New Server Check</h1>
+            <div class="well well-sm" id="messages" ng-show="utilization.showMsgs.checks">{[{ utilization.checkMsg }]}</div>
+            <form ng-submit="utilization.addTestcase(description,testcase,enabled)">
+                <div id="testcase-desc-group" class="form-group">
+                    <label>Server Check Description</label>
+                    <input type="text" ng-model="description" name="description" required class="form-control" placeholder="Enter Server Check Description">
+                </div>
+                <div id="testcase-group" class="form-group">
+                    <label>Check</label>
+                    <textarea type="text" ng-model="testcase" name="testcase" required class="form-control" placeholder="e.g. uptime"></textarea>
+                    <span class="help-block" ng-show="errorSuperhero">{{ errorSuperhero }}</span>
+                </div>
+                <div class="enabled">
+                    <label><input type="checkbox" ng-model="enabled"> Enabled</label>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-default">Add Server Check</button>
+            </form>
+        </div>
+        <div class="col-md-12 well well-sm" ng-show="utilization.showDivs.groups == true" id="groupDiv">
+            <h1 class="eric-sub-title">Current Groups</h1>
+            <div class="table-responsive">
+                <table class="table table-bordered table-condensed table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Groups</th>
+                        </tr>
+                    </thead>
+                        <tr ng-repeat="groups in utilization.groups">
+                            <td>{[{ groups.testGroup}]}</td>
+                        </tr>
+                </table>
+            </div>
+            <h1 class="eric-sub-title">Add Group</h1>
+            <div class="well well-sm" id="messages" ng-show="utilization.showMsgs.groups">{[{ utilization.groupMsg }]}</div>
+            <form ng-submit="utilization.addGroup(groupName)">
+                <div id="testcase-desc-group" class="form-group">
+                    <label>Group Name</label>
+                    <input type="text" ng-model="groupName" name="groupName" class="form-control" placeholder="Enter Group Name">
+                    <span class="help-block" ng-show="errorName">{{ errorName }}</span>
+                </div>
+                <button type="submit" class="btn btn-default">Add Group</button>
+            </form>
+        </div>
+        <div class="col-md-12 well well-sm" ng-show="utilization.showDivs.mappings == true" id="mappingDiv">
+            <h1 class="eric-sub-title">Current Mappings</h1>
+            <div class="table-responsive">
+                <table class="table table-bordered table-condensed table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Group Name</th>
+                            <th>Cluster Name</th>
+                        </tr>
+                    </thead>
+                        <tr ng-repeat="groupMappings in utilization.groupMappings">
+                            <td>{[{ groupMappings.group}]}</td>
+                            <td>{[{ groupMappings.cluster}]}</td>
+                        </tr>
+                </table>
+            </div>
+            <h1 class="eric-sub-title">Add Mappings</h1>
+            <div class="well well-sm" id="messages" ng-show="utilization.showMsgs.mappings">{[{ utilization.mapMsg }]}</div>
+            <form ng-submit="utilization.addMapping(groupMapName,clusterName)">
+                <div id="testcase-desc-group" class="form-group">
+                    <label>Cluster Name</label>
+                    <select class="form-control" id="clusterForm" ng-model="clusterName" ng-options="cluster.name for cluster in utilization.clusters">
+                        <option value="">-- select cluster --</option>
+                    </select>
+                    <br>
+                    <label>Group Name</label>
+                    <select class="form-control" id="groupForm" ng-model="groupMapName" ng-options="group.testGroup for group in utilization.groups">
+                        <option value="">-- select group --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-default">Add Mapping</button>
+            </form>
+        </div>
+        <div class="col-md-12 well well-sm" ng-show="utilization.showDivs.filter == true" id="filterDiv">
+            <h1 class="eric-sub-title">Filter Groups</h1>
+            <br>
+            <p>Current Filter Group: <b>{[{utilization.defaultGroup}]}</b></p>
+            <h1 class="eric-sub-title">Choose new filter group</h1>
+            <form ng-submit="utilization.updateFilterGroup(groupName)">
+                <div id="filter-desc-group" class="form-group">
+                    <label>Group Name</label>
+                    <select class="form-control" id="groupForm" ng-model="groupName" ng-options="group.testGroup for group in utilization.groups">
+                        <option value="">-- select group --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-default">Update Filter</button>
+            </form>
+        </div>
+    </div>
+    <h4 class="eric-title">Results for Date: <b>{[{utilization.curDate}]}</b> and Group: <b>{[{utilization.defaultGroup}]}</b></h4>
+    <div class="col-md-12 well well-sm" ng-show="utilization.noData" id="nodata">
+        <p> No Data for selected date {[{utilization.curDate}]}</p>
+    </div>
+    <br>
+    <div class="col-md-12" id="latestResults" ng-repeat="overview in utilization.summaryResults | OrderByPercentFilter">
+        <div id="accordion" class="panel-group" >
+            <div class="panel panel-default">
+                <div ng-class="{'server-util-error': (overview[0].percent < 50),'server-util-warning': (overview[0].percent > 49),'server-util-good': (overview[0].percent > 69)}" class="panel-heading" >
+                    <h4 class="panel-title"id="server_utilization_heading">
+                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#{[{overview[0].id}]}">{[{overview[1].clusterName}]} Result: {[{overview[0].percent | number:0}]}% Server checks passed<span ng-if="overview[1].parentElement"> {[{overview[1].parentElement.label.name}]}: {[{overview[1].parentElement}]}</span></a>
+                    </h4>
+                </div>
+                <div id="{[{overview[0].id}]}" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <div class="col-md-6 eric-border-left" ng-repeat="summary in overview" ng-if="$index > 0">
+                            <p><b>Description:</b> {[{summary.testcase_description}]}</p>
+                            <p><b>Command:</b> {[{summary.testcase}]}</p>
+                            <p><b>Result:</b> {[{summary.result}]}</p>
+                            <p class="server-display"><b>Output:</b><br>{[{summary.testcaseOutput}]}</p>
+                        </div>
+                        <div class="col-md-6 eric-border-left">
+                            <div ng-show="overview.jobRan">
+                                <p><b>Description:</b> Last auto deployment ran on server true if ran in last 7 days</p>
+                                <p><b>Date:</b> {[{overview.jobInfo.date}]}</p>
+                                <p><b>Result:</b> {[{overview.jobInfo.result}]}</p>
+                                <p><b>Output:</b> {[{overview.jobInfo.details}]}</p>
+                            </div>
+                            <div ng-hide="overview.jobRan">
+                                <p><b>Description:</b> Last auto deployment ran on server true if ran in last 7 days</p>
+                                <p><b>Date:</b> None</p>
+                                <p><b>Result:</b> false</p>
+                                <p><b>Output:</b> No auto deployment found for server</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

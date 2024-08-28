@@ -1,0 +1,14 @@
+{% extends "base_newlookandfeel.html" %}
+{% load i18n %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Page Not Found - 404 Error</h2>
+    <p>The requested page URL: {{ request_path }} , could not be found</p>
+    <p>The Administrator(s) have been informed.</p>
+    <p> If you want report this, create a <a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/CIP">JIRA Ticket</a> giving more details.</p>
+</div>
+{% endblock %}
+

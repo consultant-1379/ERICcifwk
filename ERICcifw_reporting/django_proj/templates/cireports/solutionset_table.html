@@ -1,0 +1,14 @@
+{% block content %}
+<table class='solset-revisions'>
+    <tr>
+        <th>Version</th>
+        <th>Date Created</th>
+    </tr>
+    {% for item in solsetvers %}
+    <tr> 
+        <td><a href="/{{ product.name }}:/solutionsets/{{ solset.name }}/{{ item.version }}/">{{ item.version }}</a></td>
+        <td>{{ item.date_created }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

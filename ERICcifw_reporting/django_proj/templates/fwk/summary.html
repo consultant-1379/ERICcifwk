@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>CI Fwk Dashboard</title>
+<!-- Include JQuery libraries --!>
+<script type="text/JavaScript" src="/static/jquery/js/jquery.js"></script>
+</head>
+
+<body>
+    <div id="debug"></div>
+    <iframe name="displayArea" width="100%" height="100%" frameborder="0"></iframe>
+<script type="text/javascript">
+
+var counter = 0;
+
+function showLink() {
+    // Retrive the dynamically created xml file.
+    $.get("/fwk/rest/summary/{{ team }}/",{},function(xml) {
+        dashboards = new Array();
+        // Traverse through each element in the xml file
+        $('url',xml).each(function(i){
+             targetName = $(this).find("target").text();
+             timeValue = $(this).find("time").text();
+             dashboards[i] = {url: targetName, time: timeValue};
+        });
+        frames['displayArea'].location.href = dashboards[counter].url;
+        setTimeout(showLink, dashboards[counter].time * 1000);
+        counter = (counter + 1) % dashboards.length;
+    });
+}
+
+window.onload = showLink;
+</script>
+</body>
+</html>

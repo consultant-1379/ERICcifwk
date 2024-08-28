@@ -1,0 +1,4 @@
+<INCLUDE NODE: NFS SC PL >
+litp /inventory/site1/network/range1/<NODE_IP_UNSCORE>/ enable
+litp /inventory/site1/cluster1/<NODE_ID> allocate
+

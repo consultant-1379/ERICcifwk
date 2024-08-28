@@ -1,0 +1,50 @@
+<domain type="kvm">
+  <name>oz_customizing</name>
+  <memory>2097152</memory>
+  <currentMemory>2097152</currentMemory>
+  <uuid>59521c07-16db-40ee-8e3e-be94d4268db1</uuid>
+  <clock offset="utc"/>
+  <vcpu>4</vcpu>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <os>
+    <type>hvm</type>
+    <boot dev="hd"/>
+  </os>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>destroy</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'/>
+    <interface type="bridge">
+      <source bridge="virbr0"/>
+      <mac address="52:54:00:4c:04:9d"/>
+      <model type="virtio"/>
+    </interface>
+    <input bus="ps2" type="mouse"/>
+    <serial type="pty">
+      <target port="0"/>
+    </serial>
+    <serial type="tcp">
+      <source host="127.0.0.1" mode="bind" service="33297"/>
+      <protocol type="raw"/>
+      <target port="1"/>
+    </serial>
+    <disk device="disk" type="file">
+      <target bus="virtio" dev="vda"/>
+      <source file="__LOCALIMAGE__"/>
+      <driver type="qcow2" name="qemu"/>
+    </disk>
+    <disk type='file' device='cdrom'>
+        <driver name='qemu' type='raw'/>
+        <source file='__LOCALSEED__'/>
+        <target dev='hdc' bus='ide'/>
+        <readonly/>
+        <address type='drive' controller='0' bus='1' unit='0'/>
+    </disk>
+  </devices>
+</domain>
+

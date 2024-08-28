@@ -1,0 +1,29 @@
+{% extends "cireports/base.html" %}
+{% block title %}{{ package.name }} Dependencies{% endblock %}
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">{{ package.name }} Artifact Dependencies
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Dependency+Modelling+and+Management" title="Artifact Dependencies Help" target="_blank"><img src="/static/images/question.png"/></a>
+        </div>
+    </div>
+    <div class="full-details">
+        <br>
+        {% if dependencyTree %}
+            <div class="dependency-text">
+                <li class="dependency-list" style="margin-left; color:red;">{{ artifactVersion.artifact }} <b> : </b> {{ artifactVersion.groupname }} <b> : </b> {{ artifactVersion.version }} <b> : </b> {{ artifactVersion.m2type }}</li>
+                    {% for entry in dependencyTree %}
+                        {% if entry.3 == False %}
+                            <li class="dependency-list" style="margin-left:{{ entry.2 }}em;">
+                            {{ entry.0.artifact }} <b> : </b> {{ entry.0.groupname }} <b> : </b> {{ entry.0.version }} <b> : </b> {{ entry.0.m2type }} <b> : </b> {{ entry.1 }}
+                        {% else %}
+                            <li class="dependency-list" style="margin-left:{{ entry.2 }}em; color:red;">    
+                            {{ entry.0.artifact }} <b> : </b> {{ entry.0.groupname }} <b> : </b> {{ entry.0.version }} <b> : </b> {{ entry.0.m2type }} <b> : </b> {{ entry.1 }}
+                        {% endif %}
+                        </li>
+                    {% endfor %}
+            </div>
+        {% else %}
+            Sorry there are no dependencies associated with {{ package.name }} {{ version }}
+        {% endif %}
+    </div>
+{% endblock %}

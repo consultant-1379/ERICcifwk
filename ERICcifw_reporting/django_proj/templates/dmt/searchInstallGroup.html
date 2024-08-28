@@ -1,0 +1,130 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+
+{% block title %}Deployment Install Group{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+    {% if installGroupList %}
+        {% for item in installGroupList %}
+            $(function() {
+                $( "#accordion_{{ item.id }}" ).accordion({
+                    active:false,
+                    collapsible: true,
+                    heightStyle: "content"
+                });
+            });
+        {% endfor %}
+    {% endif %}
+    {% if results %}
+        {% for result in results %}
+            $(function() {
+                $( "#accordionCluster_{{result.cluster.id}}" ).accordion({
+                    active:false,
+                    collapsible: true,
+                    heightStyle: "content"
+                });
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Deployment to Install Group Mapping Information
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+a+Deployment+Install+Group" title="Register a Deployment Install Group" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <table width="100%">
+        <tr>
+            <th class="title">
+                <div class="table-title">Install Group</div>
+                <span class="table-actions">
+                    <a class="img" href='/dmt/installGroup/add/None'>
+                        <img src="/static/images/create.png" title="Add New Install Group" />
+                    </a>
+                </span>
+            </th>
+        </tr>
+    </table>
+{% if not installGroupObj %}
+    <p><font color="red"><b>
+        Unfortunately there are no deployments assigned to an install group, which can be identified on the system.<br>
+    </b></font></p>
+{% else %}
+    {% if installGroupObj %}
+        {% for item in installGroupObj %}
+            <div id="accordion_{{ item.id }}">
+                <h3>{{ item.installGroup }}</h3>
+                <div>
+                    <table class="general-table">
+                        <tr>
+                            <th class="title" colspan=2>
+                                <div class="table-title">Deployments Attached to install Group {{ item.installGroup }}</div>
+                                <div class="table-actions">
+                                    <a class="img" href='/dmt/searchInstallGroup/dashboard/{{ item.id}}/'>
+                                        <img src="/static/images/dashboard-icon.png" title="Open the dashboard for {{ item.installGroup }}" />
+                                    </a>
+                                    <a class="img" href='/dmt/installGroup/edit/{{ item.id }}'>
+                                        <img src="/static/images/edit.png" title="Edit Install Group Information" />
+                                    </a>
+                                    <a class="img" href='/dmt/installGroupDeployment/add/{{ item.id }}/'>
+                                        <img src="/static/images/create.png" title="Add Deployment to install Group" />
+                                    </a>
+                                    <a class="img" href="javascript:void(0)" onCLick="checkAction('Do you really want to Delete this install Group and all associated deployments?','/dmt/deleteInstallGroup/{{ item.id }}/');">
+                                        <img src="/static/images/delete.png">
+                                    </a>
+                                </div>
+                            </th>
+                        </tr>
+                    </table>
+                    {% for result in results %}
+                        {% if item.installGroup == result.group.installGroup %}
+                            {% for deployStatusItem in deployStatus %}
+                                {% if result.cluster.id == deployStatusItem.cluster_id %}
+                                    <div id="accordionCluster_{{result.cluster.id}}">
+                                        <h3>
+                                            <a href="/dmt/clusters/{{result.cluster.id}}">{{result.cluster.name}}</a>
+                                            (Deployment Status - {{deployStatusItem.status}})
+                                        </h3>
+                                        <div>
+                                            <table class="general-table">
+                                                <tr>
+                                                    <th class="title" colspan=2>
+                                                        <div class="table-title"><a href="/dmt/clusters/{{result.cluster.id}}">{{result.cluster.name}}</a></div>
+                                                         <div class="table-actions">
+                                                            <a class="img" href='/dmt/editDeploymentStatus/{{result.cluster.id}}/{{deployStatusItem.id}}/searchInstallGroup/'>
+                                                                <img src="/static/images/edit.png" title="Edit Deployment Status for Deployment {{result.cluster.name}}" />
+                                                            </a>
+                                                            <a class="img" href="javascript:void(0)" onCLick="checkAction('Do you really want to Delete this Deployment from the install Group {{item.installGroup}}?','/dmt/deleteInstallGroupDeployment/{{ result.cluster.id }}/{{ item.id }}/');">
+                                                                <img src="/static/images/delete.png"/>
+                                                            </a>
+                                                         </div>
+                                                    </th>
+                                                </tr>
+                                                <tr><td width="35%">Status:</td><td>{{ deployStatusItem.status }}</td></tr>
+                                                <tr><td width="35%">OS:</td><td>{{ deployStatusItem.osDetails }}</td></tr>
+                                                <tr><td width="35%">Patches:</td><td>{{ deployStatusItem.patches }}</td></tr>
+                                                <tr><td width="35%">LITP:</td><td>{{ deployStatusItem.litpVersion }}</td></tr>
+                                                <tr><td width="35%">ENM Artifact (ISO):</td><td>{{ deployStatusItem.mediaArtifact }}</td></tr>
+                                                <tr><td width="35%">KGB Packages:</td><td>{{ deployStatusItem.packages }}</td></tr>
+                                                <tr><td width="35%">Description:</td><td>{{ deployStatusItem.description }}</td></tr>
+                                            </table>
+                                       </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% endfor %}
+                </div>
+            </div>
+
+        {% endfor %}
+    {% endif %}
+    {% endif %}
+     </div>
+{% endblock %}

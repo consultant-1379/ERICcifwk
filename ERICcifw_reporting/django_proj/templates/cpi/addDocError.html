@@ -1,0 +1,59 @@
+{% extends "cireports/base.html" %}
+{% if products %}
+    {% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+    {% block content %}
+        <div id="generic-title">
+            <div id="text-container"> Add Document to CPI Baseline for {{ product.name }} Drop {{ version }} </div>
+        </div>
+        <div class="full-details">
+            <br>
+                <font style="font-family: Verdana, Arial, Helvetica, sans-serif;">
+                <table border="2">
+                <tr>
+                {% if doclist %}
+                    <h3> <font color="red">Error: Document Not Stored in GASK </font></h3>
+                    </tr>
+                    <tr>
+                    <ul style="list-style-type:circle;margin-left:62px" > 
+                        {% for document in doclist %}
+                        <li>
+                            {{document}}
+                        </li> 
+                        {% endfor %}
+                    </ul>
+                    </tr>
+                {% endif %}
+                </table>
+        <table>
+            {% if seclist %}
+                <h3> <font color="red">Error: Section not available in database </font></h3>
+                <tr>
+                <ul style="list-style-type:circle;margin-left:62px" > 
+                    {% for document in seclist %}
+                        <li>
+                            {{document}}
+                        </li>
+                   {% endfor %}
+                </ul>
+                </tr>
+            {% endif %}
+        </table>
+        <table>
+            {% if not doclist and not seclist %}
+	        <tr>
+                <h3> <font color="red"> Error </font></h3>
+            </tr>
+            <tr>
+                <td>
+                    <p> Error modifying the baseline. Please contact administrator </p>
+                </td>
+            {% endif %}
+            </tr>
+        </table>
+	
+
+</font>
+    
+    {% endblock %}
+{% endif %}
+

@@ -1,0 +1,51 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} Group Summary {% endblock %}
+
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Group Summary for Drop <a href="/{{ product }}/drops/{{ drop }}">{{ drop }}</a> <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Queue" title="Delivery Queue Info" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <div class="delivery-info">
+      <table class='general-table'>
+         <tr>
+            <th>Product:</th><td>{{product}}</td>
+         </tr>
+         <tr>
+            <th>Drop:</th><td><a href="/{{ product }}/drops/{{ drop }}">{{ drop }}</a></td>
+         </tr>
+         <tr>
+            <th>Queue:</th><td><a href="/{{ product }}/queue/{{ drop }}">Delivery Queue</a></td>
+         </tr>
+         <tr>
+            <th>History:</th><td><a href="/{{ product }}/drops/{{ drop }}/obsoleteInfo">Obsoletion History</a></td>
+         </tr>
+       </table>
+     </div>
+     <br>
+     <div class="groupSummary">
+      <h3 class="sub-title"> Information </h3>
+        <br>
+        {% if details %}
+          {{ details }}
+          <br>
+        {%endif%}
+        {% if info %}
+         <ol>
+         {% for item in info %}
+           <li>
+             {% if error %}
+                {% if "FROZEN" in item %}
+                    Drop is frozen and cannot take any new deliveries<br>
+                {% else %}
+                   {{ item }}<br>
+                {% endif %}
+             {% else %}
+                {{ item }}<br>
+             {% endif %}
+           </li>
+         {% endfor %}
+        </ol>
+      {%endif%}
+     </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+<div class="modal-header">
+    <h3 class="modal-title">Delete Check Information!</h3>
+</div>
+<div class="modal-body">
+    <form>
+      <div class="form-group" ng-init="description = edit.description">
+        <label for="description" class="control-label">Server Check Description:</label>
+        <input type="text" ng-model="description" required class="form-control" id="description" readonly>
+      </div>
+      <div class="form-group" ng-init="testcase = edit.testcase">
+        <label for="testcase" class="control-label">Check:</label>
+        <textarea class="form-control" ng-model="testcase" required id="testcase" readonly></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="edit.okDelete(edit.id,description,testcase,enabled)">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="edit.cancel()">Cancel</button>
+          </div>
+    </form>
+</div>

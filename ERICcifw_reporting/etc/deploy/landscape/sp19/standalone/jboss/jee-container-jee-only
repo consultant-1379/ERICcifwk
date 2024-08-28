@@ -1,0 +1,55 @@
+<INCLUDE NODE: jee > 
+  <litp:component-def id="<JBOSS_ID>">
+    <litp:jee-container-def id="<CONTAINER_ID>">
+      <command-line-options>-Djgroups.uuid_cache.max_age=5000</command-line-options>
+      <data-dir>/var/lib/jboss/<CONTAINER_ID>/</data-dir>
+      <default-multicast><MESSAGING_GROUP_ADDRESS></default-multicast>
+      <home-dir>/home/jboss</home-dir>
+      <install-source>/opt/ericsson/nms/jboss/jboss-eap-6.0.tgz</install-source>
+      <jgroups-bind-addr>127.0.0.1</jgroups-bind-addr>
+      <jgroups-mping-mcast-addr><GROUP_MPING_ADDRESS></jgroups-mping-mcast-addr>
+      <jgroups-mping-mcast-port><GROUP_MPING_PORT></jgroups-mping-mcast-port>
+      <jgroups-udp-mcast-addr><UDP_MCAST_ADDRESS></jgroups-udp-mcast-addr>
+      <jgroups-udp-mcast-port><UDP_MCAST_PORT></jgroups-udp-mcast-port>
+      <log-dir>/var/log/jboss/<CONTAINER_ID>/</log-dir>
+      <management-listener>0.0.0.0</management-listener>
+      <management-password>passw0rd</management-password>
+      <management-port-base><MANAGEMENT_PORT_BASE></management-port-base>
+      <management-port-native><MANAGEMENT_PORT_NATIVE></management-port-native>
+      <management-user>admin</management-user>
+      <messaging-group-address><MESSAGING_GROUP_ADDRESS></messaging-group-address>
+      <messaging-group-port><MESSAGING_GROUP_PORT></messaging-group-port>
+      <name><CONTAINER_ID></name>
+      <port-offset><PORT_OFFSET></port-offset>
+      <process-group>litp_jboss</process-group>
+      <process-user>litp_jboss</process-user>
+      <public-listener>0.0.0.0</public-listener>
+      <public-port-base><PUBLIC_PORT_BASE></public-port-base>
+      <litp:firewalls-def id="fw_<CONTAINER_ID>">
+        <dport><PUBLIC_PORT_BASE>,<MANAGEMENT_PORT_BASE>,<MANAGEMENT_PORT_NATIVE></dport>
+        <name>006 <CONTAINER_ID></name>
+      </litp:firewalls-def>
+      <litp:jee-property-def id="gcInterval">
+        <property>-Dsun.rmi.dgc.server.gcInterval</property>
+        <value>300</value>
+      </litp:jee-property-def>
+      <litp:jee-property-def id="preferIPv4Stack">
+        <property>-Djava.net.preferIPv4Stack</property>
+        <value>true</value>
+      </litp:jee-property-def>
+      <litp:logrotate-def id="logrotate_<CONTAINER_ID>">
+        <compress>true</compress>
+        <create>false</create>
+        <dateext>true</dateext>
+        <dateformat>-%Y%m%d-%s</dateformat>
+        <delaycompress>true</delaycompress>
+        <name>jboss.<CONTAINER_ID></name>
+        <path>/var/log/jboss/<CONTAINER_ID>/*.log</path>
+         <postrotate>service rsyslog restart || true</postrotate>
+        <rotate>6</rotate>
+        <sharedscripts>true</sharedscripts>
+        <size>50M</size>
+      </litp:logrotate-def>
+    </litp:jee-container-def>
+  </litp:component-def>
+

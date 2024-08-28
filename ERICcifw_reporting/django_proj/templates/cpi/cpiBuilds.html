@@ -1,0 +1,61 @@
+{% extends "base_newlookandfeel.html" %}
+{% if products %}
+    {% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+    {% block content %}
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">{{ product.name }} Drop {{ version }} CPI Builds  <a class="img" href="{{ confluenceUrl}}" title="CPI Library Build Automation" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <div class="full-details">
+        <br>
+            {% if shipment %}
+            <h2> Main Library </h2>
+            <table class="general-table" id='cpibuild-table'>
+                <thead>
+                    <tr>
+                        <td><b> CPI Build </b></td>
+                        <td><b> First Build </b></td>
+                        <td><b> Last Build </b></td>
+                        <td><b> CPI Responsible </b></td>
+                    </tr>
+                </thead>
+                    {% for ship in shipment %}
+                    {% if "Deployment" not in ship.cpiDrop %}
+                <tr>
+                    <td><a href="/{{ product.name }}/cpiDocs/{{ ship.drop.name }}/{{ship.cpiDrop}}/">{{ship.cpiDrop}}</a> </td>
+                    <td> {{ship.firstBuild}}</td>
+                    <td> {{ship.endBuild}}</td>
+                    <td> {{ship.owner}}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </table>
+            <h2> Deployment Library </h2>
+            <table class="general-table" id='cpibuild-table'>
+                <thead>
+                    <tr>
+                        <td><b> CPI Build </b></td>
+                        <td><b> First Build </b></td>
+                        <td><b> Last Build </b></td>
+                        <td><b> CPI Responsible </b></td>
+                   </tr>
+                </thead>
+                {% for ship in shipment %}
+                {% if "Deployment" in ship.cpiDrop %}
+                <tr>
+                    <td><a href="/{{ product.name }}/cpiDocs/{{ ship.drop.name }}/{{ship.cpiDrop}}/">{{ship.cpiDrop}}</a> </td>
+                    <td> {{ship.firstBuild}}</td>
+                    <td> {{ship.endBuild}}</td>
+                    <td> {{ship.owner}}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </table>
+            <br><br>
+        {% else %}
+            <table id='documents-table'>
+                Sorry There are no CPI Builds  Associated with {{ product }} Drop {{ version }}.
+            </table>
+        {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+{% endif %}

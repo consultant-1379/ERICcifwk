@@ -1,0 +1,28 @@
+pipeline {
+  agent {
+    node {
+      label 'stratus_slave'
+    }
+  }
+
+  stages {
+    stage('Execute Pre Steps') {
+      steps {
+        sh label: '', script: '''pwd
+                                ls -la ./ERICcifw_reporting/ubuntuvapp/
+                                sudo sh ./ERICcifw_reporting/ubuntuvapp/pre_steps.sh ${VAPPNAME}'''
+      }
+    }
+  }
+
+  // The post build actions
+ post {
+   success {
+     echo 'Pipeline Successfully Completed'
+     sh "sudo rm -fr ${env.WORKSPACE}/*"
+   }
+   failure {
+     echo 'Pipeline Failed'
+   }
+ }
+}

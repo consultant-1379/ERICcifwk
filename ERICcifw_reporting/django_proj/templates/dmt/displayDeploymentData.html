@@ -1,0 +1,57 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Deployment Install Group{% endblock %}
+
+{% block content %}
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Default Autodeployment Versions
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Default+Autodeployment+Versions" title="Default Autodeployment Versions" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+<h3><b>IPMI (For Cloud Only)</b></h3>
+<table class="general-table">
+    <th>Resource</th>
+    <th>Version</th>
+    {% for item in ipmiVersionObj %}
+    <tr>
+        <td>{{ item.reference }}</td>
+        <td>{{ item.version }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<h3><b>Redfish (For Cloud Only)</b></h3>
+<table class="general-table">
+    <th>Resource</th>
+    <th>Version</th>
+    {% for item in redfishVersionObj %}
+    <tr>
+        <td>{{ item.reference }}</td>
+        <td>{{ item.version }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<h3><b>Deployment Script</b></h3>
+<table class="general-table">
+        <th>Resource</th>
+        <th>Version</th>
+    {% for item in deployScriptObj %}
+    <tr>
+        <td>{{ item.reference }}</td>
+        <td>{{ item.version }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<h3><b>System Environment Description (SED)</b></h3>
+<table class="general-table">
+        <th>Resource</th>
+        <th>Version</th>
+    {% for item in sedObj %}
+    {% if item.sedMaster_virtual_id != NULL %}
+    <tr>
+        <td>master</td>
+        <td>{{ item.sedMaster_virtual.version }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

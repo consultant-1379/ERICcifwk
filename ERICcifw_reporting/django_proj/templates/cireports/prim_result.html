@@ -1,0 +1,55 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Prim Results{% endblock %}
+
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            $('body').addClass('loading');
+            window.location = link;
+
+        }
+
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">{{ product }} Product Information - Drop: {{ drop }} - Media Artifact Version: {{ media }}</h2>
+<h3 class="sub-title">Colour Information</h3>
+<table class="general-table">
+    <tr><td class="alteredpriminfo"></td><td>Changes that will be made to Prim data when you click 'Write To Prim' button</td></tr>
+    <tr><td class="newpriminfo"></td><td>New products delivered to CI Fwk database but not in Prim</td></tr>
+    <tr><td class="missingpriminfo"></td><td>Removed products that are in Prim but not in CI Fwk database</td></tr>
+</table>
+{% autoescape off %}
+<table class="general-table">
+    <th>Number</th> <th> Current RState</th> <th> Changed RState</th>
+   {% for pD,cD in dataList %}
+   <tr>
+       {{pD}} {{cD}}
+   </tr>
+ {% endfor %}
+</table>
+<button type="button" href="javascript:void(0);"
+    onClick="checkAction('Do you really want to write this information to Prim?',
+    '/primUpdate/?drop={{ drop }}&media={{ media }}&user={{ user }}&password={{ password }}&write=True&file={{ file }}')"
+    title="Write to Prim"><b>Write To Prim</b></button>
+<button type="button" href="javascript:void(0);"
+    onClick="checkAction('Do you really want to cancel and return to login?', '/{{ product }}/{{ drop }}/prim/?cancel=True&user={{ user }}&file={{ file }}')"
+    title="Cancel"><b>Cancel</b></button>
+
+<h3 class="sub-title">Differences: List of Removed and New Products </h3>
+<p><b>(Note: this is just information, changes below will not be written to Prim)</b></p>
+<table class="general-table">
+     <th>Number</th> <th>RState</th>
+     {% for diff in diffData %}
+     <tr>
+         {{ diff }}
+     </tr>
+    {% endfor %}
+</table>
+{% endautoescape %}
+</div>
+<div class="modal"></div>
+{% endblock %}

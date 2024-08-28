@@ -1,0 +1,180 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% block title %}VLAN Multicast Form{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+<script language="JavaScript">
+   function checkAction(link) {
+           window.location = link;
+   }
+</script>
+<div id="dialog" style="display: none;">
+<p>Are you sure you want to change the Capacity Type? <br> <b>Note: Altering the Capacity Type will affect the Deployment Servers that are Hardware Type rack.</b></p>
+</div>
+<div class="deployment_container">
+   <h2 class="generalPageNewLook-title">Deployment Description To Deployment Mapping Form <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Add+Deployment+Description+Mapping+To+A+Deployment" title="Deployment Description Mapping Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+   {% if message %}
+   <span class="form-error"> {{message}} </span>
+   <br>
+   <br>
+   {% endif %}
+   <table class="deployment-table">
+      <form enctype="multipart/form-data" id="deploymentDescriptionForm" name="deploymentDescriptionform" method="post" action="/dmt/{{clusterId}}/deploymentDescription/{{ action }}/">
+         {% csrf_token %}
+         <tr>
+            <th width="30%">Version: </th>
+            <td>
+               <select name="version" id="version">
+                  {% for version in allVersions %}
+                  <option value="{{ version }}">{{ version }} {% if version == latestVersion %} - Latest Good{% endif %}</option>
+                  {% endfor %}
+               </select>
+            </td>
+         </tr>
+         <tr>
+            <th width="30%">Type: </th>
+            <td>
+                <select name="ddType" id="ddType">
+                  {% for ddType in allDDtypes %}
+                  <option value="{{ ddType.dd_type }}">{{ ddType.dd_type }}</option>
+                  {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th width="30%">Capacity Type:</th>
+            <td>
+                <input type="radio" name="capacityType" id="capacityType" value="test"> Test <br>
+                <input type="radio" name="capacityType" id="capacityType" value="production"> Production
+            </td>
+        </tr>
+         <tr>
+            <th width="30%">Deployment Description:</th>
+            <td>
+               <select name="deploymentDescription" id='deploymentDescription'></select>
+            </td>
+         </tr>
+         <tr>
+            <th width="30%">Auto Update:</th>
+            <td>
+               <input type="checkbox" name="autoUpdate" value="autoUpdate" {% if ddMapping.auto_update == True %} checked="checked" {% endif %}>
+            </td>
+         </tr>
+         <tr>
+            <th width="30%">Update Type:</th>
+            <td>
+               <input type="radio" name="updateType" value="complete"> Complete <br>
+               <input type="radio" name="updateType" value="partial"> Partial
+            </td>
+         </tr>
+         <tr>
+            <th width="30%">Ip Range Source:</th>
+            <td>
+               <input type="radio" name="ipRangeType" value="dns"> Dns <br>
+               <input type="radio" name="ipRangeType" value="manual"> Manual
+            </td>
+         </tr>
+         <tr>
+            <td></td>
+            <td><input name="submitForm" id="saveButton" type="submit" value="Save & Exit" title="Save & Exit">
+                <input name="submitForm" id="saveAndUpdate" type="submit" value="Save & Update DMT Now" title="Save & Update DMT Now">
+                <input id="cancelButton" type="button" value="Cancel" onClick="checkAction('/dmt/clusters/{{clusterId}}/details/')" title="Cancel">
+                <input id="updateNow" name="updateNow" type="hidden" value="0">
+            </td>
+         </tr>
+      </form>
+   </table>
+</div>
+<div class="modal"></div>
+<script>
+   $(function() {
+       deployDesc = $('#deploymentDescription');
+       var setDDValue = false;
+       if ('{{ ddMapping.deployment_description__name }}'){
+           setDDValue = true;
+           $('#version').val('{{ ddMapping.deployment_description__version__version }}');
+           $('input:radio[name=capacityType][value={{ ddMapping.deployment_description__capacity_type }}]').prop('checked', true);
+           $('#ddType').val('{{ ddMapping.deployment_description__dd_type__dd_type}}');
+           $('input:radio[name=updateType][value={{ ddMapping.update_type }}]').prop('checked', true);
+           $('input:radio[name=ipRangeType][value={{ ddMapping.iprange_type }}]').prop('checked', true);
+        } else{
+           $('#version').val('{{ latestVersion }}');
+           $('input:radio[name=capacityType][value=test]').prop('checked', true);
+           $('input:radio[name=ipRangeType][value=dns]').prop('checked', true);
+       }
+
+       function populate_deployment_descriptions_select() {
+          $.ajax({
+           url: "/api/deployment/deploymentDescriptions/version/" + $('#version').val() + "/type/" + $('#ddType').val()+"/capacityType/"+$('input[name=capacityType]:checked').val()+"/",
+           dataType: "json",
+           success: function(json) {
+               var items = [];
+               deployDesc.find('option').remove();
+               $.each(json.deploymentDescription, function(i, item) {
+                    deployDesc.append('<option value="' + item.name + '" id="' + item.name + '">' + item.name + '</option>');
+                    items.push(item.name);
+               });
+               if (setDDValue){
+                   $('#deploymentDescription').val('{{ ddMapping.deployment_description__name }}');
+                   setDDValue = false;
+               }
+           },
+           error: function(xhr, textStatus, errorThrown) {
+               deployDesc.find('option').remove();
+               deployDesc.append('<option value="" id="">No Data</option>');
+               alert("Issue retrieving the list of Deployment Descriptions: " + (errorThrown ? errorThrown : xhr.status));
+           }
+         });
+       }
+       populate_deployment_descriptions_select();
+
+       $('#dialog').dialog({
+             autoOpen: false,
+             modal: true,
+             maxWidth: 400,
+             maxHeight: 250,
+             width: 400,
+             height: 250,
+             buttons: {
+                  "Confirm": function(e) {
+                     $(this).dialog('close');
+                     $('#deploymentDescriptionForm').submit();
+                     $("body").addClass('loading');
+                },
+                  "Cancel": function() {
+                  $(this).dialog('close');
+                  $("body").removeClass('loading');
+                }
+            }
+       });
+       $("#saveAndUpdate").click(function () {
+           $('#updateNow').val('1');
+       });
+       $('input[name="submitForm"]').on('click', function(e){
+           if (!'{{ ddMapping.deployment_description__name }}'){
+               $("body").addClass('loading');
+           }else{
+               if ('{{ ddMapping.deployment_description__capacity_type }}' != $('input[name=capacityType]:checked').val()){
+                  e.preventDefault();
+                  $('#dialog').dialog('open');
+               }else{
+                  $("body").addClass('loading');
+               }
+          }
+       });
+       $("#cancelButton").click(function () {
+           $("body").addClass('loading');
+       });
+       $("#version").change(function () {
+            populate_deployment_descriptions_select();
+       });
+       $("#ddType").change(function () {
+            populate_deployment_descriptions_select();
+       });
+       $("input:radio[name=capacityType]").click(function () {
+           populate_deployment_descriptions_select();
+       });
+   });
+</script>
+{% endblock %}

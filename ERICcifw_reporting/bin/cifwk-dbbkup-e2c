@@ -1,0 +1,140 @@
+#!/bin/bash -a
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global-e2c.env ] && . ${BASEDIR}/etc/global-e2c.env
+
+LOG_FILE=${LOGS}/backup_log
+TARDIR=/proj/lciadm100/cifwk/cifwk_db_bkp_tmp_area/bkupTar.$$
+CURRENT_TIME=`date "+%Y-%m-%d_%H_%M_%S"`
+BACKUPDIR=/proj/lciadm100/gitadm100/db_backup
+CIFWK_FILE=${TARDIR}/cireports_${CURRENT_TIME}.sql
+CIFWKDB="cireports"
+CIFWKDBPORT="6446"
+CIFWKDBHOST="cireports-mysql-1416.seli.gic.ericsson.se"
+CIFWKDBPWD="BoTu0W6a9V1H3qb"
+CIFWKDBUSER="cireports"
+EMAIL="xiangkai.tang@ericsson.com,jithin.raju@ericsson.com,richard.da.silva@ericsson.com,arun.jose@ericsson.com,william.wren@ericsson.com"
+# file name
+TARNAME=db_backup_e2c.tar
+AUTODEPAREA=/proj/lciadm100/cifwk/cifwk_db_backup/
+
+$_MKDIR -p ${TARDIR}
+log "tar dir is ${TARDIR}"
+
+#
+# checkMysql:
+# Check that we can connect to mysql without a password
+# There should be a ~/.my.cnf file with the correct
+# username and password in it to make DB connections
+# Also populate the TBLS variable with only the cireports tables from the DB
+#
+checkMysql() {
+    log "Checking mysql connection .. "
+    TBLS=`$_MYSQL --skip-column-names -h${CIFWKDBHOST} -u${CIFWKDBUSER} -P${CIFWKDBPORT} -p${CIFWKDBPWD} -D${CIFWKDB} <<EOF | $_EGREP -v "^auth_" | $_EGREP -v "^django_"
+    SHOW TABLES
+EOF
+    `
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "Could not connect to the database - are you sure you have a username and password configured in ~/.my.cnf?"
+    fi
+    log "checkMysql complete..."
+}
+
+#
+# Send a mail to the group if there has been a problem with the DB backup
+#
+sendEmail() {
+    ADDR="$1"
+    MSG="There has been a problem with the CIFWK DB Backup, Please check /proj/lciadm100/cifwk/logs/backup_log and investigate"
+    echo ${MSG} | mail -s "CIFWK DB Backup Information" ${ADDR}
+}
+
+#
+# createTar:
+# Function to create tar of the backed up DB schemas
+# Takes 1 parameter
+#    1) The name of the CI Reports Database Dump File
+#
+#
+createTar() {
+    log "Creating the Backup Database Tar file"
+    cd ${TARDIR}
+    CIFWK=$($_BASENAME $1)
+
+    $_TAR cf ${TARNAME} ${CIFWK} >> ${LOG_FILE} 2>&1
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "Could not create tar file"
+    fi
+    $_GZIP ${TARNAME}
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "Could not compress tar file"
+    fi
+    $_CP ${TARNAME}.gz ${BACKUPDIR}
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "Could not copy tar file to backup directory ${BACKUPDIR}"
+    fi
+    cd ${BACKUPDIR}
+    $_RM -rf ${TARDIR}
+}
+
+# The function below is used be the autodeployment testing to copy the latest DB to the mount area to ensure
+# the latest data is available for testing
+copyTarToMountArea(){
+    log "Sending back up tar ball to ${AUTODEPAREA}"
+    TARNAME=${1}
+    BACKUPDIR=${2}
+    $_CP ${BACKUPDIR}/${TARNAME}.gz ${AUTODEPAREA}/${TARNAME}.gz
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "Could not send tar file ${TARNAME} to ${AUTODEPAREA}"
+        exit 1
+    fi
+}
+
+#
+# dumpSchema:
+# Function to dump the Schema information from the DB
+# Takes either 2 or 3 parameters
+#    1) The database to connect to
+#    2) The port of target database
+#    3) The password to login target database
+#    4) The host name of target database
+#    5) The user name to login target database
+#    6) The file to dump the DB info into
+#    7) Other connection info (This is a optional parameter)
+#
+dumpSchema() {
+    DB=$1
+    DUMPPORT=$2
+    DUMPPWD=$3
+    DUMPHOST=$4
+    DUMPUSER=$5
+    FILE=$6
+    [ ! -z "${7}" ] && OPTS="$7"
+    if [ "${OPTS}" = "specific_tables" ] ; then
+        MY_TBLS=${TBLS}
+        OPTS=""
+    fi
+    # Only dump the database schema, not the data, for the cireports tables
+    # pass any arguments as tables
+    log "$_MYSQLDUMP -h${DUMPHOST} -u${DUMPUSER} -P${DUMPPORT} -p${DUMPPWD} ${OPTS} --no-tablespaces ${DB} ${MY_TBLS} > ${FILE} 2>> ${LOG_FILE}"
+    # remove the test users: ${OPTS}
+    $_MYSQLDUMP  -h${DUMPHOST} -u${DUMPUSER} -P${DUMPPORT} -p${DUMPPWD} --no-tablespaces  ${DB} ${MY_TBLS} > ${FILE} 2>> ${LOG_FILE}
+    [ $? -ne 0 ] && cifwkError "dumpSchema failed"
+    OPTS=""
+    MY_TBLS=""
+}
+
+checkMysql
+dumpSchema ${CIFWKDB} ${CIFWKDBPORT} ${CIFWKDBPWD} ${CIFWKDBHOST} ${CIFWKDBUSER} ${CIFWK_FILE}
+createTar ${CIFWK_FILE}
+copyTarToMountArea ${TARNAME} ${BACKUPDIR}
+
+exit 0

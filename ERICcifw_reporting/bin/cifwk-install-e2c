@@ -1,0 +1,182 @@
+#!/bin/bash -a
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global-e2c.env ] && . ${BASEDIR}/etc/global-e2c.env
+
+#
+# cifwkError:
+# Display relevant cifwkError information and send Email
+#
+cifwkError() {
+    printLog " ! [$(getLogTime)] $*"
+    [ ! -z "${LOG_FILE}" ] && log "Please see ${LOG_FILE} for more information"
+    #if [ ! -z "${NEW_CIFWK_VER}" ] ; then
+    #    if [ -d "${CIFWK_ROOT}/${NEW_CIFWK_VER}" ] ; then
+    #        $_RM -rf ${CIFWK_ROOT}/${NEW_CIFWK_VER}
+    #    fi
+    #fi
+    exit 1
+}
+
+#
+# retrieve command line arguments
+#
+checkArgs() {
+    log "Verifying Arguments passed to this script"
+    if [ "$1" != "-v" ]; then
+        $_ECHO "Usage: %s -v CIFWK version [-r cifwk root directory ] [-d cifwkdb]\n" $0
+        exit 1
+    fi
+}
+
+#
+# Check user
+# Must be running as lciadm100
+#
+checkUser() {
+    log "Verifying User Creditials"
+    if [ "${ID}" != "lciadm100" ] ; then
+        $_ECHO "You must be lciadm100 to run this script"
+        exit 1
+    fi
+}
+
+#
+# If an email address has been supplied then send a mail to that address
+#
+sendEmail() {
+    if [ ! -z "${EMAIL_ADDRESS}" ] ; then
+        if [ ${DB_UPGRADE_RESULT} -eq 0 ] ; then
+
+            RESULT="Successfully Completed"
+        else
+            RESULT="Failed"
+        fi
+        $_GREP '\[2' ${LOG_FILE} > /tmp/upgradelog.$$ 2>&1
+        [[ -f "/tmp/restartlog.$$" ]] && $_CAT /tmp/restartlog.$$|$_SED s/"                 "//g|$_SED -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K|G]//g"|$_SED -r "s/\x1B\(B//g"|$_SED s/^/"         "/|$_SED -r "s/\x0D//g"  >> /tmp/upgradelog.$$
+        mail -s "CIFWK Upgrade ${NEW_CIFWK_VER}: ${RESULT}${HTTPResult}" -c ${GROUP_EMAIL_ADDRESS} ${EMAIL_ADDRESS} < /tmp/upgradelog.$$
+        rm /tmp/upgradelog.$$
+        [[ -f "/tmp/restartlog.$$" ]] && rm /tmp/restartlog.$$
+    fi
+}
+
+#
+# Restart httpd services if upgrade successful
+#
+restartHttpd() {
+    if [ ${DB_UPGRADE_RESULT} -eq 0 ] ; then
+        log "Restarting HTTPD service"
+        sudo systemctl reload httpd.service
+    fi
+    [[ -f "/tmp/restartlog.$$" ]] && $_TAIL -1  /tmp/restartlog.$$  | $_GREP FAILED > /dev/null
+    if [ $? -eq 0 ] ; then
+        HTTPResult=" [HTTP restart Failed]"
+    fi
+
+}
+#
+# Get the current version of CIFWK that is running
+#
+currentVersion() {
+    log "Checking current version of the CI Framework"
+    CURR_CIFWK_VER=`ls -l /proj/lciadm100/cifwk/latest | awk '{print $NF}'`
+    CURR_CIFWK_VER=`basename ${CURR_CIFWK_VER}`
+    if [ -z "${CURR_CIFWK_VER}" ] ; then
+        cifwkError "ERROR: Cannot determine current CIFWK version"
+        sendEmail
+        exit 1
+    fi
+}
+#
+# Create database tables for new apps
+#
+runSyncDB() {
+    if [ ${DB_UPGRADE_RESULT} -eq 0 ] ; then
+        log "Running syncdb"
+        $_PYTHON ${CIFWK_ROOT}/${NEW_CIFWK_VER}/django_proj/manage.py syncdb --noinput
+        SYNCDB_RESULT=$?
+        if [ ${SYNCDB_RESULT} -ne 0 ] ; then
+            cifwkError "ERROR: syncdb failed"
+            exit ${SYNCDB_RESULT}
+        fi
+    fi
+}
+
+
+#
+# Perform the DB update
+#
+dbMigration() {
+    log "Checking permissions on scripts to be ran"
+    for DIR in bin sql ; do
+        $_CHMOD -R +rx ${CIFWK_ROOT}/${NEW_CIFWK_VER}/${DIR}
+    done
+    $_CHMOD +x ${CIFWK_ROOT}/${NEW_CIFWK_VER}/bin/
+
+    log "Performing Database Upgrade"
+    if [ ! -z "${EMAIL_ADDRESS}" ] ; then
+        ${CIFWK_ROOT}/${NEW_CIFWK_VER}/bin/cifwk-dbupgrade-e2c -v ${NEW_CIFWK_VER} -r ${CIFWK_ROOT} -d ${CIFWKDB} -e ${EMAIL_ADDRESS} -g ${GROUP_EMAIL_ADDRESS} -l ${LOG_FILE}
+    else
+        ${CIFWK_ROOT}/${NEW_CIFWK_VER}/bin/cifwk-dbupgrade-e2c -v ${NEW_CIFWK_VER} -r ${CIFWK_ROOT} -d ${CIFWKDB} -l ${LOG_FILE}
+    fi
+    DB_UPGRADE_RESULT=$?
+    if [ ${DB_UPGRADE_RESULT} -ne 0 ] ; then
+        cifwkError "ERROR: dbupgrade failed"
+        exit ${DB_UPGRADE_RESULT}
+    fi
+}
+
+#
+# Remove cifwk versions older than one month excluding the current and new version
+#
+cleanUpOldCifwkVersions() {
+    $BASEDIR/bin/cifwk-cleanup-old-versions.sh $CURR_CIFWK_VER $NEW_CIFWK_VER
+}
+
+ARGS=("$@")
+checkArgs $1
+
+FORK="false"
+
+while getopts  "v:r:d:e:f:g:p:o:h:" flag
+do
+    case "$flag" in
+        v) NEW_CIFWK_VER="${OPTARG}";;
+        r) CIFWK_ROOT="${OPTARG}";;
+        d) CIFWKDB="${OPTARG}";;
+        e) EMAIL_ADDRESS="${OPTARG}";;
+        g) GROUP_EMAIL_ADDRESS="${OPTARG}";;
+        f) FORK="true";;
+        p) DBPWD="${OPTARG}";;
+        o) DBPORT="${OPTARG}";;
+        h) DBHOST="${OPTARG}";;
+        *) printf "Usage: %s -v Version [-r cifwk root directory ] [-d cifwkdb] [-e email address]\n" $0
+        exit 1;;
+    esac
+done
+
+#
+# Set up the logging
+#
+UG_STAMP="UG_$($_DATE "+%Y-%m-%d_%H-%M-%S")"
+LOG_DIR="${CIFWK_ROOT}/logs/${UG_STAMP}"
+LOG_FILE="${LOG_DIR}/upgrade.log"
+if [ ! -d "${LOG_DIR}" ] ; then
+    $_MKDIR -p ${LOG_DIR}
+    log "Creating log directory"
+    log "Logging all info into log @ ${LOG_FILE}"
+    $_ECHO "CIFWK Upgrade to : ${NEW_CIFWK_VER}" >> ${LOG_FILE}
+fi
+
+checkUser
+currentVersion
+dbMigration # Also updates the links..
+runSyncDB
+restartHttpd
+cleanUpOldCifwkVersions
+sendEmail
+
+$_ECHO "CIFWK has completed Upgrade to new version : ${NEW_CIFWK_VER}"
+exit 0

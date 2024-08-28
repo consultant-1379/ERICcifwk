@@ -1,0 +1,191 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% load passwordHide %}
+
+{% block title %}DMT Management Servers{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">
+        Management Servers
+        <a class="img" style="padding-left:5px;" href="/dmt/addmgtsvr/product/Management/" title="Register A Management Server"><img src="/static/images/create.png"/></a>
+        <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+A+Management+Server" title="Management Server Help" target="_blank"><img src="/static/images/question.png"/></a>
+        <a class="img" style="padding-left:5px;" href="/dmt/log/managementserver" title="User Activity Log for Management Servers"><img src="/static/images/log.png"/></a>
+    </h2>
+<div id="server">
+    <table class="general-table">
+      {% if mgtservers %}
+         <tr>
+            <th colspan="2">Name</th>
+            <th>Product</th>
+            <th>Description</th>
+            <th style="text-align: center; width:85px;">Options</th>
+         </tr>
+         {% for item in mgtservers %}
+           <tr {% ifequal item.server.id|add:"0" selected|add:"0" %}class="selected"{% endifequal %}>
+              <td colspan="2">
+                 <a href="/dmt/mgtsvrs/{{ item.server.id }}/">{{ item.server.hostname }} (id: {{ item.id }})</a></td>
+              <td>
+                 {{ item.product.name }}
+              </td>
+              <td>
+                 {{ item.description }}
+              </td>
+              <td style="text-align: center; width:85px;">
+                  <a class="img" href="/dmt/editmgtsvr/{{ item.server.id }}" title="Edit Management Server {{ item.server.hostname }}"><img src="/static/images/edit.png"/></a>
+                  <a class="img" href="javascript:void(0)"
+                       onClick="checkAction('Do you really want to Delete {{ item.server.hostname }}?', '/dmt/deletemgtsvr/{{ item.server.id}}/')"
+                       title="Delete Management Server {{ item.server.hostname }} "><img src="/static/images/delete.png"/>
+                 </a>
+              </td>
+           </tr>
+         {% endfor %}
+      {% else %}
+         <tr>No Management Servers</tr>
+      {% endif %}
+    </table>
+</div>
+<div id="server-details">
+{% if selected %}
+    {% if mgtserver %}
+        <h3>Physical Management Server Details for {{ mgtserver.server.hostname }} (id: {{ mgtserver.id }})
+            <a class="img" href="/dmt/editmgtsvr/{{ mgtserver.server.id }}/" title="Edit Management Server {{ mgtserver.server.hostname }}"><img src="/static/images/edit.png"></a>
+            <a class="img" href="javascript:void(0)"
+                onClick="checkAction('Do you really want to Delete {{ mgtserver.server.hostname }}?', '/dmt/deletemgtsvr/{{ mgtserver.server.id }}/')"
+                title="Delete Management Server {{ mgtserver.server.hostname }} "><img src="/static/images/delete.png"/>
+           </a>
+        </h3>
+        <br>
+        <table class="general-table">
+            <tr><td>Machine Name:</td><td>{{ mgtserver.server.name }}</td></tr>
+            <tr><td>Domain Name:</td><td>{{ mgtserver.server.domain_name }}</td></tr>
+            <tr><td>HW Type:</td><td>{{ mgtserver.server.hardware_type }}</td></tr>
+            <tr><td>DNS IP Address A:</td><td>{{ mgtserver.server.dns_serverA }}</td></tr>
+            <tr><td>DNS IP Address B:</td><td>{{ mgtserver.server.dns_serverB }}</td></tr>
+            <tr><th colspan="2">
+                Credentials Details
+                <div class="table-actions">
+                    <a class="img" href="/dmt/mgtsvr/{{ mgtserver.server.id }}/add/credential/">
+                        <img src="/static/images/create.png" title="Add Management Server Credentials: {{ mgtserver.id }}"  height="22" width="26" />
+                    </a>
+                </div>
+            </th></tr>
+            <tr><td colspan="2">
+                {% if mgmtServCredMaps %}
+
+                <table width="100%">
+                    {% set fndCred = 0 %}
+                    {% for credMap in mgmtServCredMaps %}
+                        {% if fndCred != 1 %}
+                            {% if credMap.mgtServer.id == mgtserver.id %}
+                                {% set fndCred = 1 %}
+                                <tr>
+                                    <th class="dmt_subheader_font">Username</th>
+                                    <th class="dmt_subheader_font">Password</th>
+                                    <th class="dmt_subheader_font">Type</th>
+                                    <th class="dmt_subheader_font">Options</th>
+                                </tr>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {% for credMap in mgmtServCredMaps %}
+                        {% if credMap.clusterServer.id == s.id %}
+                            <tr>
+                                <td class="dmt_subheader_font">{{ credMap.credentials.username }}</td>
+                                <td class="dmt_subheader_font">{{ credMap.credentials.password|passwordHide }}</td>
+                                <td class="dmt_subheader_font">{{ credMap.credentials.credentialType }}</td>
+                                <td>
+                                    <a class="img" href="/dmt/mgtsvr/{{ mgtserver.server.id }}/edit/credential/{{ credMap.credentials.id }}/">
+                                        <img src="/static/images/edit.png" title="Edit Management Server Credentials: {{ mgtserver.id }}" height="17" width="17"/></a>
+                                    <a class="img" href="javascript:void(0)" onClick="checkAction('Do you really want to delete the Management Server credentials within {{ mgtserver.server.hostname }} (id: {{ mgtserver.id }})?',
+                                                        '/dmt/mgtsvr/{{ mgtserver.server.id }}/delete/credential/{{ credMap.credentials.id }}/')">
+                                    <img src="/static/images/delete.png" title="Delete Management Server credentials within: {{ mgtserver.id }}" height="17" width="17"/></a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+                {% endif %}
+            </td></tr>
+            <tr><th colspan="2">Nic Details</th></tr>
+            {% for n in allNics %}
+                {% if n.server.hostname == mgtserver.server.hostname %}
+                    {% if n.interface == "eth0" %}
+                        <tr><td>Mac Address (eth0):</td><td>{{ n.mac_address }}</td></tr>
+                    {% endif %}
+                    {% if n.interface == "eth1" %}
+                        <tr><td>Mac Address (eth1):</td><td>{{ n.mac_address }}</td></tr>
+                    {% endif %}
+                    {% if n.interface == "eth2" %}
+                        <tr><td>Mac Address (eth2):</td><td>{{ n.mac_address }}</td></tr>
+                    {% endif %}
+                    {% if n.interface == "eth3" %}
+                        <tr><td>Mac Address (eth3):</td><td>{{ n.mac_address }}</td></tr>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% if nic.server.hostname == mgtserver.server.hostname %}
+               <tr><th colspan="2">IPv4 Info</th></tr>
+               <tr><td>IPv4 Host Address:</td>
+                   <td>{% if ipAddressesInfo.ipv4_host_address %}{{ ipAddressesInfo.ipv4_host_address }}{% else %}Not Assigned{% endif %}</td>
+               </tr>
+               <tr><td>IPv4 Host Bitmask:</td>
+                   <td>{% if ipAddressesInfo.ipv4_host_bitmask %}/{{ ipAddressesInfo.ipv4_host_bitmask }}{% else %}Not Assigned{% endif %}</td>
+               </tr>
+               <tr><th colspan="2">IPv6 Info</th></tr>
+               <tr><td>IPv6 Host Address:</td>
+                   <td>{% if ipAddressesInfo.ipv6_host_address %}{{ ipAddressesInfo.ipv6_host_address }}{% else %}Not Assigned{% endif %}</td>
+               </tr>
+               <tr><th colspan="2">Storage vLAN Details</th></tr>
+               <tr><td>IPv4 Storage Vlan Address :</td>
+                   <td>{% if ipAddressesInfo.storage_address %}{{ ipAddressesInfo.storage_address }}{% else %}Not Assigned{% endif %}</td>
+               </tr>
+               <tr><th colspan="2">Backup vLAN Details</th></tr>
+               <tr><td>IPv4 Backup Vlan Address :</td>
+                   <td>{% if ipAddressesInfo.backup_address %}{{ ipAddressesInfo.backup_address }}{% else %}Not Assigned{% endif %}</td>
+               </tr>
+               <tr><th colspan="2">Internal vLAN Details</th></tr>
+               <tr><td>IPv4 Internal Vlan Address :</td>
+                   <td>{% if ipAddressesInfo.internal_address %}{{ ipAddressesInfo.internal_address }}{% else %}Not Assigned{% endif %}</td>
+               </tr>
+            {% endif %}
+            {% if iloAddress and  iloAddress != "None" %}
+                <tr><th colspan="2">ILO Details</th></tr>
+                <tr><td>ILO Username :</td><td>{{ ilo.username }}</td></tr>
+                <tr><td>ILO Password :</td><td>{{ ilo.password|passwordHide }}</td></tr>
+                <tr><td>ILO Address :</td><td><a href="http://{{ iloAddress }}/">{{ iloAddress }}</a></td></tr>
+            {% endif %}
+       </table>
+    {% endif %}
+    <br>
+    <h3>Deployments Associated with {{ mgtserver.server.hostname }}  (id: {{ mgtserver.id }})
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+a+Deployment" title="Deployment Help" target="_blank"><img src="/static/images/question.png"/></a>
+        <a class="img" href="/dmt/addcluster/" title="Register A Deployment"><img src="/static/images/create.png"/></a>
+    </h3>
+    {% if clusters %}
+    <table class="general-table">
+            <tr>
+                <th>Name</th>
+                <th>Deployment ID</th>
+            </tr>
+           {% for c in clusters %}
+            <tr>
+                <td><a href="/dmt/clusters/{{ c.id }}/">{{ c.name }}</a></td>
+                <td>{{ c.id}}</td>
+            </tr>
+           {% endfor %}
+       </table>
+    {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

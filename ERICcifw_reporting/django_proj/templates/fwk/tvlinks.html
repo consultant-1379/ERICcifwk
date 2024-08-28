@@ -1,0 +1,31 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}TV Links{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Registered TV Teams</h2>
+    <div class="generic-text">
+        <br>
+        <table id="fwkTV-table" class="general-table">
+            {% if teams %}
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Live Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in teams %}
+                <tr>
+                    <td><a href="/fwk/links/{{ item.name }}">{{ item.name }}</a></td>
+                    <td><a href="/fwk/summary/{{ item.name }}">{{ item.name }}</a></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td><p>No TV information found</p></td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

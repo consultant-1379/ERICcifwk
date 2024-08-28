@@ -1,0 +1,22 @@
+<INCLUDE NODE: launcher >
+  <litp:component-def id="launcher">
+    <litp:cmw-bundle-def id="pkg">
+      <bundle_name>ERIClauncher_CXP9030204-<PACKAGE_VERSION></bundle_name>
+      <bundle_type>rpm</bundle_type>
+      <version>1</version>
+    </litp:cmw-bundle-def>
+    <litp:file-def id="help">
+      <ensure>directory</ensure>
+      <name>launcher_help</name>
+      <path>/var/www/html/help</path>
+      <recurse>true</recurse>
+      <source>/opt/ericsson/com.ericsson.nms.pres.TorLauncher/html/help</source>
+    </litp:file-def>
+    <litp:file-def id="launcher">
+      <ensure>directory</ensure>
+      <name>pres_launcher</name>
+      <path>/var/www/html/container/tor-launcher</path>
+      <recurse>true</recurse>
+      <source>/opt/ericsson/com.ericsson.nms.pres.TorLauncher/html/container/tor-launcher</source>
+    </litp:file-def>
+  </litp:component-def>

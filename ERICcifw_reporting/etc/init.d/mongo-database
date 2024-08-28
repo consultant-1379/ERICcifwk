@@ -1,0 +1,109 @@
+#!/bin/bash
+# chkconfig: 2345 20 80  
+#            |   |  |   
+#            |   |  +--Stop priority    
+#            |   +-----Start priority   
+#            +---------Default runlevels    
+# description: Mongo Database init.d script
+# processname: Mongo     
+# logfile: /var/log/mongod_data.log    
+#
+# Source CI Framework global environment, if available.     
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+_PWD=pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; $_PWD)
+if [ -f ${BASEDIR}/etc/global.env ]; then
+    . ${BASEDIR}/etc/global.env
+else
+   _ECHO=/bin/echo
+   _CAT=/bin/cat
+   _RM=/bin/rm
+   _GREP=/bin/grep
+   _AWK=/bin/awk
+   _SLEEP=/bin/sleep
+fi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+
+DESC="Mongo Database"  
+
+CONFIG_FILE=/proj/lciadm100/cifwk/latest/bin/config-mongo.conf
+for i in `$_CAT $CONFIG_FILE | $_GREP '^[^#].*'`
+do
+       var=`$_ECHO "$i" | $_AWK -F"=" '{print $1}'`
+       param=`$_ECHO "$i" | $_AWK -F"=" '{print $2}'`
+       eval $var=$param
+done
+
+
+# Start the service Mongo
+start() {
+        if [ -f "${MONGOD_PID_FILE}" ]; then
+           $_ECHO -n " ${DESC} Service is already running on -  "
+           $_CAT ${MONGOD_PID_FILE}
+           exit 1
+        else 
+            $_ECHO -n "Starting ${DESC} Service"
+            nohup numactl --interleave=all ${MONGOD_DIR} --dbpath ${MAIN_DBPATH} -port ${MONGOD_PORT} > ${MONGOD_LOG_FILE} 2>&1 &
+            PID=$!
+            $_ECHO ${PID} > ${MONGOD_PID_FILE}
+
+        fi
+        
+}
+
+# Stop the service Mongo
+stop() {
+        $_ECHO -n "Stopping ${DESC} Service"
+        if [ ! -z "${MONGOD_PID_FILE}" ]; then
+            $_CAT ${MONGOD_PID_FILE} | xargs kill -15
+            $_RM -f ${MONGOD_PID_FILE}
+        fi               
+}
+
+# Status the service Mongo
+status(){
+        if [ -f "${MONGOD_PID_FILE}" ]; then
+            $_ECHO -n "${DESC} Service is running on -  "
+            $_CAT ${MONGOD_PID_FILE}
+        else
+            $_ECHO -n "${DESC} Service not running."
+            exit 1
+        fi
+                       
+}
+
+#Restarting the service Mongo
+restart(){
+        $_ECHO "Restarting ${DESC} Service: "
+        stop
+        $_SLEEP 1
+        start
+}
+
+
+
+### Main Logic ###
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status
+        ;;
+  restart)
+        restart
+        ;;
+  *)
+        $_ECHO "${DESC} Service Usage: $0 {start|stop|restart|status}"
+        exit 2
+esac
+
+exit 0

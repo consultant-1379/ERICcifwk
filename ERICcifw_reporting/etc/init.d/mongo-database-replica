@@ -1,0 +1,165 @@
+#!/bin/bash
+# chkconfig: 2345 20 80  
+#            |   |  |   
+#            |   |  +--Stop priority    
+#            |   +-----Start priority   
+#            +---------Default runlevels    
+# description: Mongo Database init.d script
+# processname: Mongo     
+# logfile: /var/log/mongod_data.log    
+#
+# Source CI Framework global environment, if available.     
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+_PWD=pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; $_PWD)
+if [ -f ${BASEDIR}/etc/global.env ]; then
+        . ${BASEDIR}/etc/global.env
+else
+     _ECHO=/bin/echo
+     _CAT=/bin/cat
+     _RM=/bin/rm
+     _GREP=/bin/grep
+     _AWK=/bin/awk
+     _SLEEP=/bin/sleep
+
+fi
+
+# Source function library. 
+. /etc/rc.d/init.d/functions
+ 
+DESC="Mongo Database"  
+
+CONFIG_FILE=/proj/lciadm100/cifwk/latest/etc/init.d/config-mongo.conf
+for i in ` $CONFIG_FILE | $_GREP '^[^#].*'`
+do
+       var=`$_ECHO "$i" | $_AWK -F"=" '{print $1}'`
+       param=`$_ECHO "$i" | $_AWK -F"=" '{print $2}'`
+       eval $var=$param
+done
+
+
+
+# Start the service Mongo
+start() {
+        $_ECHO -n "Starting ${DESC} Service: mongod, mongos, repset0, repset1  "
+        if [ -f "${MONGOD_PID_FILE}" ]; then
+           $_ECHO -n "mongod is already running on -  "
+           $_CAT ${MONGOD_PID_FILE}
+        else 
+            nohup numactl --interleave=all ${MONGOD_DIR} --configsvr  --dbpath ${MAIN_DBPATH} -port ${MONGOD_PORT} > ${MONGOD_LOG_FILE} 2>&1 &
+            PID=$!
+            $_ECHO ${PID} > ${MONGOD_PID_FILE}
+        fi
+        if [ -f "${MONGOS_PID_FILE}" ]; then
+            $_ECHO -n "mongos is already running on -  "
+            $_CAT ${MONGOS_PID_FILE}
+        else
+            $_SLEEP 10
+            nohup numactl --interleave=all ${MONGOS_DIR} --configdb ${CONFIG_DB} --port ${MONGOS_PORT} > ${MONGOS_LOG_FILE} 2>&1 &
+            PID=$!
+            $_ECHO ${PID} > ${MONGOS_PID_FILE}
+        fi
+        if [ -f "${REPSET0_PID_FILE}" ]; then
+            $_ECHO -n "repset0 is already running on -  "
+            $_CAT ${REPSET0_PID_FILE}
+        else
+            nohup numactl --interleave=all ${MONGOD_DIR} --dbpath ${REPSET0_DBPATH} --port ${REPSET0_PORT} --replSet repset0  > ${REPSET0_LOG_FILE} 2>&1 &
+            PID=$!
+            $_ECHO ${PID} > ${REPSET0_PID_FILE}
+        fi
+        if [ -f "${REPSET1_PID_FILE}" ]; then
+            $_ECHO -n "repset1 is already running on -  "
+            $_CAT ${REPSET1_PID_FILE}
+        else
+            nohup numactl --interleave=all ${MONGOD_DIR} --dbpath ${REPSET1_DBPATH} --port ${REPSET1_PORT} --replSet repset1  > ${REPSET1_LOG_FILE} 2>&1 &
+            PID=$!
+            $_ECHO ${PID} > ${REPSET1_PID_FILE}
+        fi
+        
+}
+
+
+# Stop the service Mongo
+stop() {
+        $_ECHO -n "Stopping ${DESC} Service: mongod, mongos, repset0, repset1."
+        if [ ! -z "${MONGOD_PID_FILE}" ]; then
+            $_CAT ${MONGOD_PID_FILE} | xargs kill -15
+            $_RM -f ${MONGOD_PID_FILE}
+        fi
+        if [ ! -z "${MONGOS_PID_FILE}" ]; then
+            $_CAT ${MONGOS_PID_FILE} | xargs kill -15
+            $_RM -f ${MONGOS_PID_FILE}
+        fi
+        if [ -f "${REPSET0_PID_FILE}" ]; then
+            $_CAT ${REPSET0_PID_FILE} | xargs kill -15
+            $_RM -f ${REPSET0_PID_FILE}
+        fi
+        if [ -f "${REPSET1_PID_FILE}" ]; then
+            $_CAT ${REPSET1_PID_FILE} | xargs kill -15
+            $_RM -f ${REPSET1_PID_FILE}
+        fi
+}
+
+
+# Status the service Mongo
+status(){
+        $_ECHO -n "${DESC} Service Status: "
+        if [ -f "${MONGOD_PID_FILE}" ]; then
+            $_ECHO -n "mongod is running on -  "
+            $_CAT ${MONGOD_PID_FILE}
+        else
+            $_ECHO -n "mongod not running. "
+        fi
+        if [ -f "${MONGOS_PID_FILE}" ]; then
+            $_ECHO -n "mongos is running on -  "
+            $_CAT ${MONGOS_PID_FILE}
+        else
+            $_ECHO -n "mongos not running. "
+        fi
+        if [ -f "${REPSET0_PID_FILE}" ]; then
+            $_ECHO -n "repset0 is running on -  "
+            $_CAT ${REPSET0_PID_FILE}
+        else
+            $_ECHO -n "repset0 not running. "
+        fi
+        if [ -f "${REPSET1_PID_FILE}" ]; then
+            $_ECHO -n "repset1 is running on -  "
+            $_CAT ${REPSET1_PID_FILE}
+        else
+            $_ECHO -n "repset1 not running. "
+        fi
+                       
+}
+
+#Restarting the service Mongo
+restart(){
+        $_ECHO "Restarting ${DESC} Service: mongod, mongos, repset0, repset1 - "
+        stop
+        $_SLEEP 1
+        start
+}
+
+
+
+### Main Logic ###
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status
+        ;;
+  restart)
+        restart
+        ;;
+  *)
+        $_ECHO "${DESC} Service Usage: $0 {start|stop|restart|status}"
+        exit 2
+esac
+
+exit 0

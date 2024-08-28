@@ -1,0 +1,7 @@
+<INCLUDE NODE: NFS > 
+      <litp:node-def id="<NODE_ID>">
+        <litp:solution-ref id="<NODE_SOLUTION_ID>">
+          <solution-name><NODE_SOLUTION_DEF_NAME></solution-name>
+        </litp:solution-ref>
+      </litp:node-def>
+

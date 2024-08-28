@@ -1,0 +1,165 @@
+{% extends "base_newlookandfeel.html" %}
+{% block content %}
+
+ <div class="general-container">
+     <h2 class="generalPageNewLook-title">{{ product.name }} Drop {{ drop }} Executive Summary
+         <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/CDB+Executive+Summary" title="Help" target="_blank"><img src="/static/images/question.png"/></a>
+     </h2>
+
+
+                 <br>
+                     {% if latestTypes == 1 %}
+
+                     <table class="general-table" id="cdb_status-table">
+                               {% if latest %}
+                                 <caption><h1>Current Status</h1></caption>
+                                  <tr>
+
+                                     {% for iso, isoBuildStatus in latest.items %}
+                                     {% if isoBuildStatus %}
+                                     {% for status in isoBuildStatus %}
+                                     {% if status.1  == "caution" %}
+                                     <td><p class="cdb-title"> {{ status.0 }}</p>
+                                         <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a> <br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnCautionStatusDetails/{{ status.4 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="120" height="120"></a><br><b>Since:</b> {{ status.3 }}</p>
+                                     </td>                                                                                                                                                                                           {% endif %}
+                                     {% if status.1  == "passed_manual" %}
+                                     <td><p class="cdb-title"> {{ status.0 }}</p>
+                                         <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a> <br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnKGBreadyDetails/{{ status.4 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="120" height="120"></a><br><b>Since:</b> {{ status.3 }}</p>
+                                     </td>
+                                     {% endif %}
+                                     {% endfor %}
+                                     {% endif %}
+                                     {% endfor %}
+                               {% for iso, isoBuildStatus in latest.items %}
+                                     {% if isoBuildStatus %}
+                                     {% for status in isoBuildStatus %}
+                                     {% if status.1  == "failed" or status.1  == "passed" or status.1  == "in_progress" %} <td>{% endif %}
+                                             {% if status.1  == "" or status.1  == "passed_manual" or status.1  == "caution"%}
+                                             {% else %}
+                                             <p class="cdb-title"> {{ status.0 }}</p>
+                                             {% endif %}
+                                              {% if status.1  == "" %}
+                                              <p><img src="/static/images/not_started.png" alt="not_started" width="40" height="40"></p>
+                                              {% else %}
+                                                    {% if status.1  == "failed" or status.1  == "passed" %}
+                                                        {% if status.6 != "None" and  status.6 != "" %}
+                                                        <p align="center"><b>ISO:</b> <a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnisoreport/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="120" height="120"></a><br><b>Started:</b> {{ status.2 }} <br> <b>Ended:</b> {{ status.3 }}<br><a href="{{ status.6 }}" target="_blank"><b>Test Report</b></a></p>
+                                                        {% else %}
+                                                        <p align="center"><b>ISO:</b> <a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnisoreport/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="120" height="120"></a><br><b>Started:</b> {{ status.2 }} <br> <b>Ended:</b> {{ status.3 }}<br><b>No Report</b></p>
+                                                        {% endif %}
+                                                    {% elif status.1  == "in_progress" %}
+                                                      {% if status.5 != "None" %}
+                                                      <p align="center"><b>ISO:</b> <a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="{{ status.5 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"></a><br><b>Started:</b> {{ status.2 }}<br><b>No Report</b></p>
+                                                      {% else %}
+                                                      <p align="center"><b>ISO:</b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"><br><b>Started:</b> {{ status.2 }}<br><b>No Report</b></p>
+                                                      {% endif %}
+                                                    {% endif %}
+                                                {% endif %}
+                                         {% endfor %}
+                                         {% if status.1  == "failed" or status.1  == "passed" or status.1  == "in_progress" %} </td>{% endif %}
+                                      {% endif %}
+                                     {% endfor %}
+                                </tr>
+                               {% else %}
+                                  <tr>  <td><p align="center"><img src="/static/images/not_started.png" alt="not_started" width="80" height="80"></p></td></tr>
+                              {% endif %}
+                          </table>
+                         <br>
+                         <br>
+                         <br>
+                         <br>
+                         <br>
+                         <br>
+                         {% endif %}
+                         {% if cdbType %}
+                         <table class="general-table" id="cdb_status-table">
+                             <caption><h1>Last Successful Historical Status</h1></caption>
+                               <tr>
+                               {% for iso, isoBuildStatus in successfulStatus.items %}
+                                     {% if isoBuildStatus %}
+                                               <td>
+                                                   {% for status in isoBuildStatus %}
+                                                       {% if status.1 = "" %}
+                                                       {% else %}
+                                                       <p class="cdb-title" > {{ status.0 }}</p>
+                                                       {% endif %}
+                                                        {% if status.1  == "" %}
+                                                           <img src="/static/images/not_started.png" alt="not_started" width="40" height="40"/>
+                                                         {% else %}
+                                                             {% if status.6 != "None" and  status.6 != "" %}
+                                                             <p align="center"><b>ISO:</b> <a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnisoreport/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="120" height="120"></a><br><b>Started:</b> {{ status.2 }} <br> <b>Ended:</b> {{ status.3 }}<br><a href="{{ status.6 }}" target="_blank"><b>Test Report</b></a></p>
+                                                             {% else %}
+                                                             <p align="center"><b>ISO:</b> <a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnisoreport/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="120" height="120"></a><br><b>Started:</b> {{ status.2 }} <br> <b>Ended:</b> {{ status.3 }}<br><b>No Report</b></p>
+                                                             {% endif %}
+                                                         {% endif %}
+                                                   {% endfor %}
+                                                </td>
+                                      {% endif %}
+                                    {% endfor %}
+                                  </tr>
+                              </table>
+                              {% endif %}
+               <br>
+               <br>
+               <br>
+               {% if flag == 1 %}
+                    <table class="general-table" id="cdb_status-table">
+                        {% if isos %}
+                        <caption><h1>History</h1></caption>
+
+                            {% for item in isos %}
+                                {% for iso, cdb in cdbHistory.items %}
+                                <tr>
+                                       {% if iso == item %}
+                                       {% if cdb %}
+                                       {% for status in cdb %}
+                                       {% if status.1  == "caution" %}
+                                       <td><p class="cdb-title"> {{ status.0 }}</p>
+                                           <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnCautionStatusDetails/{{ status.4 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"></a><br><b>Since:</b> {{ status.3 }}</p>
+                                       </td>
+                                       {% endif %}
+                                       {% if status.1  == "passed_manual" %}
+                                       <td><p class="cdb-title"> {{ status.0 }}</p>
+                                           <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnKGBreadyDetails/{{ status.4 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"></a><br><b>Since:</b> {{ status.3 }}</p>
+                                       </td>
+                                       {% endif %}
+                                          {% endfor %}
+                                            {% for status in cdb %}
+                                             {% if status.1  == "failed" or status.1  == "passed" or status.1  == "in_progress" %} <td>{% endif %}
+                                              {% if status.1 = "" or status.1 == "passed_manual" or status.1  == "caution" %}
+                                               {% else %}
+                                                            <p class="cdb-title" > {{ status.0 }}</p>
+                                                        {% endif %}
+                                                        {% if status.1  == "" %}
+                                                            <img src="/static/images/not_started.png" alt="not_started" width="40" height="40">
+                                                        {% else %}
+                                                            {% if status.1  == "failed" or status.1  == "passed" %}
+                                                                {% if status.6 != "None" and  status.6 != "" %}
+                                                                <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnisoreport/{{ status.4 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"></a><br><b>Started:</b> {{ status.2 }} <br> <b>Ended:</b> {{ status.3 }}<br><a id="{{ status.0 }}_{{ product.name }}_{{ iso.version }}" href="{{ status.6 }}" target="_blank"><b>Test Report</b></a></p>
+                                                                {% else %}
+                                                                <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="/{{ product.name }}/{{ drop }}/{{ iso.version }}/{{ status.0 }}/returnisoreport/{{ status.4 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"></a><br><b>Started:</b> {{ status.2 }} <br> <b>Ended:</b> {{ status.3 }}<br><b>No Report</b></p>
+                                                                {% endif %}
+                                                             {% elif status.1  == "in_progress" %}
+                                                                {% if status.5 != "None" %}
+                                                                <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><a href="{{ status.5 }}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"></a><br><b>Started:</b> {{ status.2 }}<br><b>No Report</b></p>
+                                                                {% else %}
+                                                                <p align="center"><b>ISO: </b><a href="/{{ product.name }}/{{ drop }}/mediaContent/{{iso.mediaArtifact.name}}/{{ iso.version }}"><b class="isoLink">{{ iso.version }}</b></a><br><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" width="100" height="100"><br><b>Started:</b> {{ status.2 }}<br><b>No Report</b></p>
+                                                                {% endif %}
+                                                             {% endif %}
+                                                        {% endif %}
+                                                        {% if status.1  == "failed" or status.1  == "passed" or status.1  == "in_progress" %} </td>{% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                          {% endif %}
+                                        </tr>
+                                     {% endfor %}
+                                   {% endfor %}
+                          {% else %}
+                               <td><p><center>No status information currently found</center></p></td>
+                          {% endif %}
+                    </table>
+               {% else %}
+                  <br><br><br><br><p>No status information currently found</p>
+               {% endif %}
+   </div>
+{% endblock %}

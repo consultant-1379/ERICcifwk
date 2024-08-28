@@ -1,0 +1,139 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+{% block title %} Media Artifact to Delivery Group Mappings {% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title"> Media Artifact to Delivery Group Mappings for {{ drop }}</h2>
+    <div class="layout-bar"> <a href="/{{ product }}/drops/{{ drop }}">Drop:{{ drop }}</a> | <a href="/{{ product }}/queue/{{ drop }}">Delivery Queue</a> | <a href="/{{ product }}/{{ drop }}/media/">Historic Media Artifact Versions</a></div>
+        <br>
+      <div style="width: 50%; float: left;">
+        <b class="sub-title">Productware Media Artifact to Delivery Group Mappings</b>
+        <table class="general-table">
+            <tr>
+                <th style="width:100px">Productware Version</th>
+                <th style="width:130px">Testware Mapping</th>
+                <th style="width:280px">Delivery Group</th>
+                <th style="width:250px">Delivery Group Status</th>
+            </tr>
+            {% for isoDelGrpTup in isoDelGrps %}
+            <tr>
+                <td><a href="/{{ product }}/{{ drop }}/mediaContent/{{ isoDelGrpTup.0.1 }}/{{ isoDelGrpTup.0.0 }}">{{ isoDelGrpTup.0.0 }}</a></td>
+                <td>
+                    {% for value in isoDelGrpTup.1.0 %}
+                    <a href="/{{ product }}/{{ drop }}/mediaContent/{{ value.0 }}/{{ value.1 }}">{{ value.1 }}</a><br>
+                    {% endfor %}
+                </td>
+                <td colspan=2>
+                    <table class="general-table">
+                        {% for value in isoDelGrpTup.1.1 %}
+                        <tr>
+                            <td style="width:280px">
+                                {% if value.1 != 'delivered' %}
+                                   <span style="text-decoration: line-through; color:red">
+                                {% endif %}
+                                <a {% if value.1 != 'delivered' %}
+                                      style="color:red"
+                                   {% endif %}
+                                   {% if value.1 == 'restored' %}
+                                      href="/{{product}}/queue/{{drop}}/{{value.0}}/"
+                                   {% else %}
+                                      href="/{{product}}/queue/{{drop}}/{{value.0}}/?section={{value.1}}"
+                                   {% endif %}
+                                >{{ value.0 }}</a>
+                                 {% if value.2 == "True" %}
+                                      - Contains Testware
+                                 {% elif value.2 == "Priority" %}
+                                      - Contains {{ value.3 }} Testware
+                                 {% endif %}
+                                 {% if value.1 != 'deleted' %}
+                                     </span>
+                                 {% endif %}
+                            </td>
+                            <td style="width:250px">
+                                {% if value.1 != 'delivered' %}
+                                    <font color=red>
+                                {% endif %}
+                                {% if value.1 != 'delivered' and  value.1 != 'obsoleted' %}
+                                   obsoleted - {{ value.1 }}
+                                {% else %}
+                                   {{ value.1 }}
+                                {% endif %}
+                                {% if value.1 != 'delivered' %}
+                                    </font>
+                                {% endif %}
+                           </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+      </div>
+      <div style="width: 50%; float: right;">
+        <b class="sub-title">Testware Media Artifact to Delivery Group Mappings</b>
+        <table class="general-table">
+            <tr>
+                <th style="width:100px">Testware Version</th>
+                <th style="width:130px">Productware Mapping</th>
+                <th style="width:280px">Delivery Group</th>
+                <th style="width:250px">Delivery Group Status</th>
+            </tr>
+            {% for testIsoDelGrpTup in testIsoDelGrps %}
+            <tr>
+                <td><a href="/{{ product }}/{{ drop }}/mediaContent/{{ testIsoDelGrpTup.0.1 }}/{{ testIsoDelGrpTup.0.0 }}">{{ testIsoDelGrpTup.0.0 }}</a></td>
+                <td>
+                    {% for value in testIsoDelGrpTup.1.0 %}
+                    <a href="/{{ product }}/{{ drop }}/mediaContent/{{ value.0 }}/{{ value.1 }}">{{ value.1 }}</a><br>
+                    {% endfor %}
+                </td>
+                <td colspan=2>
+                    <table class="general-table">
+                        {% for value in testIsoDelGrpTup.1.1 %}
+                        <tr>
+                            <td style="width:280px">
+                                {% if value.1 != 'delivered' %}
+                                   <span style="text-decoration: line-through; color:red">
+                                {% endif %}
+                                <a {% if value.1 != 'delivered' %}
+                                      style="color:red"
+                                   {% endif %}
+                                   {% if value.1 == 'restored' %}
+                                      href="/{{product}}/queue/{{drop}}/{{value.0}}/"
+                                   {% else %}
+                                      href="/{{product}}/queue/{{drop}}/{{value.0}}/?section={{value.1}}"
+                                   {% endif %}
+                                >{{ value.0 }}</a>
+                                 {% if value.2 == "True" %}
+                                      - Contains Testware
+                                 {% elif value.2 == "Priority" %}
+                                      - Contains {{ value.3 }} Testware
+                                 {% endif %}
+                                 {% if value.1 != 'deleted' %}
+                                     </span>
+                                 {% endif %}
+                            </td>
+                            <td style="width:250px">
+                                {% if value.1 != 'delivered' %}
+                                    <font color=red>
+                                {% endif %}
+                                {% if value.1 != 'delivered' and  value.1 != 'obsoleted' %}
+                                   obsoleted - {{ value.1 }}
+                                {% else %}
+                                   {{ value.1 }}
+                                {% endif %}
+                                {% if value.1 != 'delivered' %}
+                                    </font>
+                                {% endif %}
+                           </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+      </div>
+    </div>
+    {% endblock %}
+{% endif %}

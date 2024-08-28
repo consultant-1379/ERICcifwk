@@ -1,0 +1,56 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+{% block title %}{{ product.name }} Drop {{ drop.name }} Delivery Queue Jiras {% endblock %}
+{% block content %}
+    <script>
+        $(function() {
+            $( "#accordion" ).accordion({
+                active:0,
+                collapsible: true,
+                heightStyle: "content"
+            });
+        });
+    </script>
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">
+            Adding Jira to Delivery Group: {{ group }} <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Queue" title="Delivery Queue Info" target="_blank"><img src="/static/images/question.png"/></a>
+        </h2>
+        <div class="layout-bar"> <a href="/{{ product.name }}/drops/{{ drop.name }}">Drop:{{ drop.name }}</a> | <a href="/{{ product.name }}/queue/{{ drop.name }}">Delivery Queue</a></div>
+        <br>
+        <form enctype="multipart/form-data" name="AddGroupJiraForm" method="post" action="">{% csrf_token %}
+         <h3> Add Jira to Delivery Group</h3>
+        <br> <br>
+        <table>
+            <th>Jira Number </th>
+                <tr>
+                    <td>
+                        <input type="text" name="jira" size="75">
+                    </td>
+                </tr>
+        </table>
+        {% if error %}<span style="color:red">{{errorMsg}}</span> {% endif %}
+        <br>
+        <input name="SubmitExit" type="submit" value="Submit And Exit" title="Submit And Exit"></input>
+         <input name="SubmitAnother" type="submit" value="Submit And Add Another" title="Submit And Another"></input>
+        </form>
+    <br>
+    <div id="accordion">
+        <h4> Current Group Jiras </h4>
+        <div>
+            {% if jiras %}
+                <table class="general-table">
+                    <th>Jira Number</th><th>Type</th>
+                {% for jira in jiras %}
+                    <tr>
+                        <td><a href="{{jiraUrl}}{{ jira.jiraIssue.jiraNumber }}" target="_blank"> {{ jira.jiraIssue.jiraNumber }} </a></td>
+                        <td> {{ jira.jiraIssue.issueType }} </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                No jiras found in the database for this delivery group
+            {% endif %}
+        </table>
+        </div>
+    </div>
+    {% endblock %}
+{% endif %}

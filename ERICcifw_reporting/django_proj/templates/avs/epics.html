@@ -1,0 +1,31 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">AVS EPICs
+        </div>
+    </div>
+    <div class="generic-text">
+        <br>
+        <table id="avsEpics-table">
+            {% for eachEpic in epics %}
+                <tr valign="top">
+                <td>
+                <a href="/avs/epics/{{ eachEpic.name }}">{{ eachEpic.name }}</a>
+                </td>
+                {% if eachEpic.name == epic.name %}
+                <td class="selected">
+                {% else %}
+                <td>
+               {% endif %}
+               {{ eachEpic.title }}
+               </td>
+               </tr>
+           {% endfor %}
+        </table>
+    </div>
+
+ {% endblock %}
+

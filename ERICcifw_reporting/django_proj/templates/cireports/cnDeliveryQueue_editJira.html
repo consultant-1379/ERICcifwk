@@ -1,0 +1,30 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Edit Jira Ticket for {{ deliveryGroupNumber }} {% endblock %}
+
+{% block content %}
+    <link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+    <script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src='/static/cnDeliveryQueue_editJira.js'></script>
+    <div id="hidden_deliveryGroupNumber_div" style="display:none">{{ deliveryGroupNumber }}</div>
+    <div class="delivery-form-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;" >
+          Edit Jira Ticket for Delivery Group {{ deliveryGroupNumber }}
+            <a class="img" href="" title="Delivery Queue Help" target="_blank">
+                <img src="/static/images/question.png"/>
+            </a>
+        </h2>
+        <div id='drop_team_form'>
+            <br>
+            <label for='drop'>Drop:</label>
+            <input id='drop' class="delivery_form_drop" style="width: 20%; background-color: #d1d1e0;" readonly>
+            <br>
+        </div>
+        <br>
+        <div id='sg_form'>
+            <input type="button" value="Add Jira Ticket" style="cursor:pointer;" class="btn-default" id="add_jira">
+        </div>
+        <br>
+        <input type="button" class="btn-default" value="Edit Jira" id="edit_jira">
+    </div>
+{% endblock %}

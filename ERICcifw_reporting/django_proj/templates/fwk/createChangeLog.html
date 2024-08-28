@@ -1,0 +1,115 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Change Log{% endblock %}
+
+{% block content %}
+    <script>
+$(document).ready(function () {
+
+    $('#startDate').datetimepicker({
+        format: 'Y-m-d H:i',
+        onShow: function (ct) {
+            if ($('#endDate').val()) {
+                dateTime = $('#endDate').val();
+                dateTime = dateTime.substring(0, 10);
+                dateTime = dateTime.replace(/[-]/g,'/');
+                this.setOptions({
+                    maxDate: dateTime
+                });
+            } else {
+                this.setOptions({
+                    maxDate: '0'
+                });
+            }
+        }
+
+    });
+    $('#endDate').datetimepicker({
+        format: 'Y-m-d H:i',
+        onShow: function (ct) {
+            if ($('#startDate').val()) {
+                dateTime = $('#startDate').val();
+                dateTime = dateTime.substring(0, 10);
+                dateTime = dateTime.replace(/[-]/g,'/');
+                this.setOptions({
+                    minDate: dateTime
+                });
+            } else {
+                this.setOptions({
+                    minDate: '2012/01/10'
+                });
+            }
+            this.setOptions({
+                    maxDate: '0'
+                });
+
+        },
+
+        onChangeDateTime: function (dp, $input) {
+            var enddateinput = $input.val();
+        }
+    });
+
+    $('#search_button').click(displaySummary);
+
+    function displaySummary() {
+
+        if (!$('#startDate').val()||!$('#endDate').val()) {
+            alert("Please select a date range");
+            return;
+        }
+
+        var start = ($('#startDate').val()+':00');
+        var end = ($('#endDate').val()+':00');
+
+        $('div#clresults').html('<img src = "/static/images/processing.gif" >');
+        doRest(start, end);
+    }
+
+
+    function doRest(start, end) {
+        $('#search_button').attr('disabled', 'disabled');
+        $.ajax({
+            type: "GET",
+            url: "/fwk/createChangeLog/",
+            dataType: "html",
+            data: {
+                "from": start,
+                "until": end
+            },
+            success: function (html) {
+                $('div#clresults').html(html);
+                $('#search_button').attr('disabled', false);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Could not retrieve query result: " + (errorThrown ? errorThrown : xhr.status));
+            },
+        });
+    }
+
+});
+    </script>
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">
+            Change Log
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Change+Logs" title="Change Log Help" target="_blank"><img src="/static/images/question.png"/></a>
+        </h2>
+        <div class="col-sm-2">
+            <div class="well changelog-content">
+                    <label>Select Date Range:</label>
+                    <br>
+                    <div style=margin:1px;>
+                        From : <input id="startDate" name="start"  maxlength="19" size="15" type="text" style="margin:10px;">
+                        <br>
+                        Until :   <input id="endDate" name="end" maxlength="19" size="15" type="text" style="margin:15px;">
+                        <br>
+                    </div>
+                    <div style=margin:1px;>
+                        <input type="submit" id="search_button" value="Query" style="margin:1px; padding:5px 15px; float: right; background:#ccc; border:0 none; cursor:pointer; -webkit-border-radius: 5px; border-radius: 5px;">
+                    </div>
+            </div>
+        </div>
+        <div id='clresults' style="overflow: hidden;margin: 10px auto;clear:both;">
+        </div>
+    </div>
+{% endblock %}

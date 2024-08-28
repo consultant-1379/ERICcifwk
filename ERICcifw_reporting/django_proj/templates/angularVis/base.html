@@ -1,0 +1,144 @@
+{% load staticfiles %}
+<html>
+    {% block headscript %}
+    <head>
+        <meta charset="utf-8">
+        <meta httpequiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1">
+        <script type="text/javascript" src="/static/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-route.min.js"></script>
+        <script type="text/javascript" src="/static/angular-resource.min.js"></script>
+        <script type="text/javascript" src="/static/js/script.js"></script>
+        <script type="text/javascript" src="/static/js/chartController.js"></script>
+        <link rel=StyleSheet href="/static/jquery/datetimepicker/jquery.datetimepicker.css" type="text/css" />
+        <link rel=StyleSheet href="/static/jquery/dropdown/multiple-select.css" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap-theme.min.css">
+        <script type="text/javascript"  href="/static/js/ui-bootstrap-tpls-0.13.3.min.js"></script>
+        <script type="text/javascript"  href="/static/js/angular-messages.js"></script>
+        <script type="text/javascript"  href="/static/bootstrap/js/bootstrap.min.js"></script>
+        <link rel=stylesheet href="/static/css/buildlogStyle.css" type="text/css" />
+        <link rel=stylesheet href="/static/css/style.css"  type="text/css" />
+        <link rel=stylesheet href="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" type="text/css" />
+        <base href="/">
+        <title>PDU NAM CI Portal</title>
+    </head>
+    {% endblock headscript %}
+    {% block body %}
+    <body ng-app="{% block ng_app %}{% endblock ng_app %}">
+        {% block header_includes %}
+        <div class="navbar navbar-default navbar-static-top" role="navigation">
+            <div class="container-fluid">
+            {% block navbar %}
+                <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+          <a class="navbar-brand" href="#" target="_self">
+            <span><img class="brand-logo" src="{% static "images/logo.png" %}"></span>
+                PDU NAM Continuous Integration Portal
+          </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Product <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a id="prodset_link" href="/releaseProducts" target="_self">Products</a></li>
+                    <li><a id="prodset_link" href="/ps" target="_self">Product Sets</a></li>
+                </ul>
+            </li>
+            {% block releases %}{% endblock releases %}
+            <li><a id="cpl_link" href="/cireports/allArtifacts/" target="_self">Complete Package List</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Deployments <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="/dmt/mgtsvrs/" target="_self">Manage Management Servers</a></li>
+                <li><a href="/dmt/clusters/" target="_self">Manage Deployments</a></li>
+                <li><a href="/dmt/nassvrs/" target="_self">Manage NAS</a></li>
+                <li><a href="/dmt/storage/" target="_self">Manage SAN</a></li>
+                <li><a href="/dmt/enclosure/" target="_self">Manage Enclosure(s)</a></li>
+                <li><a href="/dmt/ViewUploadSED/" target="_self">Manage SED</a></li>
+                <li><a href="/dmt/changeClusterGroup/" target="_self">Change Deployment Group</a></li>
+                <li><a href="/dmt/searchInventory/" target="_self">Search Inventory</a></li>
+                <li><a href="/dmt/searchInstallGroup/" target="_self">Deployment Install Group Inventory</a></li>
+                <li><a href="/dmt/upload/preLoadedSed/" target="_self">Upload Pre-Populated SED</a></li>
+                <li><a href="/dmt/sshkey/" target="_self">SSH Key</a></li>
+                <li><a href="/dmt/uploadSnapshot/" target="_self">Pre-Commit Staging Area</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Visualisation <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="/metrics/CloudMetrics/" target="_self">Cloud Metrics</a></li>
+                    <li><a href="/metrics/KgbMetrics/" target="_self">KGB Metrics</a></li>
+                    <li class="divider"></li>
+                    <li><a href="/vis/showWidgets" target="_self">Chart(s)</a></li>
+                    <li><a href="/vis/showWidgetDefinitions/" target="_self">Chart Configuration(s)</a></li>
+                    <li><a href="/vis/showChartMappings/" target="_self">Sequence Configuration</a></li>
+                    <li><a href="/visualisation/baseline/" target="_self">Baseline</a></li>
+                    <li><a href="/visualisation/serverutilization/" target="_self">Server Utilization</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Framework <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="/fwk/links/" target="_self">TV Teams</a></li>
+                    <li><a href="/admin" target="_self">Admin</a></li>
+                    <li><a href="/femjob" target="_self">Create Jobs</a></li>
+                    <li><a href="/fwk/changeLog" target="_self">Change Log</a></li>
+                    <li><a href="/TickerTapeHistory" target="_self">Ticker Tape History</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Excellence <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <!--<li><a href="/excellence/showCategories/">Categories</a></li>
+                    <li><a href="/excellence/showQuestions/">Questions</a></li>!-->
+                    <li><a href="/excellence/showOrganisations/" target="_self">Organisations</a></li>
+                    <li><a href="/excellence/takeQuestionnaire/" target="_self">New Assessment</a></li>
+                    <li><a href="/excellence/searchQuestionnaires/" target="_self">Assessment History</a></li>
+                </ul>
+            </li>
+           <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">External <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    {% load tags %}
+                    <li>{% getSPPLinks %}</li>
+                    <li class="divider"></li>
+                    <li><a href="https://atvcloud4.athtem.eei.ericsson.se/users/login">Install Manager</a></li>
+                    <li><a href="https://taftm.lmera.ericsson.se/">Test Management</a></li>
+                    <li><a href="https://gerrit-gamma.gic.ericsson.se">Gerrit</a></li>
+                    <li><a href="https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus">Nexus</a></li>
+                    {% block fem %}{% endblock fem%}
+                </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+              {% block user %}
+                {% if user.is_authenticated %}
+                <li><a>Welcome, {{ user.username }}</a></li>
+                <li><p class="navbar-btn"><a href="/logout" target="_self" class="btn btn-default" title="Logout of the CI Portal"><span class="glyphicon glyphicon-log-out"></span></a></p></li>
+                {% else %}
+                <li><p class="navbar-btn"><a href="/login" target="_self" class="btn btn-default" title="Login: sigum & LAN password"><span class="glyphicon glyphicon-log-in"></span></a></p></li>
+                {% endif %}
+              {% endblock user %}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+    </div>
+    {% endblock navbar %}
+</div>
+{% endblock header_includes %}
+
+<div class="container-fluid" id="content">
+            {% block content %}
+            {% endblock content %}
+        </div>
+    </body>
+    {% endblock body %}
+</html>
+

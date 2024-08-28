@@ -1,0 +1,24 @@
+<INCLUDE NODE: pmmedcore >
+  <litp:component-def id="pmmedcore">
+    <name>pmmedcore</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <install-source><EARWAR_FILE></install-source>
+      <name><EARWAR_NAME></name>
+      <service>jee_tor</service>
+      <version><PACKAGE_VERSION></version>
+      <litp:jms-queue-def id="jms_fail_q">
+        <jndi>MediationFailureResponseResultHandler</jndi>
+        <name>queue/MediationFailureResponseQueue,java:jboss/exported/jms/queue/MediationFailureResponseQueue</name>
+      </litp:jms-queue-def>
+      <litp:jms-queue-def id="jms_res_q">
+        <jndi>MediationResponseResultHandler</jndi>
+        <name>queue/MediationResponseQueue,java:jboss/exported/jms/queue/MediationResponseQueue</name>
+      </litp:jms-queue-def>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICpmmedcore_CXP9030102</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>    

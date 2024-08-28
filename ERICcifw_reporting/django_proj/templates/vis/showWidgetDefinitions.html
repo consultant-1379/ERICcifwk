@@ -1,0 +1,70 @@
+{% extends "base_newlookandfeel.html" %}
+{% load rem_html_space %}
+{% block title %}CIFWK Visualisation Widget Definitions{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Chart Configuration(s)
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Configuration/" title="Chart Configuration Help" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+        {% if sequence %}
+            <h1>Add Chart to Sequence: {{ sequence }}</h1>
+        {% endif %}
+    <table class="general-table" id="chartConfiguration-table">
+        {% if widgetDefinitions %}
+        <form action="/vis/showWidgetDefinitions/{{ sequence }}/" method="post">{% csrf_token %}
+            <thead>
+                <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Chart</th>
+                <th>View</th>
+                <th>Refresh Time</th>
+                <th>Granularity</th>
+                <th>Options</th>
+                    {% if sequence %}
+                <th>Add Chart to Display</th>
+                    {% endif %}
+                </tr>
+            </thead>
+                {% for widgetdefinition in widgetDefinitions %}
+                <tr>
+                    <td>{{ widgetdefinition.name }}</td>
+                    <td>{{ widgetdefinition.description }}</td>
+                    <td>{{ widgetdefinition.widget }}</td>
+                    <td>{{ widgetdefinition.view|convert_space }}</td>
+                    <td>{{ widgetdefinition.refresh }}</td>
+                    <td>{{ widgetdefinition.granularity }}</td>
+                    <td>
+                        {% if sequence %}
+                        {% endif %}
+                        <a class="img" href="/vis/editWidgetDefinition/{{ widgetdefinition.id }}/" title="Edit Chart Configuration {{ widgetdefinition.name }}"><img src="/static/images/edit.png"/></a>
+                        <a class="img" href="#"
+                            onClick="checkAction('Do you really want to Delete {{ widgetdefinition.name}}?', '/vis/deleteWidgetDefinition/{{ widgetdefinition.id }}/')" title="Delete Chart Configuration {{ widgetdefinition.name }}"><img src="/static/images/delete.png"/></a>
+                        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Sequence" title="Add Chart Sequence Help" target="_blank"><img src="/static/images/question.png"/></a>
+                    </td>
+                        {% if sequence %}
+                        <td align="center"><input type="checkbox" name="toBeAdded" value="{{ widgetdefinition.name }}"/></td>
+                        {% endif %}
+                </tr>
+            {% endfor %}
+            {% if sequence %}
+                <tr><td class="centered-cell" colspan=8 bgcolor="#FFFFFF" >&nbsp</td></tr>
+                <tr><td class="centered-cell" colspan=8 bgcolor="#FFFFFF" ><input type="submit" value="Submit" /></td></tr>
+            {% endif %}
+                </table>
+                <p><b>For Infomation about CI Visualisation and Charts Please <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Visualisation/" target="_blank">Visit This Confluence Page</a></p>
+        {% else %}
+            </table>
+            <p><b>For Infomation about CI Visualisation and Widgets Please <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Visualisation/" target="_blank">Visit This Confluence Page</a></p>
+        {% endif %}
+    </div>
+{% endblock %}
+</form>

@@ -1,0 +1,32 @@
+# Do not edit this crontab directly (crontab -e)
+# Instead update the crontab file in the cifwk git repo and load it (crontab cron-file-name)
+# Crontab File is /proj/lciadm100/cifwk/latest/etc/crontab-lciadm100-cifwk-oss.lmera.ericsson.se
+# minute (0-59),
+# | hour (0-23),
+# |  |  day of the month (1-31),
+# |  |  |  month of the year (1-12),
+# |  |  |  |  day of the week (0-6 with 0=Sunday).
+# |  |  |  |  |
+# *  *  *  *  *
+
+0 * * * * /proj/lciadm100/cifwk/latest/bin/cifwk-dbbkup
+30 * * * * /proj/lciadm100/cifwk/killHangingHttpd.sh > /dev/null 2>&1
+*/5 * * * * /proj/lciadm100/cifwk/latest/bin/check_messagebus_consumer_process > /dev/null 2>&1
+#Restarts the message bus consumer each night at midnight
+0 0 * * * /proj/lciadm100/cifwk/latest/bin/restart_messagebus_consumer_process > /dev/null 2>&1
+0 * * * * /proj/lciadm100/cifwk/latest/bin/copy_http_logs > /dev/null 2>&1
+*/20 * * * * /proj/lciadm100/cifwk/latest/bin/check_httpd > /dev/null 2>&1
+5 * * * * /proj/lciadm100/cifwk/logs/lmirbe/servercheck > /dev/null 2>&1
+# Every night at 04:05 compress logfiles older than 3 days
+05 04 * * *  find /var/cifwk/logs/  -name "*[^g][^z]" -a -mtime +3 | xargs gzip -9 2>/dev/null
+# Deliver the Testware
+# 10 * * * * /proj/lciadm100/cifwk/latest/bin/cicmd update_testwaredata 2>/dev/null
+# Removes all entries (except OPENSTACK Sed files) from the staging areas that older than 21 days old
+01 0 * * * find /proj/lciadm100/tmpUploadSnapshot/* ! -iname "OPENSTACK*SED.txt" -mtime +21 -exec rm -rf {} \;
+# Removes all Sed Files from the Central Temporary Area that older than 30 days old
+01 0 * * * find /proj/lciadm100/tmpUploadSed/* -name "*.cfg" -mtime +30 -exec rm -rf {} \;
+# Removes all html error Files from /tmp that older than 10 days old
+01 0 * * * find /tmp/* -name "2017*" -mtime +10 -exec rm -rf {} \;
+# Check the /proj/lciadm100 area to ensure it doesn't get below 50G
+02 0 * * * /proj/lciadm100/cifwk/latest/etc/projLciadm100AreaSizeCheckSendEmail /proj/lciadm100 50000000
+#0 0 * * * /usr/sbin/logrotate /proj/lciadm100/cifwk/mylogrotate.conf

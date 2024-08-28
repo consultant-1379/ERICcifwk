@@ -1,0 +1,17 @@
+<INCLUDE NODE: upg_mgr >
+  <litp:component-def id="upg_mgr">
+    <name>upg_mgr</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <app-type>ear</app-type>
+      <install-source>/opt/ericsson/com.ericsson.oss.itpf.common.UpgradeManager/UpgradeManager.ear</install-source>
+      <name>UpgradeManager</name>
+      <service>jboss_tor</service>
+      <version><PACKAGE_VERSION></version>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICupgrademgr_CXP9030194</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>

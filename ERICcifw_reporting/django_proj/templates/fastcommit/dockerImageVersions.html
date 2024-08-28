@@ -1,0 +1,92 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} {{ imageName }} Versions{% endblock %}
+{% block content %}
+<script src="/static/commonFunctions.js"></script>
+<script type="text/javascript">
+    $(document).ready(function()
+    {
+        $(".tablesort").tablesorter({widgets: ['zebra']});
+    });
+</script>
+<script>
+    $(function() {
+        $( "#accordion_imageVersions" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+        $( "#accordion_imageVersions" ).show()
+    });
+</script>
+
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">{{ imageName }} Image Versions
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Fast+Commit" title="Fast Commit Info"
+           target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <br>
+    {% if imageVersions %}
+        <div class="layout-bar">
+            {% if imageVersions.has_previous %}
+                <a href="/dockerimages/{{ imageName }}/?page={{ imageVersions.previous_page_number }}">Previous Page</a> |
+            {% endif %}
+            {% if imageVersions.has_previous or imageVersions.has_next %}
+                <span class="current">
+                    Page {{ imageVersions.number }} of {{ imageVersions.paginator.num_pages }}
+                </span>
+            {% endif %}
+            {% if imageVersions.has_next %}
+                | <a href="/dockerimages/{{ imageName }}/?page={{ imageVersions.next_page_number }}">Next Page</a>
+            {% endif %}
+            {% if imageVersions.has_previous or imageVersions.has_next %}
+                | <a href="/dockerimages/{{ imageName }}/?page=all">View All ({{ imageVersionsCount }})</a>
+            {% endif %}
+        </div>
+        <br>
+        <div id="accordion_imageVersions" style="display:none">
+        {% for imageContents in imageVersionsAndContents %}
+            <h3>{{imageName}} {{imageContents.0.image_version__version}}</h3>
+            <div>
+                <table class="general-table">
+                    <thead>
+                        <tr>
+                            <th align="center">Package</th>
+                            <th align="center">Version</th>
+                            <th align="center">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for content in imageContents %}
+                        <tr>
+                            <td>{{ content.package_revision__package__name }}</td>
+                            <td>{{ content.package_revision__version }}</td>
+                            <td>{{ content.package_revision__date_created }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        </div>
+        <br>
+        <div class="layout-bar">
+            {% if imageVersions.has_previous %}
+                <a href="/dockerimages/{{ imageName }}/?page={{ imageVersions.previous_page_number }}">Previous Page</a> |
+            {% endif %}
+            {% if imageVersions.has_previous or imageVersions.has_next %}
+                <span class="current">
+                    Page {{ imageVersions.number }} of {{ imageVersions.paginator.num_pages }}
+                </span>
+            {% endif %}
+            {% if imageVersions.has_next %}
+                | <a href="/dockerimages/{{ imageName }}/?page={{ imageVersions.next_page_number }}">Next Page</a>
+            {% endif %}
+            {% if imageVersions.has_previous or imageVersions.has_next %}
+                | <a href="/dockerimages/{{ imageName }}/?page=all">View All ({{ imageVersionsCount }})</a>
+            {% endif %}
+        </div>
+    {% else %}
+    <p>No Data Found!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+#!/bin/bash -a
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+REPO_BASE="http://atclvm433.athtem.eei.ericsson.se:8081/nexus/content/repositories/duraci-3pps/"
+TARGET_DIR="/proj/lciadm100/tools"
+
+createTarget() {
+    if [ ! -d ${TARGET_DIR} ] ; then
+        log "Creating target directory"
+        $_MKDIR -p ${TARGET_DIR}/rabbitmq || error "Could not create target directory ${TARGET_DIR}/rabbitmq"
+        $_MKDIR -p ${TARGET_DIR}/erlang || error "Could not create target directory ${TARGET_DIR}/erlang"
+
+    fi
+}
+
+getErlang() {
+    G="com/ericsson/duraci/3pps"
+    A="erlang-otp"
+    V="R16B01"
+    URL="${REPO_BASE}${G}/${A}/${V}/${A}-${V}.tar.gz"
+    OFILE="/tmp/${A}-${V}.tar.gz"
+    log "Retrieving ${URL}"
+    $_WGET -O ${OFILE} ${URL} || error "Could not retrieve ${URL}"
+    log "Extracting ${OFILE}"
+    TD=${TARGET_DIR}/erlang
+    tar --directory=${TD} -xzf ${OFILE} || error "Could not extract ${OFILE} to ${TD}"
+    if [ -L ${TD}/latest ] ; then
+        $_RM -f ${TD}/latest || error "Could not delete ${TD}/erlang"
+    fi
+    $_LN -s ${TD}/${A}-${V} ${TD}/latest || error "Could not create symlink ${TD}/latest"
+}
+
+getRabbitMq() {
+    G="com/ericsson/duraci/3pps"
+    A="rabbitmq-server"
+    V="3.0.4"
+    URL="${REPO_BASE}${G}/${A}/${V}/${A}-${V}.tar.gz"
+    OFILE="/tmp/${A}-${V}.tar.gz"
+    log "Retrieving ${URL}"
+    $_WGET -O ${OFILE} ${URL} || error "Could not retrieve ${URL}"
+    log "Extracting ${OFILE}"
+    TD=${TARGET_DIR}/rabbitmq
+    tar --directory=${TD} -xzf ${OFILE} || error "Could not extract ${OFILE} to ${TD}"
+    if [ -L ${TARGET_DIR}/latest ] ; then
+        $_RM -f ${TD}/latest || error "Could not delete ${TD}/latest"
+    fi
+    $_LN -s ${TD}/rabbitmq_server-${V} ${TD}/latest
+}
+
+createTarget
+getErlang
+getRabbitMq

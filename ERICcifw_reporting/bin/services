@@ -1,0 +1,46 @@
+#!/bin/bash 
+
+#
+# services
+# Check the user running the script and start up relevant services
+#   gitadm100 will start up ..
+#       - GERRIT
+#       - NEXUS
+#   lciadm100 will start up ..
+#       - TOMCAT (Jenkins)
+#       - CI FWK UI
+#
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname `/usr/bin/readlink -f $0`)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+LOG_FILE=${LOGS}/services_log
+if [ ! -f ${LOG_FILE} ]; then
+    touch ${LOG_FILE}
+    chgrp ci_admins ${LOG_FILE}
+    chmod 660 ${LOG_FILE}
+fi
+
+log "About to $1 services for ${CURRENT_USER}"
+
+if [[ $CURRENT_USER == "lciadm100" ]]; then
+        log "Apache Tomcat Service $1"
+        export JAVA_HOME=/proj/lciadm100/tools/jdk1.6.0_31
+        export CATALINA_HOME=/proj/lciadm100/tools/apache-tomcat-6.0.35
+        export CATALINA_OPTS="-d64 -server -Xmx8g -XX:MaxPermSize=1g -Djava.awt.headless=true"
+        # Temporarily commented out with move of Jenkins to different server
+        #$CATALINA_HOME/bin/catalina.sh $1 >> ${LOG_FILE} 2>&1
+        log "CI Framework UI Service $1"
+        ${BASEDIR}/etc/init.d/cifwk-httpd $1 >> ${LOG_FILE} 2>&1
+        #Start Message Bus Daemon Monitor 
+        log "CI Framework Message Bus Consumer $1"
+        ${BASEDIR}/etc/init.d/message-bus-consumer $1 >> ${LOG_FILE} 2>&1
+        log "memcached Service $1"
+        ${BASEDIR}/etc/init.d/memcached $1 >> ${LOG_FILE} 2>&1
+elif [[ $CURRENT_USER == "gitadm100" ]]; then
+        export REVIEW_SITE=/proj/gitadm100/data/review_site
+        export JAVA_HOME=/proj/gitadm100/tools/jdk1.6.0_31
+fi

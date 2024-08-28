@@ -1,0 +1,40 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Obsolete Package Confirmation{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(link) {
+            window.location = link;
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Obsolete Package Confirmation</h2>
+    <table class="general-table">
+        <tr>
+            <td><b>Package:</b></td><td>{{ package }} </td>
+        </tr>
+        <tr>
+            <td><b>Version:</b></td><td>{{ version }} </td>
+        </tr>
+        {% if platform != "None" %}
+            <tr>
+                <td><b>Platform:</b></td><td>{{ platform }} </td>
+            </tr>
+        {% endif %} 
+        <tr>
+            <td> <b>Drop:</b></td><td>{{ drop }} </td>
+        </tr>
+        <tr>
+            <td><b>Product:</b></td><td>{{ product }} </td>
+         <form enctype="multipart/form-data" name="obsoleteform" method="post" action="/{{ product}}/drops/{{ drop }}/obsoleteVersion/">{% csrf_token %}
+                    <input type="hidden" name="id" value='{{ id }}'>
+                    <input type="hidden" name="package" value='{{ package }}'>
+                    <input type="hidden" name="version" value='{{ version }}'>
+                    <input type="hidden" name="platform" value='{{ platform }}'>
+                    <tr><td> <b>Reason:</b></td><td><textarea type="text" rows="2" cols="52" name ="reason" value =''></textarea></td></tr>
+                    <tr><td colspan=2><input type="submit" value="Obsolete" title="Obsolete"></input>
+                  <input type="button" value="Cancel" onClick="checkAction('/{{ product}}/drops/{{ drop }}/')" title="Cancel"></input></td></tr>
+           </form>
+   </table>
+</div>
+{% endblock %}

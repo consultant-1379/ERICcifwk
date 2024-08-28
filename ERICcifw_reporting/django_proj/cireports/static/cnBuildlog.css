@@ -1,0 +1,59 @@
+#cnbuildlog-container {
+    position: absolute;
+    height: 100%;
+    margin: 5% 0 0 5%;
+    width: 90%;
+    top: 0%;
+    /* min-width: 1200px; */
+}
+
+#cnbuildlog-table{
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+}
+
+#cnbuildlog-table td, th{
+    border: 1px solid #dddddd;
+    text-align: left;
+    font-size: 0.9em;
+    padding: 8px;
+}
+
+#cnbuildlog-table tr:nth-child(even){
+    background-color: #dddddd;
+}
+
+#cnbuildlog-table tr:nth-child(even) td{
+    border-color:white;
+}
+
+
+#cnbuildlog-table tr:nth-child(even):hover{
+    background-color: #DAE4EC;
+}
+
+#cnbuildlog-table tr:nth-child(odd):hover{
+    background-color: #E6F0F8;
+}
+
+#cnbuildlog-table a{
+    color: #337ab7 !important;
+    text-decoration: none;
+}
+
+#cnbuildlog-table a:hover{
+    color: #4B0082 !important;
+}
+
+p {
+    white-space: pre-wrap;
+}
+
+.cnbuildlog_dialog_form {
+    height: 50%;
+    width: 50%;
+    margin: 10px;
+    vertical-align: top;
+}

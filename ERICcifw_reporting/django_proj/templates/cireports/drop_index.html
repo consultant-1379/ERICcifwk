@@ -1,0 +1,20 @@
+{% extends "cireports/base.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Drop List{% endblock %}
+
+    {% block content %}
+        <table class="tablesort">
+            <thead>
+            <tr>
+                <th>Drop</th><th>Release Date</th>
+            </tr>
+            </thead>
+            {% for item in drops %}
+            <tr> 
+                <td><a href="/{{ product.name }}/drops/{{ item.name }}">{{ item.name }}</a></td>
+                <td>{{ item.actual_release_date.date }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endblock %}
+{% endif %}

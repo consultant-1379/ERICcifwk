@@ -1,0 +1,50 @@
+{% block content %}
+{% load extractDeliverer %}
+{% load nexusUrl %}
+<table class="general-table" id='delivery-stats'>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Version</th>
+            <th>Date</th>
+            {% if not drop %}
+                <th>Drop Delivered To</th>
+            {% endif %}
+            <th>Delivered By</th>
+        </tr>
+    </thead>
+    {% for item in fullPackages %}
+        <tr>
+            {% if item.obsolete %}
+                <td><font color="red">{{ item.package_revision.package.name }}</font></td>
+                <td><font color="red">{{ item.package_revision.version }} (obsoleted)</font></td>
+                <td><font color="red">{{ item.date_created }}</font></td>
+                {% if not drop or drop == "None" %}
+                    <td align=center><font color="red"><a href="/{{ product }}/deliver_info/{{ release }}/{{ item.drop.name }}">{{ item.drop.name }}</a></font></td>
+                {% endif %}
+                <td><font color="red">
+                {% if item.delivery_info|extractDeliverer == "" %}
+                    Automated Delivery
+                {% else %}
+                    {{ item.delivery_info|extractDeliverer }}
+                {% endif %}
+                </font></td>
+            {% else %}
+                <td>{{ item.package_revision.package.name }}</td>
+                <td>{{ item.package_revision.version }}</td>
+                <td>{{ item.date_created }}</td>
+                {% if not drop or drop == "None" %}
+                    <td align=center><a href="/{{ product }}/deliver_info/{{ release }}/{{ item.drop.name }}">{{ item.drop.name }}</a></td>
+                {% endif %}
+                <td>
+                {% if item.delivery_info|extractDeliverer == "" %}
+                    Automated Delivery
+                {% else %}
+                    {{ item.delivery_info|extractDeliverer }}
+                {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

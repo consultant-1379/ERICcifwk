@@ -1,0 +1,15 @@
+{% extends "base_newlookandfeel.html" %}
+ {% block title %}Select Product Set{% endblock %}
+  {% block content %}
+    <div class="general-container">
+      <h2 class="generalPageNewLook-title">Select Product Set For this Media Artifact Delivery </h2>
+       <div class="delivery-info">
+        <form enctype="multipart/form-data" name="prodSetSelect" method="post" action="/mediaDelivery/{{ mediaArtifact }}/{{ version }}/">{% csrf_token %}
+            <table class='general-table'>
+                {{ form }}
+                <tr><td></td><td><input type="submit" name="prodSetSubmit" /></td></tr>
+            </table>
+        </form>
+      </div>
+   </div>
+ {% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base_newlookandfeel.thml" %}
+
+{% block title %}CI Framework Upgrade {% endblock %}
+
+{% block content %}
+<form enctype="multipart/form-data" name="upgradeform" method="post" action="../admin/upgrade/">{% csrf_token %}
+    <table class="general-table">
+        <thead>Upgrade</thead>
+        {{ form.as_table }}
+        <tr><td></td><td><input type="submit" name="Upgrade" /></td></tr>
+    </table>
+</form>
+{% endblock %}

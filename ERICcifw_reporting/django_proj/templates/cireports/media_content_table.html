@@ -1,0 +1,116 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% load sizeConvert %}
+{% if product %}
+    {% block title %}{{ product.name }} Media Content {{ version }} - Drop {{ dropName }} {% endblock %}
+    {% block content %}
+     <script type="text/javascript" src='/static/tablesorterFunction.js'></script>
+        <script type="text/javascript" src='/static/mediaContent.js'></script>
+        <script>
+            (function($) {
+             $(document).ready(function() {
+                 function doCDBInfoRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product.name }}/drop/{{ dropName }}/latestCDB/{{ isoId }}/cdbxml/",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table.drop-cdbs').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('table.drop-cdbs').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+                 }
+                   doCDBInfoRequest();
+                 });
+             })(jQuery);
+        </script>
+        <div id="hidden_product_div" style="display:none">{{ product.name }}</div>
+        <div id="hidden_drop_div" style="display:none">{{ dropName }}</div>
+        <div id="hidden_artifact_div" style="display:none">{{ mediaArtifact }}</div>
+        <div id="hidden_version_div" style="display:none">{{ version }}</div>
+        <div id="hidden_testware_div" style="display:none">{{ testware }}</div>
+	<div class="general-container">
+        <h2  class="generalPageNewLook-title">{{ product.name }} (Drop:{{ dropName }}) Media: {{ mediaArtifact }} Content <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+ISO" title="Drop Info" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <div class="layout-bar"><a href="/{{ product.name }}/drops/{{ dropName }}/">Drop:{{ dropName }}</a> | {% if mediaActive == 1 %} <a href="{{hubIsoUrl}}/{{mediaArtifact}}/{{ version }}/{{mediaArtifact}}-{{ version }}.{{ mediaType }}">E2C Download</a> | {% if localIsoUrl %} <a href="{{localIsoUrl}}/{{mediaArtifact}}/{{ version }}/{{mediaArtifact}}-{{ version }}.{{ mediaType }}">Athlone Proxy Download</a> |{% endif %} {% endif %} <a href="/{{ product.name }}/{{ dropName }}/media/">Historical Versions</a> | {% if product.name == "ENM" %} <a href="/{{ product.name }}/queue/{{ dropName }}/">Delivery Queue</a> | {% endif %}<a href="/{{ product.name }}/{{ dropName }}/setCautionStatus/{{ version }}/product/?artifactId={{ mediaArtifact }}&groupId={{maGroupId}}">Set Caution Status</a>
+        </div>
+        {% if mediaActive == 0 %}
+        <br>
+        <div class="inactive_media">
+            This Media Artifact version is no longer available to download from Nexus
+        </div>
+        {% endif %}
+        <br>
+        <div class="generic-sub-title">
+            <div class='my-legend-Stack' style="float:right;top:0cm;position:relative;">
+                    <div class='legend-scale'>
+                        <div class='legend-scale'>
+                            <ul class='legend-labels' style="display:inline-block;">
+                                <li><span style='background:#FF0000;'></span><b>Artifact Obsoleted from ISO after Passed Test Run</b></li>
+                                <li><span style='background:#1E90FF;'></span><b>Artifact Version Updated in this ISO Version</b></li>
+                                <li><span style='background:#8A2BE2;'></span><b>Artifact New in this ISO Version</b></li>
+                                <li><span style='background:#000000;'></span><b>Artifact Unchanged in this ISO Version</b></li>
+                            </ul>
+                      </div>
+                    </div>
+            </div>
+            <table class="general-table" style="width:40%;">
+               <tr>
+                   <td><b>Version:</b></td><td>{{ version }}</td>
+               </tr>
+               {% if product.name != 'ENM' or 'RSTATE' in dropSystemInfo %}
+               {% else %}
+                 <tr>
+                  <td width="30%"><b>System Info:</b></td><td colspan="2">{{ dropSystemInfo }}</td>
+                 </tr>
+               {% endif %}
+               <tr>
+                   <td width="30%"><b>RState:</b></td><td colspan="2">{{ rstate }}</td>
+               </tr>
+               <tr>
+                   <td width="30%"><b>Type:</b></td><td colspan="2">{{ mediaType }}</td>
+               </tr>
+                <tr>
+                   <td width="30%"><b>Size(GB):</b></td><td colspan="2">{{ mediaSize|sizeConvert }}</td>
+               </tr>
+               <tr>
+                   <td width="30%"><b>Build Date:</b></td><td colspan="2">{{ buildDate }}</td>
+               </tr>
+            {% if prodTWmediaMaps %}
+            <tr>
+              {% if testware == True %}
+              <td><b>Product ISO Version(s):</b></td><td>
+              {% else %}
+              <td><b>Testware ISO Version(s):</b></td><td>
+              {% endif %}
+              {% for item in prodTWmediaMaps %}
+                 {% if testware == True %}
+                 <a href="/{{ product.name }}/{{ dropName }}/mediaContent/{{ item.productIsoVersion__mediaArtifact__name }}/{{ item.productIsoVersion__version }}">{{ item.productIsoVersion__version }}</a><br>
+                 {% else %}
+                 <a href="/{{ product.name }}/{{ dropName }}/mediaContent/{{ item.testwareIsoVersion__mediaArtifact__name }}/{{ item.testwareIsoVersion__version }}">{{ item.testwareIsoVersion__version }}</a><br>
+                 {% endif %}
+                 {% endfor %}
+              </td>
+            </tr>
+            {% endif %}
+            </table>
+            <div class="generic-text">
+         <br>
+        <div class="sub-title"><b>Current Status</b></div>
+        <div id="generic-sub-title">
+            <br>
+            <table class="drop-cdbs status-summary" style="font-size: 1.5em;">
+                <tr><td> Loading Data ... </td></tr>
+            </table>
+        </div>
+        <br>
+        <table id="iso-content-table" class="general-table"></table>
+        </div>
+        </div>
+    {% endblock %}
+{% endif %}

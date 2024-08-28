@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datapaths xmlns="http://www.ericsson.com/DataPaths"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ericsson.com/DataPaths datapath.xsd">
+
+	<!-- eftp endpoint defined here so it can be re-used in both data paths -->
+	<endpoint id="EventFTP" uri="eftp"
+		uri_schema="eftp://${ipAddress}:${port}?username=${user}&amp;password=${password}">
+		<property name="ipAddress" type="instance" />
+		<property name="port" type="instance" />
+		<property name="user" type="instance" />
+		<property name="password" type="instance" />
+	</endpoint>
+	
+	<!-- eftp endpoint defined here so it can be re-used in both data paths -->
+	<endpoint id="EventSFTP" uri="esftp"
+		uri_schema="esftp://${ipAddress}:${port}?username=${user}&amp;password=${password}">
+		<property name="ipAddress" type="instance" />
+		<property name="port" type="instance" />
+		<property name="user" type="instance" />
+		<property name="password" type="instance" />
+	</endpoint>
+
+	<endpoint id="Sftp_File" uri="file" uri_schema="file:${directory}">
+		<property name="directory" type="instance" />
+	</endpoint>
+
+	<!-- <bean classname="" id=""></bean> -->
+
+
+	<errorhandler id="ftp" redeliver_attempts="0">
+		<bean id="errorProcessor" classname="com.ericsson.nms.mediation.FTPErrorProcessor" />
+		<endpoint id="anonymous" uri="jms"
+			uri_schema="jms:queue:${queueName}?username=guest&amp;password=guestp">
+			<property name="queueName" type="instance" />
+		</endpoint>
+	</errorhandler>
+
+	<!-- Basic Data Path for Single File Transfer -->
+	<datapath id="com.ericsson.nms.mediation.singleFileTransfer" errorhandler="ftp">
+		<bean id="eftpProcessor" classname="com.ericsson.nms.mediation.EftpProcessor" />
+		<reference type="endpoint" ref="EventFTP" />
+		<reference type="endpoint" ref="Sftp_File"></reference>
+		<bean id="Sftp_EventProcessor" classname="com.ericsson.nms.mediation.EventProcessor" />
+		<endpoint id="anonymous" uri="jms"
+			uri_schema="jms:queue:${queueName}?username=guest&amp;password=guestp">
+			<property name="queueName" type="instance" />
+		</endpoint>
+	</datapath>
+	
+	<!-- Basic Data Path for SFTP Single File Transfer -->
+	<datapath id="com.ericsson.nms.mediation.sftpSingleFileTransfer" errorhandler="ftp">
+		<bean id="eftpProcessor" classname="com.ericsson.nms.mediation.EftpProcessor" />
+		<reference type="endpoint" ref="EventSFTP" />
+		<reference type="endpoint" ref="Sftp_File"></reference>
+		<bean id="Sftp_EventProcessor" classname="com.ericsson.nms.mediation.EventProcessor" />
+		<endpoint id="anonymous" uri="jms"
+			uri_schema="jms:queue:${queueName}?username=guest&amp;password=guestp">
+			<property name="queueName" type="instance" />
+		</endpoint>
+	</datapath>
+
+
+</datapaths>

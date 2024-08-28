@@ -1,0 +1,48 @@
+# Compiled source #
+*.class
+
+# Eclipse files
+.project
+.classpath
+.settings
+
+# Test output files
+*/test-output/*
+/test-output/
+/test-output
+test-output/
+test-output/**/*
+*/test-output/**/*
+
+# Packages
+*.jar
+
+# Python files
+*.pyc
+*.swp
+
+# Maven build files
+target
+reports
+# ARQ tests
+arq-perf
+
+# PMD
+.pmd
+
+# Merge files
+*.orig
+
+# 3pp dependencies
+ERICcifw_reporting/lib/3pp/
+/nbproject/configs/script.properties
+/nbproject/project.properties
+/nbproject/project.xml
+/nbproject/private/*
+
+# Static directories populated during build
+ERICcifw_reporting/django_proj/angularVis/static/
+
+#Grunt Files
+ERICcifw_reporting/django_proj/node_modules
+package.json

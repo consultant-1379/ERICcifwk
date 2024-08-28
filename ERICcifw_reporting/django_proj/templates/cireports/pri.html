@@ -1,0 +1,59 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product }} {{ name }} PRI{% endblock %}
+    {% block content %}
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">{{ product }} PRI Information for {{ name }}
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/PRI+Information" title="PRI Information" target="_blank"><img src="/static/images/question.png"/></a>
+        </h2>
+        <div class="full-details">
+            <br>
+            <table id="documents-table" class="general-table tablesort">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Drop</th>
+                    <th>Status</th>
+                    <th>Current Version</th>
+                    <th>Initial Delivered Version</th>
+                    <th>Priority</th>
+                    <th>Include in Node PRI</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            {% for item in items %}
+                <tr>
+                    <td><a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/{{ item.fault_id }}">{{ item.fault_id }}</a></td>
+                    <td>{{ item.fault_desc }}</td>
+                    <td>{{ item.fault_type }}</td>
+                    <td>{{ item.drop.name }}</td>
+                    {% if item.status == "null" %}
+                        <td>Open</td>
+                    {% else %}
+                        <td>{{ item.status }}</td>
+                    {% endif %}
+                    <td align="center">{{ item.pkgver.version }}</td>
+                    <td align="center">{{ item.first_pkgver.version }}</td>
+                    <td>{{ item.priority }}</td>
+                    <form enctype="multipart/form-data" name="Update Node PRI List" method="post" action="/{{ product }}/cireports/updateNodePRIStatus/{{ name }}/" onsubmit="return confirm('Are You Sure You Want To Update the Node PRI?')">{% csrf_token %}
+                    {% if item.node_pri == 1 %}
+                        <td><input type="checkbox" name="includedNodePri" value="{{ item.id }}" checked>
+                    {% else %}
+                        <td><input type="checkbox" name="notIncludedNodePri" value="{{ item.id }}" >
+                    {% endif %}
+                    <td>{{ item.comment }}</td>
+                </tr>
+            {% endfor %}
+                <tr>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                <td>
+                    <input type="image" src="/static/images/updateNodePRI.png" alt="Update Node PRI"/>
+                </td>
+                <td></td>
+                </tr>
+        </table>
+    </div>
+{% endblock %}
+{% endif %}

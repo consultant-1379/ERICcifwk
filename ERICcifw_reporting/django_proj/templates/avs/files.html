@@ -1,0 +1,32 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">AVS - Uploaded Files
+        </div>
+    </div>
+    <div class="generic-text">
+        <br>
+        <table id="avsEpics-table">
+            <tr>
+                <th>File Name</th><th>Date Uploaded</th><th>Owner</th>
+            </tr>
+            {% for eachFile in files %}
+                <tr valign="top">
+                <td>
+                <a href="/avs/files/{{ eachFile.id }}">{{ eachFile.fileName }}</a>
+                </td>
+                <td>
+               {{ eachFile.dateCreated }}
+               </td>
+               <td>
+                   {{ eachFile.owner }}
+               </td>
+               </tr>
+           {% endfor %}
+        </table>
+    </div>
+ {% endblock %}
+

@@ -1,0 +1,14 @@
+#!/bin/bash -a
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+PRODUCT=$1
+EMAIL=$2
+PACKAGE_NAME=$(ls | awk '$1 ~ /[ERIC|EXTR][0-9a-zA-Z]+_CXP[0-9]+/ { print $1}')
+$_PYTHON /proj/lciadm100/cifwk/latest/django_proj/manage.py cifwk_deliver --package ${PACKAGE_NAME} --packageVersion latest --drop auto --product ${PRODUCT} --email ${EMAIL}
+$_ECHO "$(date) ${PRODUCT} ${EMAIL} ${PACKAGE_NAME}" >> /proj/lciadm100/cifwk/logs/auto_delivery.log
+exit 0

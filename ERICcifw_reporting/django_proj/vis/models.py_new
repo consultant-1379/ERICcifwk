@@ -1,0 +1,60 @@
+from django.db import models
+import fem.models
+
+# Create your models here.
+# By default, Django gives each model the following field: id = models.AutoField(primary_key=True)
+# This is an auto-incrementing primary key, which sets the id to an Integer Field.
+# TODO: Update when Django AutoField supports multiple int types
+
+import logging
+logger = logging.getLogger(__name__)
+# Create your models here.
+
+
+class Widget (models.Model):
+    '''
+    '''
+    widgetTypes = (("Pie Chart","Pie Chart"), ("Trend Chart","Trend Chart"),("Table", "Table"),)
+    name = models.CharField(max_length=50, unique=True)
+    type = models.CharField(max_length=20,choices=widgetTypes)
+    description = models.TextField(max_length=50)
+    url = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return str(self.name) + " --> " + str(self.type)
+
+
+class WidgetDefinition (models.Model):
+    '''
+    '''
+    granularityType = (("Minutes", "minutes"),("Hours", "hours"), ("Days", "days"), ("Weeks", "weeks"), ("Months", "months"),)
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(max_length=50)
+    widget = models.ForeignKey(Widget)
+    view = models.ForeignKey(View)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    refresh = models.IntegerField(max_length=4)
+    granularity = CharField(null=True,choices=granularityType)
+
+    def __unicode__(self):
+        return str(self.name) + " --> " + str(self.widget) + " --> " +str(self.view)
+    
+class WidgetRender (modes.Model)
+    '''
+    '''
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(max_length=50)
+
+    def __unicode__(self):
+        return str(self.name) + " --> " + str(self.widgetDefinition)
+
+class WidgetDefintionToRenderMapping (modes.Model)
+    '''
+    '''
+    widgetDefinition = models.ForeignKey(WidgetDefinition)
+    widgetRender = models.ForeignKey(WidgetRender)
+
+    def __unicode__(self):
+        return str(self.widgetDefinition) + " : " + str(self.widgetRender)
+

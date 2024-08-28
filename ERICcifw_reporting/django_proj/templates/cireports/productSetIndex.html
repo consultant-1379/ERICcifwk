@@ -1,0 +1,147 @@
+{% extends "base_newlookandfeel.html" %}
+{% load remDot %}
+{% if prodSets %}
+    {% block content %}
+        <script>
+            $(document).ready(function () {
+                $('#productSet_1_header').click();
+            });
+        </script>
+        <div class="general-container">
+            <h2 class="generalPageNewLook-title">
+                Product Set Summary <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+Sets" title="Product Set Help" target="_blank"><img src="/static/images/question.png"/></a>
+            </h2>
+            <div id="accordion">
+                {% for productSet in prodSets %}
+                    {% if forloop.counter  == 1 %}
+                        <h2 id="productSet_1_header">{{ productSet.name }} ProductSet Overview</h2>
+                    {% else %}
+                        <h2 id="productSet_{{ productSet.name }}_header">{{ productSet.name }} ProductSet Overview</h2>
+                    {% endif %}
+                    <div>
+                        <div class="products_mainPage">
+                                <div class="sub-title"><a id="productSet_{{ productSet.name }}" href="/{{ productSet.name }}/prodSetReleases/">{{ productSet.name }} Product Sets [+]</a>
+                                    <a id="productSet_form_{{ productSet.name }}" class="img" href="/{{productSet.name}}/configureSummary/" title="Configure Release Summary View" ><img src="/static/images/edit.png"/></a>
+                                </div>
+                            <table class="general-table">
+                                <tr>
+                                    <th>Drop</th>
+                                    <th>Freeze Date</th>
+                                    <th>Historical</th>
+                                    <th>Status</th>
+                                </tr>
+                                {% for key,drops in prodSetToDropDict.items %}
+                                    {% if key.name == productSet.name %}
+                                        {% for drop,prodSetData in drops %}
+                                            <tr>
+                                                <td><a id="{{ productSet.name }}_{{ drop.name|remDot }}" href="/{{ productSet.name }}/dropMedia/{{ drop.name }}">{{ drop.name }}</a></td>
+                                                <td>{{ drop.mediaFreezeDate }}</td>
+                                                <td><a href="/{{ productSet.name }}/historicalContent/{{ drop.name }}">Versions</a></td>
+                                                {% if prodSetData %}
+                                                    <td>
+                                                        <table align="center" class="status-summary">
+                                                            <tr>
+                                                                {% for prodSetBuild, prodSetBuildStatus in prodSetData.items %}
+                                                                    {% if prodSetBuildStatus %}
+                                                                        {% for status in prodSetBuildStatus %}
+                                                                          {% if status.1 == "caution"%}
+                                                                               <td style="white-space: nowrap;">
+                                                                                   <p class="cdb-title"> {{ status.0 }}</p>
+                                                                                   <p align="center"><a href="/{{ productSet.name }}/content/{{ drop.name }}/{{prodSetBuild.version}}"><b class="isoLink">{{ prodSetBuild.version }}</b></a><br><a id="{{ productSet }}_{{ prodSetBuild.version|remDot }}_{{ status.0 }}_{{ status.1 }}" href="/{{ drop.name }}/{{ prodSetBuild.id }}/{{ status.0 }}/returnProdSetCautionStatusDetails/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" class="status-summary-img"></a><br><b>Since:</b> {{ status.3 }}</p>
+                                                                               </td>                                                                                                                                                                                                                 {% endif %}
+                                                                         {% if status.1 == "passed_manual"%}
+                                                                                <td style="white-space: nowrap;">
+                                                                                   <p class="cdb-title"> {{ status.0 }}</p>
+                                                                                   <p align="center"><a href="/{{ productSet.name }}/content/{{ drop.name }}/{{prodSetBuild.version}}"><b class="isoLink">{{ prodSetBuild.version }}</b></a><br><a id="{{ productSet }}_{{ prodSetBuild.version|remDot }}_{{ status.0 }}_{{ status.1 }}" href="/{{ drop.name }}/{{ prodSetBuild.id }}/{{ status.0 }}/returnProdSetKGBreadyDetails/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" class="status-summary-img"></a><br><b>Since:</b> {{ status.3 }}</p>
+                                                                               </td>
+                                                                          {% endif %}
+                                                                      {% endfor %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                {% for prodSetBuild, prodSetBuildStatus in prodSetData.items %}
+                                                                    {% if prodSetBuildStatus %}
+                                                                        {% for status in prodSetBuildStatus %}
+                                                                            {% if status.1  == "failed" or status.1  == "passed" or status.1  == "in_progress"%}
+                                                                              <td style="white-space: nowrap;">
+                                                                                  <p class="cdb-title"> {{ status.0 }}</p>
+                                                                            {% endif %}
+                                                                            {% if status.1  == "" or status.1 == "passed_manual" or status.1 == "caution"%}
+                                                                            {% endif %}
+                                                                            {% if status.1  == "" %}
+                                                                                <p><img src="/static/images/not_started.png" alt="not_started" width="40" height="40"></p></td>
+                                                                            {% else %}
+                                                                                {% if status.1  == "failed" or status.1  == "passed"%}
+                                                                                    {% if status.6 != "None" and status.6 != "" %}
+                                                                                    <p align="center"><a href="/{{ productSet.name }}/content/{{ drop.name }}/{{prodSetBuild.version}}"><b class="isoLink">{{ prodSetBuild.version }}</b></a> <br><a id="{{ productSet }}_{{ prodSetBuild.version|remDot }}_{{ status.0 }}_{{ status.1 }}" href="/{{ prodSetBuild.id }}/{{ status.0 }}/returnpsreport/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" class="status-summary-img"></a><br><b>Ended:</b> {{ status.3 }}<br><a id="{{ status.0 }}_{{ productSet.name }}_{{ prodSetBuild.version|remDot }}" href="{{ status.6 }}" target="_blank"><b>Test Report</b></a></p></td>
+                                                                                    {% else %}
+                                                                                        <p align="center"><b>Product Set Version:</b>  <a href="/{{ productSet.name }}/content/{{ drop.name }}/{{prodSetBuild.version}}"><b class="isoLink">{{ prodSetBuild.version }}</b></a> <br><a id="{{ productSet }}_{{ prodSetBuild.version|remDot }}_{{ status.0 }}_{{ status.1 }}" href="/{{ prodSetBuild.id }}/{{ status.0 }}/returnpsreport/{{ status.4 }} "><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" class="status-summary-img"></a><br><b>Ended:</b> {{ status.3 }}<br><b>No Report</b></p></td>
+                                                                                    {% endif %}
+
+                                                                                {% elif status.1  == "in_progress" %}
+                                                                                    {% if status.5 != "None" %}
+                                                                                        <p align="center"><b>Product Set Version:</b>  <a href="/{{ productSet.name }}/content/{{ drop.name }}/{{prodSetBuild.version}}"><b class="isoLink">{{ prodSetBuild.version }}</b></a><br><a id="{{ productSet }}_{{ prodSetBuild.version|remDot }}_{{ status.0 }}_{{ status.1 }}" href="{{status.5}}"><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" class="status-summary-img"></a><br><b>Started:</b> {{ status.2 }}<br><b>No Report</b></p></td>
+                                                                                    {% else %}
+                                                                                        <p id="{{ productSet }}_{{ prodSetBuild.version|remDot }}_{{ status.0 }}_{{ status.1 }}" align="center"><b>Product Set Version:</b> <a href="/{{ productSet.name }}/content/{{ drop.name }}/{{prodSetBuild.version}}"><b class="isoLink">{{ prodSetBuild.version }}</b></a><br><img src="/static/images/{{status.1}}.png" alt="{{status.1}}" class="status-summary-img"><br><b>Started:</b> {{ status.2 }}<br><b>No Report</b></p></td>
+                                                                                    {% endif %}
+                                                                                {% endif %}
+                                                                            {% endif %}
+                                                                            {% if status.1  == "failed" or status.1  == "passed" or status.1  == "in_progress"%}
+                                                                                </td>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </tr>
+                                                        </table>
+                                                        <p align="center"> <a id="{{ productSet }}_{{ drop.name|remDot }}_exec_summary" href="/{{ productSet }}/{{ drop.name }}/PSsummary/">Executive Summary</a></p>
+                                                    </td>
+                                                {% else %}
+                                                    <td><p align="center"><img src="/static/images/not_started.png" alt="not_started" width="40" height="40"></p></td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                            {% for key,value in noReleaseDict.items %}
+                                {% if key == productSet.name %}
+                                    {{ value }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                {% for product, drop in cnProductToDropDict.items %}
+                <h2 id="productSet_1_header">{{ product.product_set_name }} ProductSet Overview</h2>
+                <div class="products_mainPage">
+                    <table class="general-table">
+                        <tr>
+                            <th>Historical Drop - Product Set CN Content</th>
+                            <th>Status</th>
+                        </tr>
+                        {% for productSetObj in drop %}
+                        <tr>
+                            <td><a href="/ENM/historicalContent/{{ productSetObj.0 }}">{{ productSetObj.0 }}</a></td>
+                            <td>
+                                <table align="center" class="status-summary">
+                                    <tr>
+                                        {% for productSet, statusQuo in productSetObj.1.items %}
+                                        {% for confLevel, status in statusQuo.items %}
+                                            <td style="white-space: nowrap;">
+                                                <p class="cdb-title"> {{ confLevel }}</p>
+                                                <b>Product Set Version:</b> <a href="cloudnative/getCloudNativeProductSetContent/{{ productSetObj.0 }}/{{ productSet }}/"><b class="isoLink">{{ productSet }}</b></a><br><img src="/static/images/{{status}}.png" alt="{{status}}" class="status-summary-img"><br><b>State is:</b> {{ status }}<br>
+                                            </td>
+                                        {% endfor %}
+                                        {% endfor %}
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}

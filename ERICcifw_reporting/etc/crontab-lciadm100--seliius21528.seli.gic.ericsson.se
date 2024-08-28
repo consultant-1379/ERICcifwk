@@ -1,0 +1,25 @@
+# Do not edit this crontab directly (crontab -e)
+# Instead update the crontab file in the cifwk git repo and load it (crontab cron-file-name)
+# Crontab File is /proj/lciadm100/cifwk/latest/etc/crontab-lciadm100-seliius21528.seli.gic.ericsson.se
+# minute (0-59),
+# | hour (0-23),
+# |  |  day of the month (1-31),
+# |  |  |  month of the year (1-12),
+# |  |  |  |  day of the week (0-6 with 0=Sunday).
+# |  |  |  |  |
+# *  *  *  *  *
+
+# Clean Eiffel messages once per month
+0 0 1 * * /proj/lciadm100/cifwk/latest/bin/clean-eiffel-messages.sh > /dev/null 2>&1
+# DB backup in every hour
+0 * * * * /proj/lciadm100/cifwk/latest/bin/cifwk-dbbkup-e2c
+# Check message bus consumer
+*/2 * * * * /proj/lciadm100/cifwk/latest/bin/check_messagebus_consumer_process > /dev/null 2>&1
+# Check message bus length
+*/5 * * * * /proj/lciadm100/cifwk/latest/bin/check_messagebus_queue.sh
+# Check available storage on server and notify team if storage usage exceeds 80%
+*/5 * * * * /proj/lciadm100/cifwk/latest/bin/check-server-storage.sh > /dev/null 2>&1
+
+*/10 * * * * /proj/lciadm100/cifwk/latest/bin/deployment-sync.sh > /dev/null 2>&1
+0 */2 * * * /proj/lciadm100/cifwk/latest/bin/deployment-sync-check.sh > /dev/null 2>&1
+*/5 * * * * /proj/lciadm100/cifwk/latest/bin/cicmd updateUsers > /dev/null 2>&1

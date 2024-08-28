@@ -1,0 +1,2 @@
+  <litp:vcs-cluster-config-def id="vcs_config"/>
+  <litp:vcs-component-def id="vcsr"/>

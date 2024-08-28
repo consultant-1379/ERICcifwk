@@ -1,0 +1,46 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Testware {% endblock %}
+    {% block content %}
+        <script src="/static/commonFunctions.js"></script>
+        <script type="text/javascript">
+            (function($) {
+             $(document).ready(function() {
+                function doRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/testware/xml/",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table#testware-artifacts').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('table#testware-artifacts').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+                   }
+                   doRequest();
+                 });
+             })(jQuery);
+        </script>
+
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">{{ product.name }} Latest Testware Artifacts <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Testware+Management" title="Testware Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <div class="generic-sub-title">
+            <div class="generic-text">
+                <br>
+                <table class="general-table" id="testware-artifacts">
+                    <tr><td><img src="/static/images/processing.gif"></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+{% endif %}
+
+
+

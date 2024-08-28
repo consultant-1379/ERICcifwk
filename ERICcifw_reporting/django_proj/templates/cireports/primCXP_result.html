@@ -1,0 +1,71 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Prim Results{% endblock %}
+
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            $('body').addClass('loading');
+            window.location = link;
+
+        }
+    }
+    function ConfirmForm() {
+        if (confirm("You are about to Write to PRIM. " +
+        "Click OK to continue or Cancel to abort.")){
+            $('body').addClass('loading');
+            return true
+         }else{
+            return false;
+        }
+
+    }
+
+</script>
+<div class="general-container">
+<h2 class="generalPageNewLook-title">{{ product }} Product Information - Drop: {{ drop }} - Media Artifact Version: {{ media }}</h2>
+{% autoescape off %}
+{% if dataList %}
+<table class="general-table">
+    <th>Number</th><th>Current RState</th><th>New RState</th>
+ {% for pD,cD in dataList %}
+ <tr>
+     {{pD}} {{cD}}
+ </tr>
+ {% endfor %}
+ </table>
+ <form enctype="multipart/form-data" name="writeToPrimform" method="post" OnSubmit="return ConfirmForm();" action="/{{ product }}/{{drop}}/primCXPupdate/">{% csrf_token %}
+     <input type="hidden" name="user" value='{{ user }}'>
+     <input type="hidden" name="password" value='{{ password }}'>
+     <input type="hidden" name="media" value='{{ media }}'>
+     {% for package in packages %}
+        <input type="hidden" name="package" value='{{ package }}'>
+     {% endfor %}
+     <button type="submit" name="writeToPrim" value="Write To Prim" title="Write To PRIM">Write To PRIM</button>
+ </form>
+ {% else %}
+  <b>No Changes in CXP Numbers' RStates</b>
+  <br>
+  <br>
+ {% endif %}
+ <button type="button" href="javascript:void(0);" onClick="checkAction('Do you really want to cancel and return to login?', '/{{ product }}/{{drop}}/primCXP/')" title="Cancel">Cancel</button>
+
+
+{% if diffData %}
+    <h3>Differences: Not in Prim due invalid CXP Number or not Registered.  </h3>
+    <p><b>(Note: this is just information, changes below will not be written to Prim)</b></p>
+    <table class="general-table">
+        <th>Number</th><th>RState</th>
+        {% for diff in diffData %}
+         <tr>
+            {{ diff }}
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+{% endautoescape %}
+</div>
+<div class="modal"></div>
+{% endblock %}

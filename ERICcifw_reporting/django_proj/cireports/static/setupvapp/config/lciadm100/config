@@ -1,0 +1,9 @@
+[CIFWK]
+dbHost = cireports-mysql-1416.seli.gic.ericsson.se
+dbPassword = BoTu0W6a9V1H3qb
+dbPort = 6446
+storageEngine = SET default_storage_engine=INNODB
+
+[DMT_AUTODEPLOY]
+key = /home/lciadm100/.ssh/id_rsa
+cifwk_portal_url = https://ci-portal.seli.wh.rnd.internal.ericsson.com

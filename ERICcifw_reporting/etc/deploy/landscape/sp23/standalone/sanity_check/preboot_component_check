@@ -1,0 +1,1 @@
+litp /inventory/deployment1/ms1/ms_node show -rp | grep "ms_node" | grep -v "vmservice"

@@ -1,0 +1,65 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %} {{ artifact.name }} Testware Details{% endblock %}
+
+{% block content %}
+<script type="text/javascript">
+    (function($) {
+     $(document).ready(function() {
+        function doRequest() {
+            $.ajax({
+                type: 'GET',
+                url: "/{{ product }}/testware/showall/{{ artifact.name }}/xml/?page={{ pageNo }}",
+                dataType: 'html',
+                cache: false,
+                success: function(html, textStatus) {
+                    $('table#testware-revisions').replaceWith(html);
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    if (xhr.status != 0)
+                    {
+                    $('table#testware-revisions').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                    }
+                },
+                });
+           }
+           doRequest();
+         });
+     })(jQuery);
+
+</script>
+
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">{{ artifact.name }} Testware Details <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Testware+Management" title="Testware Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <div class="generic-sub-title">
+        <div class="generic-text">
+        <br>
+        {% if not error %}
+            <table id="testware-revisions">
+                <tr><td><img src="/static/images/processing.gif"></td></tr>
+            </table>
+            <table id="paginator">
+                <tr>
+                    {% if allTestwareArtifacts.has_previous %}
+                        <td><a href="{{ product.name }}/testware/showall/{{ artifact.name }}/?page={{ allTestwareArtifacts.previous_page_number }}">Previous</a></td>
+                    {% endif %}
+                    {% if allTestwareArtifacts.has_previous or allTestwareArtifacts.has_next %}
+                        <span class="current">
+                            <td>Page {{ allTestwareArtifacts.number }} of {{ allTestwareArtifacts.paginator.num_pages }}</td>
+                        </span>
+                    {% endif %}
+
+                    {% if allTestwareArtifacts.has_next %}
+                        <td><a href="{{ product.name }}/testware/showall/{{ artifact.name }}/?page={{ allTestwareArtifacts.next_page_number }}">Next</a></td>
+                    {% endif %}
+                    {% if allTestwareArtifacts.has_previous or allTestwareArtifacts.has_next %}
+                        <td><a href="{{ product.name }}/testware/showall/{{ artifact.name }}/?page=all">All({{ count }})</a></td>
+                    {% endif %}
+                </tr>
+            </table>
+        {% else %}
+            {{ error }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

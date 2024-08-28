@@ -1,0 +1,20 @@
+{% extends "cireports/base.html" %}
+{% if products %}
+    {% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+    {% block content %}
+    <script>
+	function refresh() {
+		window.location.reload(true);
+		}
+	setTimeout(refresh,15000);
+    </script>
+        <div id="generic-title">
+            <div id="text-container" >{{ product.name }} Drop {{ version }} CPI Baseline & SDI
+                <a class="img" href="{{ confluenceUrl }}" title="CPI Library Build Automation" target="_blank"><img src="/static/images/question.png"/></a>
+            </div>
+        </div>
+        <div class="full-details">
+            <iframe src="/{{product.name}}/buildstatus/{{version}}/{{cpiDrop}}/" seamless width=100% frameborder="0"> </iframe>
+        </div>
+    {% endblock %}
+{% endif %}

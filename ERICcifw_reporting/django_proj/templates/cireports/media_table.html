@@ -1,0 +1,213 @@
+{% extends "base_newlookandfeel.html" %}
+{% load sizeConvert %}
+<script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+        $(document).ready(function()
+        {
+           $(".tablesort").tablesorter();
+        });
+</script>
+{% if product %}
+    {% block title %}{{ product.name }} Media Artifacts {% endblock %}
+    {% block content %}
+    <div class="general-container">
+             <h2 class="generalPageNewLook-title">
+            {% if release %}
+            {{ release }} Media History (Up to Last 20 Builds)
+            {% else %}
+                {% if product.name != "ENM" or 'RSTATE' in drop.systemInfo %}
+                   Drop: {{ drop.name }} - {{mediaArtifact}} Media
+                {% else %}
+                   Drop: {{ drop.name }} - Main Track {{ product.name }} ({{ drop.systemInfo }})
+                {% endif %}
+            {% endif %}
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+ISO" title="Media Help" target="_blank"><img src="/static/images/question.png"/></a>
+           </h2>
+            {% if release %}
+            {% else %}
+            <div class="layout-bar">
+                <a href="/{{ product.name }}/drops/{{ drop.name }}/">Drop:{{ drop.name }}</a> | <a href="/{{ product.name }}/{{ drop.name }}/compareISOs/">Compare Productware ISO Versions</a>
+                |<a href="/{{ product.name }}/{{ drop.name }}/compareBOMs/"> Compare Productware BOM Versions</a>
+            </div>
+            <br>
+            {% endif %}
+            <div class="tablinksborder">
+                <ul class="tab">
+                    {% for category in categories %}
+                        <li><a id="{{category}}-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('{{category}}')">{{category|title}}</a></li>
+                    {% endfor %}
+               </ul>
+            </div>
+       {% for category in categories %}
+          <div id={{category}} class="tabcontent">
+            {% spaceless %}
+                <table class="general-table">
+                     <thead>
+                         <tr>
+                            <th colspan="3">Name</th>
+                            <th>Version</th>
+                            <th>Type</th>
+                            <th>Size(GB)</th>
+                            <!--  <th>BOM Version</th> -->
+                            <th>Build Date</th>
+                            <th>Built For</th>
+                            {% if prodTWmediaMapTestwareData and category.name == "productware" %}
+                               <th>Testware ISO</th>
+                            {% endif %}
+                            {% if prodTWmediaMapTestwareData and category.name == "testware" %}
+                               <th>Product ISO</th>
+                            {% endif %}
+                            <th>Delivered To</th>
+                            <th>Deliver</th>
+                            {% if product.isoDownload %}
+                                <th>Download</th>
+                            {% endif %}
+                            <th>Current Status</th>
+                            <th>Obsoleted From</th>
+                        </tr>
+                     </thead>
+                     {% for item in mediaArtifactVersions %}
+                        {% if item.mediaArtifact__category__name == category.name %}
+                         <tr {% if item.active == 1 %} title="Active: Is in Nexus" {% else %} title="Inactive: Deleted From Nexus" {% endif %}>
+                            {# Media Name Column #}
+                            <td align="center" colspan="3">{{item.mediaArtifact__name}}</td>
+                            {# Media Version Column #}
+                            <td align="center">
+                              <a href="/{{ item.drop__release__product__name }}/{{ item.drop__name }}/mediaContent/{{ item.mediaArtifact__name }}/{{ item.version }}">{{ item.version }}</a>
+                            </td>
+                            {# Media Type Column #}
+                            <td align="center">{{item.mediaArtifact__mediaType}}</td>
+                            {# Media Size Column #}
+                            <td align="center">{{item.size|sizeConvert}}</td>
+                            {# BOM Version Column #}
+                            <!--
+                             <td align="center">
+                                 {% if item.isoBomUrl %}
+                                     <a href="{{item.hubIsoUrl}}/{{item.mediaArtifact__name}}/{{item.version}}-BOM/{{item.mediaArtifact__name}}-{{item.version}}-BOM.pom">{{ item.version }}</a>
+                                 {% else %}
+                                     --
+                                 {% endif %}
+                             </td>
+                             -->
+                            {# Build Date Column #}
+                            <td align="center">{{item.build_date}}</td>
+                            {# Built For Column #}
+                            <td align="center">{{item.drop__name}}</td>
+                            {# Testware ISO Column #}
+                            {% if prodTWmediaMapProductData and category.name == "productware" %}
+                              <td align="center">
+                                 {% for prodTW in prodTWmediaMapProductData %}
+                                   {% if item.id == prodTW.productIsoVersion__id %}
+                                      <a href="/{{ item.drop__release__product__name }}/{{ item.drop__name }}/mediaContent/{{ prodTW.testwareIsoVersion__mediaArtifact__name }}/{{ prodTW.testwareIsoVersion__version }}">{{ prodTW.testwareIsoVersion__version }}</a><br>
+                                   {% endif %}
+                                 {% endfor %}
+                              </td>
+                              {% endif %}
+                            {# Product ISO Column #}
+                            {% if prodTWmediaMapTestwareData and category.name == "testware" %}
+                             <td align="center">
+                                  {% for prodTW in prodTWmediaMapTestwareData %}
+                                     {% if item.id == prodTW.testwareIsoVersion__id %}
+                                        <a href="/{{ item.drop__release__product__name }}/{{ item.drop__name }}/mediaContent/{{ prodTW.productIsoVersion__mediaArtifact__name }}/{{ prodTW.productIsoVersion__version }}">{{ prodTW.productIsoVersion__version }}</a><br>
+                                     {% endif %}
+                                  {% endfor %}
+                             </td>
+                             {% endif %}
+                             {# Delivered To Column #}
+                            <td>
+                                {% for drpMedia in deliveryData %}
+                                 {% if drpMedia.mediaArtifactVersion__id == item.id and drpMedia.released == True %}
+                                   <a href="/{{ drpMedia.drop__release__productsetrelease__productSet__name }}/dropMedia/{{ drpMedia.drop__name }}">{{drpMedia.drop__release__productsetrelease__productSet__name}}:{{ drpMedia.drop__name }}</a><br>
+                                 {% endif %}
+                                {% endfor %}
+                            </td>
+                            {# Deliver Column #}
+                             <td>
+                                 {% if item.active == 1 %}
+                                   <a id="mediaDeliver_{{ item.rstate }}" href="/mediaDelivery/{{ item.mediaArtifact__name }}/{{ item.version }}">Deliver this</a>
+                                 {% endif %}
+                             </td>
+                             {# Download Column #}
+                             {% if product.isoDownload %}
+                             <td>
+                                {% if item.active == 1 %}
+                                   <a href="{{item.hubIsoUrl}}/{{item.mediaArtifact__name}}/{{ item.version }}/{{item.mediaArtifact__name}}-{{ item.version }}.{{ item.mediaArtifact__mediaType }}">E2C</a>
+                                  {% if item.localIsoUrl %}
+                                      |
+                                     <a href="{{item.localIsoUrl}}/{{item.mediaArtifact__name}}/{{ item.version }}/{{item.mediaArtifact__name}}-{{ item.version }}.{{ item.mediaArtifact__mediaType }}">Athlone Proxy</a>
+                                  {% endif %}
+                                {% else %}
+                                   <b>No longer available</b>
+                                {% endif %}
+                             </td>
+                             {% endif %}
+                             {# Current Status Column #}
+                             <td>
+                                <table align="center" class='status-summary'>
+                                  <tr>
+                                    {% if item.currentCDBStatuses %}
+                                        {% for cdb in item.currentCDBStatuses %}
+                                            <td>
+                                                <p align="center">
+                                                  <b>{{ cdb.cdb_type_name }}</b>
+                                                <br>
+                                                {% if cdb.test_report_link %}
+                                                    <a class="img" href="{{ cdb.test_report_link }}">
+                                                {% endif %}
+                                                <img src="/static/images/{{cdb.status}}.png" width="40" height="40" title="
+                                                    {% if cdb.started_date %}
+                                                        Started:&nbsp;&nbsp;{{ cdb.started_date }}{% endif %}{% if cdb.ended_date %}{% if cdb.status == 'caution' or cdb.status == 'passed_manual' %}Since: {% else %}
+Finished: {% endif %}{{ cdb.ended_date }}
+                                                    {% endif %}
+                                                "/>
+                                                {% if cdb.test_report_link %}
+                                                    </a>
+                                                {% endif %}
+                                                </p>
+                                            </td>
+                                        {% endfor %}
+                                    {% else %}
+                                      <td width="130px">
+                                        <p align="center">
+                                           <img src="/static/images/not_started.png" width="40" height="40">
+                                        </p>
+                                      </td>
+                                    {% endif %}
+                                  </tr>
+                               </table>
+                              </td>
+                              {# Obsoleted From Column #}
+                              <td>
+                                  {% for drpMedia in deliveryData  %}
+                                     {% if drpMedia.mediaArtifactVersion__id == item.id and drpMedia.obsolete = True %}
+                                         {{drpMedia.drop__release__productsetrelease__productSet__name}}: <a href="/{{ drpMedia.drop__release__productsetrelease__productSet__name }}/{{ drpMedia.drop__name }}/obsoleteMediaHistory/">{{drpMedia.drop__name}}</a><br>
+                                     {% endif %}
+                                  {% endfor %}
+                              </td>
+                            </tr>
+                         {% endif %}
+                       {% endfor %}
+                 </table>
+              {% endspaceless %}
+            </div>
+    {% endfor %}
+  </div>
+ <script type="text/javascript">
+   openItem("productware");
+   function openItem(name) {
+       var i, tabcontent, tablinks;
+       tabcontent = document.getElementsByClassName("tabcontent");
+       for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+       }
+       tablinks = document.getElementsByClassName("tablinks");
+       for (i = 0; i < tablinks.length; i++) {
+           tablinks[i].className = tablinks[i].className.replace(" active", "");
+       }
+       document.getElementById(name).style.display = "block";
+       document.getElementById(name + "-tab").className += " active";
+   }
+</script>
+    {% endblock %}
+{% endif %}
+

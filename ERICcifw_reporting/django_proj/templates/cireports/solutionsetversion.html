@@ -1,0 +1,36 @@
+{% extends "cireports/base.html" %}
+{% if product %}
+    {% block title %} {{ solset.name }} {% endblock %}
+    {% block content %}
+    <script type="text/javascript">
+        (function($) {
+         $(document).ready(function() {
+             oldhtml = "";
+             setInterval(function() {
+                $.ajax({
+                    type: 'GET',
+                    url: "/{{ product.name }}/solutionsets/{{ solset.name }}/{{ solsetver.version }}/xml/",
+                    dataType: 'html',
+                    success: function(html, textStatus) {
+                        if (html != oldhtml) {
+                            $('table.solsetrevision').replaceWith(html);
+                            oldhtml = html;
+                        }
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                if (xhr.status != 0)
+                {
+                            $('table.solsetrevision').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                }
+                    }
+                });
+             }, 1000);
+             });
+         })(jQuery);
+     </script>
+     <h3>{{ solset.name }}: {{ solset.product_number }}</h3>
+    <table class='solsetrevision'>
+        <tr><td>Retrieving data ...</td></tr>
+    </table>
+    {% endblock %}
+{% endif %}

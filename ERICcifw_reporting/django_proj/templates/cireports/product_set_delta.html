@@ -1,0 +1,52 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}
+        Difference in Product Set Versions
+    {% endblock %}
+    {% block content %}
+    <script type="text/javascript" src='/static/productSetDelta.js'></script>
+    <div class="general-container">
+            <h2 class="generalPageNewLook-title">
+                Difference Between Product Set Versions
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Compare+Two+Product+Set+Versions" title="Comparing versions Info" target="_blank"><img src="/static/images/question.png"/></a>
+           </h2>
+           <div id=empty_form>
+            <table class='general-table'>
+                <tr>
+                    <th>Product Set</th>
+                    <th>Product Set Version</th>
+                    <th>Previous Product Set Version</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td><select id='products' style='height:70%;min-width:150px;margin:10px'></select></td>
+                    <td>
+                        <div>
+                        <label for='drops'>Drop:</label>
+                        <select id='drops' ></select>
+                        <label for='product_set'>Version:</label>
+                        <select id='product_set' ></select>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                        <label for='previous_drops'>Drop:</label>
+                        <select id='previous_drops' ></select>
+                        <label for='previous_product_set'>Version:</label>
+                        <select id='previous_product_set' ></select>
+                        </div>
+                    </td>
+                    <td><input type="button" value="Show Diff" id="get_diff"></td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div id="results" class="isoDiffResult">
+        </div>
+        <input type="hidden" name="productSetVersion" value="{{ productSetVersion }}">
+        <input type="hidden" name="drop" value="{{ drop }}">
+        <input type="hidden" name="product" value="{{ product }}">
+        <input type="hidden" name="previous_product_set" value="{{ previousPS }}">
+ <div class="modal"></div>
+    {% endblock %}
+{% endif %}

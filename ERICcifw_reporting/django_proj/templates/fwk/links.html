@@ -1,0 +1,41 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Team {{ team }} TV Links{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Team '{{ team }}' TV Links
+        <a href="/admin/fwk/tvinfomap/add/"><img src="/static/images/create.png" /></a>
+        <a href="/admin/fwk/tvinfomap/"><img src="/static/images/delete.png" /></a>
+        <a href="/admin/fwk/tvinfomap/"><img src="/static/images/edit.png" /></a>
+    </h2>
+    <br>
+    <table id="fwkTV-table" class="general-table">
+        {% if tvinfo %}
+        <thead>
+           <tr>
+               <th>Title</th>
+               <th>URL
+                   <a href="/admin/fwk/urldisplay/add/"><img src="/static/images/create.png" height="25em"/></a>
+                   <a href="/admin/fwk/urldisplay/"><img src="/static/images/delete.png" height="25em"/></a>
+                   <a href="/admin/fwk/urldisplay/"><img src="/static/images/edit.png" height="25em"/></a>
+               </th>
+               <th>Time Displayed (Seconds)</th>
+               <th>Sequence</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in tvinfo %}
+            <tr>
+                <td>{{ item.url.title }}</td>
+                <td><a href="{{ item.url.url }}">{{ item.url.url }}</a></td>
+                <td>{{ item.time }}</td>
+                <td>{{ item.sequence }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% else %}
+        <tr><td><p>No TV information found for {{ team }}</p></td></tr>
+        {% endif %}
+    </table>
+</div>
+{% endblock %}

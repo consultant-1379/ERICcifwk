@@ -1,0 +1,18 @@
+{% extends "dmt/base.html" %}
+
+{% block title %} {% endblock %}
+
+{% block content %}
+
+<div id="generic-title">
+<div id="text-container">Success. File uploaded
+</div>
+</div>
+<br><br><br><br>
+
+Link to Uploaded File <a href="{{uploadUrl}}/{{ dateTimeNow }}/{{fileName}}">{{uploadUrl}}/{{ dateTimeNow }}/{{fileName}}</a><br><br>
+
+<a href="{{request.META.HTTP_REFERER}}">Return to Upload page</a>
+
+
+{% endblock %}

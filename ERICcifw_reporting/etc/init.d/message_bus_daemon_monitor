@@ -1,0 +1,36 @@
+#!/bin/bash
+# manages the check on Eiffel monitor daemon status
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname `/usr/bin/readlink -f $0`)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/../../ ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+export PYTHONPATH=/proj/lciadm100/cifwk/latest/django_proj/:$PYTHONPATH
+
+
+case "$1" in
+  start)
+    echo "Starting to Check Message Bus Daemon Status"
+    # Start the daemon
+    $_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/message_bus_daemon_monitor.py start
+    ;;
+  stop)
+    echo "Stopping to Check Message Bus Daemon Status"
+    # Stop the daemon
+    $_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/message_bus_daemon_monitor.py stop
+    ;;
+  restart)
+    echo "Restarting Check for Message Bus Daemon"
+    $_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/message_bus_daemon_monitor.py restart
+    ;;
+  *)
+    # Refuse to do other stuff
+    echo "Usage: message_bus_daemon_check  {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

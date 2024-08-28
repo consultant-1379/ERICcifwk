@@ -1,0 +1,60 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+{% block title %}{{ product.name }} Drop {{ drop.name }} Delivery Queue Comments {% endblock %}
+{% block content %}
+<script type="text/javascript">
+    function validateForm() {
+        var x = document.forms["AddGroupCommentForm"]["comment"].value;
+        if (x == null || x == "-") {
+            alert("Please enter in a comment");
+            return false;
+        }
+    }
+</script>
+<div class="general-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">
+            Adding Comment to Delivery Group
+        </h2>
+        <div class="layout-bar"> <a href="/{{ product.name }}/drops/{{ drop.name }}">Drop:{{ drop.name }}</a> | <a href="/{{ product.name }}/queue/{{ drop.name }}">Delivery Queue</a></div>
+        <br>
+        <form enctype="multipart/form-data" name="AddGroupCommentForm" onsubmit="return validateForm()" method="post" action="">{% csrf_token %}
+        <table>
+        <h3>
+            To add a comment to this Delivery Group please complete below
+        </h3>
+        <br>
+            <th>Comment</th>
+                <tr>
+                    <td>
+                        <input type="text" name="comment" size="75">
+                    </td>
+                </tr>
+        </table>
+        <br>
+        <input name="Submit" type="submit" value="Submit" title="Submit"></input>
+        </form>
+    <br>
+    <div id="accordion">
+        <h4> Current Group Comments </h4>
+        <div>
+            {% if comments %}
+                <table class="general-table">
+                    <th>Comment</th><th>Date</th>
+                {% for comment in comments %}
+                    <tr>
+                        <td> {{ comment.comment }} </td>
+                        {% if comment.date %}
+                            <td>{{ comment.date }}</td>
+                        {% else %}
+                            <td>-</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                No comments found in the database for this delivery group
+            {% endif %}
+        </table>
+        </div>
+    </div>
+    {% endblock %}
+{% endif %}

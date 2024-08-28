@@ -1,0 +1,110 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+
+{% block title %}Search Inventory{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Search Inventory Information
+    </h2>
+    <p>
+        This page can be used to search for specific inventory information<br>
+        The main use of the search facility is to search for information that needs to be unique<br>
+        within a deployment system<br>
+    </p>
+    <p>
+        The following is a list of the item that can be searched for <br>
+        Server ipv4 Address e.g. 192.168.0.44 <br>
+        Server ipv6 Address e.g. 2001:1b70:82a1:16:0:3018:1b:1 <br>
+        Server Mac Address e.g 00:50:56:00:00:42 <br>
+        Server Hostname e.g atrcxb1234 <br>
+    </p>
+    <p>
+        Enter the search string in the text box below and click "Search".<br>
+        This should return a link to the page where the search string can be found<br>
+        </p>
+    <form method='POST' action='/dmt/searchInventory/'>
+        {% csrf_token %}
+        <input style="width: 250px;" type="text" name="entry"/>
+        <input type="submit" value="Search" title="Search" onclick="$('body').addClass('loading');">
+        <br/>
+        <br/>
+    </form>
+{% if valueEntered %}
+    <h3>Search Results For "{{valueEntered}}"</h3>
+    {% if allResults|length == 0 %}
+            <table class="general-table">
+                <tr><th>Identified</th><td>No Result</td></tr>
+            </table>
+        <br>
+        <p><font color="red"><b>
+            Unfortunately no result has been found for the string entered.<br>
+            Please ensure the string is entered correctly. <br>
+            If the duplicate entry is still an issue. <br>
+            Please log a Jira ticket with the <a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/CIS">Continuous Integration Services</a> area.<br>
+        </b></font></p>
+    {% else %}
+            <table class="general-table">
+                <tr>
+                    <th>Type</th>
+                    <th>Identified Within</th>
+                    <th>Link</th>
+                </tr>
+                {% for result in allResults %}
+                    <tr>
+                        <td>{{result.serverType}}</td>
+                        {% if result.serverType == "Service Unit"  or result.serverType == "Server ILO"%}
+                            <td>{{ result.identifier }} as {{ result.unitName }} ({{ result.unitNumber }})</td>
+                        {% elif result.serverType == "Veritas" or result.serverType == "Multicast Info" or result.serverType == "Virtual Image" %}
+                            <td>{{ result.identifier }} as {{ result.unitName }}</td>
+                        {% elif result.serverType == "LVS Router" %}
+                            <td>{{ result.unitName }}</td>
+                        {% elif result.serverType == "Database VIP" %}
+                            <td>{{ result.unitName }}</td>
+                        {% elif result.serverType == "Hybrid Cloud" %}
+                            <td>{{ result.unitName }}</td>
+                        {% elif result.serverType == "Dvms Information" %}
+                            <td>{{ result.unitName }}</td>
+                        {% else %}
+                            <td>{{ result.identifier }}</td>
+                        {% endif %}
+
+                        {% if result.serverType == "Deployment Server" %}
+                            <td><a href="/dmt/clusters/{{ result.clusterId }}">{{result.serverType}} Link (id: {{ result.clusterId }})</a></td>
+                        {% elif result.serverType == "Virtual Image" %}
+                            <td><a href="/dmt/clusters/{{ result.clusterId }}">Deployment Link (id: {{ result.clusterId }})</a></td>
+                        {% elif result.serverType == "Management Server" %}
+                            <td><a href="/dmt/mgtsvrs/{{ result.serverId }}">{{result.serverType}} Link (id: {{ result.serverId }})</a></td>
+                        {% elif result.serverType == "NAS Server" %}
+                            <td><a href="/dmt/nassvrs/{{ result.serverId}}">{{result.serverType}} Link</a></td>
+                        {% elif result.serverType == "SAN Server" %}
+                            <td><a href="/dmt/storage/{{ result.serverId }}">{{result.serverType}} Link</a></td>
+                        {% elif result.serverType == "Enclosure" %}
+                            <td><a href="/dmt/enclosure/{{ result.serverId}}">{{result.serverType}} Link</a></td>
+                        {% elif result.serverType == "Service Unit" or result.serverType == "Veritas" or result.serverType == "Server ILO" or result.serverType == "Multicast Info" %}
+                            <td><a href="/dmt/clusters/{{ result.clusterId }}/details/">{{ result.identifier }} Link (id: {{ result.clusterId }})</a></td>
+                        {% elif result.serverType == "LVS Router" %}
+                            <td><a href="/dmt/clusters/{{ result.clusterId }}">{{ result.identifier }} (id: {{ result.clusterId }})</a></td>
+                        {% elif result.serverType == "Hybrid Cloud" %}
+                           <td><a href="/dmt/clusters/{{ result.clusterId }}">{{ result.identifier }} (id: {{ result.clusterId }})</a></td>
+                        {% elif result.serverType == "Database VIP" %}
+                            <td><a href="/dmt/clusters/{{ result.clusterId }}">{{ result.identifier }} (id: {{ result.clusterId }})</a></td>
+                        {% elif result.serverType == "Dvms Information" %}
+                            <td><a href="/dmt/clusters/{{ result.clusterId }}">{{ result.identifier }} (id: {{ result.clusterId }})</a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+    {% endif %}
+    {% endif %}
+<div class="modal"></div>
+{% endblock %}

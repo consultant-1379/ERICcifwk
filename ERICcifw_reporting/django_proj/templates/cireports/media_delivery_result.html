@@ -1,0 +1,27 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}{{ productSet }} Delivery Information{% endblock %}
+{% block content %}
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">{{ productSet }} Delivery Success Information</h2>
+        A delivery with the following information has been made.
+        <div class="delivery-info">
+            <table class='general-table'>
+                <tr>
+                    <th>Product:</th> <td><a href="/{{media.drop.release.product.name}}/releases/"><b>{{media.drop.release.product.name}}</b></a></td>
+                </tr>
+                <tr>
+                    <th> Media Artifact:</th> <td><a href="/{{ media.drop.release.product.name }}/{{ media.drop.name }}/media/"><b>{{media.mediaArtifact.name}}</b></a></td>
+                </tr>
+                <tr>
+                    <th>Version:</th> <td> <a href="/{{ media.drop.release.product.name }}/{{ media.drop.name }}/mediaContent/{{ version }}"><b>{{ version }}</b></a></td>
+                </tr>
+                <tr>
+                    <th>Product Set:</th> <td><a href="/{{productSet}}/prodSetReleases"><b>{{productSet}}</b></a></td>
+                </tr>
+                <tr>
+                    <th>Drop:</th> <td><a href="/{{ productSet }}/dropMedia/{{ drop }}"><b>{{ drop }}</b></a></td>
+                </tr>
+           </table>
+       </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "cireports/base.html" %}
+{% block title %} {{ product }} {{ packageName }} Mapping  {% endblock %}
+{% block content %}
+<div id="generic-title">
+    <div id="text-container">{{ packageName }} KGB Dependencies
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Package+KGB+Dependency" title="Package Mapping Help" target="_blank"><img src="/static/images/question.png"/></a>
+    </div>
+</div>
+<div class="full-details">
+    {% if error %}
+        <p><h4><font color="red">{{ error }}</font></h4></p>
+    {% endif %}
+    <p><h4>Please Add {{ packageName }} KGB Dependencies Below and Commit List.</h4></p>
+    <form enctype="multipart/form-data" name="deliveryform" method="post" action="/{{ product }}/{{ packageName }}/dependencyMapping/add/">{% csrf_token %}
+            <table id="testware-mapping-table">
+                <tr>{{ pkgForm }}</tr>
+            </table>
+            {% if dependentPackageList %}
+            <p><h4>Selected KGB Dependencies for {{ packageName }}:</h4></p>
+                    {% for pkg in dependentPackageList %}
+                        <input type="checkbox" name="dependentPackages" value="{{ pkg }}" checked>{{ pkg }}<br>
+                    {% endfor %}
+            {% endif %}
+            <br>
+            <input type="submit" name="submit" value="Add to List"/>
+            <input type="submit" name="submit" value="Update List"/>
+            <input type="submit" name="submit" value="Commit List"/>
+        </form>
+    </form>
+
+</div>
+{% endblock %}

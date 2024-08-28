@@ -1,0 +1,3 @@
+      <litp:component-ref id="vcs_config">
+        <component>vcs_config</component>
+      </litp:component-ref>

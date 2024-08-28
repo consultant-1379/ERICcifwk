@@ -1,0 +1,18 @@
+#!/bin/bash -a
+
+sudo /usr/bin/oz-install -d3 -u __TEMPLATEDESCRIPTION__ -c /etc/oz/oz.cfg
+if [ $? -ne 0 ] ; then
+    exit $?
+fi
+sudo /bin/mv /dev/shm/var/lib/libvirt/images/*.qcow2 /dev/shm/
+if [ $? -ne 0 ] ; then
+    exit $?
+fi
+export TMPDIR=/dev/shm/
+if [ $? -ne 0 ] ; then
+    exit $?
+fi
+/usr/bin/virt-sparsify --compress __IMAGELOCATION__ __COMPRESSEDIMAGELOCATION__
+if [ $? -ne 0 ] ; then
+    exit $?
+fi

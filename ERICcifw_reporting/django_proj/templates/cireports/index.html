@@ -1,0 +1,73 @@
+{% extends "base_newlookandfeel.html" %}
+
+
+{% block title %}Landing Page{% endblock %}
+
+{% block content %}
+<link rel=StyleSheet href="/static/landingPage.css" type="text/css" />
+<script type="text/javascript" src='/static/landingPage.js'></script>
+<div class="container">
+     <div class="landingPage-title" style="left: 0; right: 0;"> Quick Links </div>
+     <div id="error_message" class="flash_bad"></div>
+     <br>
+     <table>
+      <tr>
+     <td><div class="quickLinkBox">
+         <span class="quickLink-title">Deployments</span>
+         <br>
+         <br>
+         <a class="img" href="/dmt/clusters/" title="Deployments" target="_self" style="left: 0; right: 0;"><img src="/static/images/deployment.png" alt="Deployments" width="45px" height="45px" /></a>
+          <br>
+          <br>
+          <div id="empty_deployment_form"></div>
+    </div>
+     </td>
+     <td><div class="quickLinkBox">
+         <div><span class="quickLink-title" style="left: 0; right: 0;">Artifacts</span>
+              <br>
+              <br>
+             <a class="img"  href="/cireports/allArtifacts/" title="Complete Packages & Testware List" target="_self" style="left: 0; right: 0;"><img src="/static/images/artifact.png" alt="Complete Packages & Testware List" width="50px" height="45px" /></a></div>
+         <br>
+         <div class="dropdown">
+             <button class="dropbtn">Select Product</button>
+             <div class="products-dropdown-content"></div>
+         </div>
+         <div id="empty_form"></div>
+     </div>
+     </td>
+     <td><div class="quickLinkBox">
+         <span class="quickLink-title" style="left: 0; right: 0;">ENM Delivery Queue</span>
+         <br>
+         <br>
+         <a class="img" href="/ENM/queue/" title="Delivery Queue" target="_self" style="left: 0; right: 0;"><img src="/static/images/deliveryQueue.png" alt="Delivery Queue" width="50px" height="40px" /></a>
+            <br>
+            <br>
+           <div id="empty_drop_form"></div>
+           <div class="dropdown">
+               <button class="dropbtn">Select Drop</button>
+               <div class="dropdown-content">
+             </div>
+         </div>
+         </div>
+      </td>
+      <td><div class="quickLinkBox">
+         <span class="quickLink-title" style="left: 0; right: 0;">cENM Delivery Queue</span>
+         <br>
+         <br>
+         <a class="img" href="/cloudNative/Cloud Native ENM/" title="Delivery Queue" target="_self" style="left: 0; right: 0;"><img src="/static/images/deliveryQueue.png" alt="Delivery Queue" width="50px" height="40px" /></a>
+            <br>
+            <br>
+           <div id="empty_cn_drop_form"></div>
+           <div class="dropdown">
+               <button class="dropbtn">Select Drop</button>
+               <div class="cn-dropdown-content">
+             </div>
+         </div>
+         </div>
+      </td>
+     </tr>
+    </table>
+</div>
+<div class="modal"></div>
+{% endblock %}
+

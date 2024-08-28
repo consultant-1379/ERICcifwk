@@ -1,0 +1,23 @@
+{% extends "cireports/base.html" %}
+
+{% block title %}Create Jenkins Jobs{% endblock %}
+
+{% block content %}
+<h1>Job creation results</h1>
+<div class="results">
+{% for result in results %}
+    {% if result.res == "OK" %}
+     <li  style="color:green;">
+    
+        {{ result.job }}
+        RESULT:{{ result.res }}
+     </li>
+    {% else %}
+     <li  style="color:red;">
+        {{ result.job }}
+        RESULT:{{ result.res }}
+     </li>
+    {% endif %}
+{% endfor %}
+</div>    
+{% endblock %}

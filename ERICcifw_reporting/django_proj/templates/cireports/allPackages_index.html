@@ -1,0 +1,56 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Complete Packages & Testware List {% endblock %}
+{% block content %}
+<script type="text/javascript" src="/static/toggleTabsOnClick.js"></script>
+<div class="artifact-container">
+    <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">
+        Complete Packages & Testware List ({{ count }}) <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Complete+Packages+&+Testware+List" title="Package & Testware Info" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <br>
+        <div class="tablinksborder">
+            <ul class="tab">
+                {% if packages %}
+                   <li><a id="packages-tab" class="tablinks" href="javascript:void(0);">Packages ({{ countPkgs }})</a></li>
+                {% endif %}
+                {% if testware %}
+                   <li><a id="testware-tab" class="tablinks" href="javascript:void(0);">Testware ({{ countTw }})</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% if packages %}
+       <div id="packages" class="tabcontent">
+          <table class="artifact-table">
+              <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Number</th>
+                </tr>
+            </thead>
+                {% for item in packages %}
+                <tr>
+                    <td><a id="package_{{ item.name }}" href="/prototype/packages/{{ item.name }}">{{ item.name }}</a></td>
+                    <td>{{ item.package_number }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+        {% if testware %}
+        <div id="testware" class="tabcontent">
+             <table class="artifact-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Number</th>
+                </tr>
+            </thead>
+                {% for item in testware %}
+                <tr>
+                    <td><a id="testware_{{ item.name }}" href="/prototype/packages/{{ item.name }}">{{ item.name }}</a></td>
+                    <td>{{ item.package_number }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+         </div>
+       {% endif %}
+   </div>
+{% endblock %}

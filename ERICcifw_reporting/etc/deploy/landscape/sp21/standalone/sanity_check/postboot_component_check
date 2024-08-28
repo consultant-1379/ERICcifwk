@@ -1,0 +1,1 @@
+litp /inventory show -rp | grep vcsgrp

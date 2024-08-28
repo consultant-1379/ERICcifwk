@@ -1,0 +1,37 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}CIFWK Portal Glossary {% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">PDU NAM CI Portal Glossary</h2>
+    {% if tuple %}
+    <div class="glossaryDetails">
+        <div class="generic-sub-title">
+            <br>
+            <div class="generic-text">
+                [ <a href='glossary/#CIGlossary-CIGlossary'><span class="mw-headline"><strong>Glossary</strong></span></a> ]
+                    {% for entry in tuple %}
+                    [ <a href='glossary/#CIGlossary-{{ entry.0 }}'><span class="mw-headline"><strong>{{ entry.0 }}</strong></span></a> ]
+                    {% endfor %}
+            </div>
+            <br><br>
+        </div>
+        <div id="CIGlossary-CIGlossary"><h3 class="sub-title" style="font-weight: bold;">Glossary</h3>
+            <br>
+            <div>The below Glossary lists all terms related to the PDU NAM Continuous Integration Portal.</div>
+            <div id="generic-sub-title">
+                {% for entry in tuple %}
+                <br><br>
+                <div class="sub-title" id="CIGlossary-{{ entry.0 }}"><h3 style="font-weight: bold;">{{ entry.0 }}</h3></div>
+                    <div id="glossary-text">
+                        {% for name,description in entry.1.items %}
+                        <b>{{ name }}: </b>
+                        {{ description|linebreaksbr }}<br>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

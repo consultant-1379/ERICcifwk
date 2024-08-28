@@ -1,0 +1,45 @@
+{% extends "cireports/base.html" %}
+{% load nexusUrl %}
+{% block title %} Customer Deployable Baseline Content {% endblock %}
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">Customer Deployable Baseline Content for {{drop.name}} ({{type.typeStripUnderscores}}) <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/" title="CDB Content" target="_blank"><img src="/static/images/question.png"/></a></div>
+    </div>
+    <div class="generic-text">
+        <br>
+        <h2>Started: {{cdb.started}}</h2>
+        <table id="package-table" class="tablesort">
+            <thead>
+            {# Set up the headers for the table based on if they are activated for the product or not #}
+            <tr>
+                {% if product.pkgName %}<th>Package</th>{% endif %}
+                {% if product.pkgNumber %}<th>Number</th>{% endif %}
+                {% if product.pkgVersion %}<th>Version</th>{% endif %}
+                {% if product.pkgRState %}<th>RState</th>{% endif %}
+                {% if product.date %}<th>Date Created</th>{% endif %}
+                {% if product.platform %}<th>Platform</th>{% endif %}
+                {% if product.category %}<th>Media Category</th>{% endif %}
+            </tr>
+            </thead>
+            {% if cdbContent %}
+                {% for pkg in cdbContent %}
+                <tr>
+                    {% if product.pkgName %}<td align=center>{{ pkg.package_revision.package.name }}</td>{% endif %}
+                    {% if product.pkgNumber %}<td align=center>{{ pkg.package_revision.package.package_number }}</td>{% endif %}
+                    {% if product.pkgVersion %}<td align=center><a href="{{ item|nexusUrl:product.name }}">{{ pkg.package_revision.version }}</a></td>{% endif %}
+                    {% if product.pkgRState %}<td align=center>{{ pkg.package_revision.getRState }}</td>{% endif %}
+                    {% if product.date %}<td align=center>{{ pkg.package_revision.date_created }}</td>{% endif %}
+                    {% if product.platform %}<td align=center>{{ pkg.package_revision.platform }}</td>{% endif %}
+                    {% if product.category %}
+                        {% if pkg.package_revision.infra %}
+                            <td align=center><span style="display:none">_</span>{{ pkg.package_revision.category }}<br>Infrastructure</td>
+                        {% else %}
+                            <td align=center>{{ pkg.package_revision.category }}</td>
+                        {% endif %}
+                    {% endif %}
+                </tr>
+                {% endfor %}
+        </table>
+    {% endif %}
+    </div>
+{% endblock %}

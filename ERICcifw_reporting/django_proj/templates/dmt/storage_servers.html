@@ -1,0 +1,84 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Storage Attached Network Details{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="deployment_container">
+    <h3 class="generalPageNewLook-title">Storage Servers
+        <a class="img" style="padding-left:5px;" href="/dmt/addStorage/" title="Register Storage"><img src="/static/images/create.png"/></a>
+        <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+a+Clariion" title="Storage Registration Help" target="_blank"><img src="/static/images/question.png"/></a>
+        <a class="img" style="padding-left:5px;" href="/dmt/log/storage/" title="User Activity Log for the Storage Servers"><img src="/static/images/log.png"/></a>
+    </h3>
+<div id="server">
+    <p/><b>For Information on Deployments <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Deployments" target="_blank">Visit This Confluence Page</a></b></p>
+    <table class="general-table">
+        {% if storageServers %}
+            <tr>
+                <th>Name</th>
+                <th style="text-align: center;" >Options</th>
+            </tr>
+            {% for item in storageServers %}
+            <tr>
+                <td
+                    {% ifequal item.id|add:"0" selected|add:"0" %}
+                    class="selected"
+                    {% endifequal %}
+                >
+                    <a href="/dmt/storage/{{ item.id }}/">{{ item.hostname }} (id: {{ item.id }})</a></td>
+                    <td style="text-align: center;" >
+                        <a class="img" href="/dmt/editStorage/{{ item.id }}/edit" title="Edit {{ item.hostname }} Server"><img src="/static/images/edit.png"/></a>
+                        <a class="img" href="javascript:void(0)"
+                            onClick="checkAction('Do you really want to Delete {{ item.hostname }}?', '/dmt/deleteStorage/{{ item.id }}/delete')" title="Delete {{ item.hostname }} Server"><img src="/static/images/delete.png"/></a>
+                    </td>
+                </tr>
+            {% endfor %}
+       {% else %}
+            <tr>No Storage Servers</tr>
+      {% endif %}
+  </table>
+</div>
+<div id="server-details">
+{% if selected %}
+    <br>
+    <h3>Storage Server Details for {{ storageServer.hostname }}</h3>
+    {% if storageServer %}
+    <table class="general-table">
+            <tr><th>Machine Name:</th><td>{{ storageServer.name }}</td></tr>
+            <tr><th>Type:</th><td>{{ storageServer.vnxType }}</td></tr>
+            <tr><th>Domain Name:</th><td>{{ storageServer.domain_name }}</td></tr>
+            <tr><th>Serial Number:</th><td>{% if storageServer.serial_number %}{{ storageServer.serial_number }}{% else %}Not Assigned{% endif %}</td></tr>
+            <tr><th>SP-A IP Address:</th><td>{{ ipOneObject.address }}</td></tr>
+            <tr><th>SP-B IP Address:</th><td>{{ ipTwoObject.address }}</td></tr>
+            <tr><th>Login Scope:</th><td>{{ storageServer.credentials.loginScope }}</td></tr>
+            <tr><th>SAN Admin Password:</th><td>{% if storageServer.sanAdminPassword %}{{ storageServer.sanAdminPassword }}{% else %}Not Assigned{% endif %}</td></tr>
+            <tr><th>SAN Service Password:</th><td>{% if storageServer.sanServicePassword %}{{ storageServer.sanServicePassword }}{% else %}Not Assigned{% endif %}</td></tr>
+       </table>
+    {% endif %}
+    <br>
+    <h3>Deployments Associated with {{ storageServer.hostname }}</h3>
+    {% if clusters %}
+    <table class="general-table">
+        <tr>
+            <th>Name</th>
+            <th>Deployment ID</th>
+        </tr>
+       {% for c in clusters %}
+        <tr>
+            <td><a href="/dmt/clusters/{{ c.cluster.id }}/">{{ c.cluster.name }}</a></td>
+            <td>{{ c.cluster.id}}</td>
+        </tr>
+       {% endfor %}
+   </table>
+   {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

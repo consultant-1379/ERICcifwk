@@ -1,0 +1,51 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}CIFWK Excellence Model Category Data{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Questionnaire History
+        <a class="img" href="/excellence/takeQuestionnaire/" title="Take New Questionnaire"><img src="/static/images/create.png"/></a>
+    </h2>
+    <br>
+    <table class="general-table" id="excellenceOrganistaions-table">
+        {% if quentionnaireDict %}
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>Version</th>
+                    <th>Sections Complete</th>
+                    <th>Status</th>
+                    <th>Results</th>
+                </tr>
+            </thead>
+            {% for questionnaire,section in quentionnaireDict.items %}
+                <tr>
+                    <td>{{ questionnaire.questionnaire_Name }}</td>
+                    <td>{{ questionnaire.organisation }}</td>
+                    <td>{{ questionnaire.version }}</td>
+                    <td>{{ section.0 }}</td>
+                    <td>
+                        {% if section.0 < 5 %}
+                            Not Complete
+                        {% else %}
+                            Completed
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if section.0 < 5 %}
+                            <a class="img" href="/excellence/questionnaire/{{ section.1 }}/{{ questionnaire.version }}/{{ questionnaire.id}}/{{ section.1 }}/" title="Complete Quentionnaire">Complete</a>
+                        {% else %}
+                            <a class="img" href="/excellence/questionnaire/{{ questionnaire.id|urlencode }}/" title="Link">Results</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+        <tr>
+            <th>Sorry You Have not Started or Completed Any Questionnaire ---- No Results Found</th>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endblock %}

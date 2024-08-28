@@ -1,0 +1,42 @@
+<INCLUDE NODE: SC PL >
+       <litp:vm-system id="vm_deployment1_cluster1_<NODE_SYSTEM_NAME>">
+          <boot_dev>eth0</boot_dev>
+          <bridge>br0</bridge>
+          <bridge_enabled>False</bridge_enabled>
+          <bridge_stp>off</bridge_stp>
+          <bridge_stp_fdelay>0</bridge_stp_fdelay>
+          <cpus>4</cpus>
+          <disk>40G</disk>
+          <domain>vm_deployment1_cluster1_<NODE_SYSTEM_NAME></domain>
+          <hostname><NODE_HOSTNAME></hostname>
+          <macaddress><NODE_MAC></macaddress>
+          <path>/var/lib/libvirt/images</path>
+          <ram>10240M</ram>
+          <require></require>
+          <systemname>vm_deployment1_cluster1_<NODE_SYSTEM_NAME></systemname>
+          <vmware>True</vmware>
+          <litp:generic-bios id="bios">
+            <require></require>
+          </litp:generic-bios>
+          <litp:hba id="hba0">
+            <require></require>
+            <litp:hbaport id="hbaport0">
+              <index>0</index>
+              <require></require>
+              <wwpn>A0</wwpn>
+            </litp:hbaport>
+            <litp:hbaport id="hbaport1">
+              <index>1</index>
+              <require></require>
+              <wwpn>A1</wwpn>
+            </litp:hbaport>
+          </litp:hba>
+          <litp:nic id="nic0">
+            <require></require>
+            <litp:nicport id="p0">
+              <index>0</index>
+              <macaddress><NODE_MAC></macaddress>
+              <require></require>
+            </litp:nicport>
+          </litp:nic>
+        </litp:vm-system> 

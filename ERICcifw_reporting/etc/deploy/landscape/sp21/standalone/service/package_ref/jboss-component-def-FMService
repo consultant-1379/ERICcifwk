@@ -1,0 +1,17 @@
+<INCLUDE NODE: FMService >
+  <litp:component-def id="FMService">
+    <name>FMService</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <install-source><EARWAR_FILE></install-source>
+      <name><EARWAR_NAME></name>
+      <service>jee_tor</service>
+      <version><PACKAGE_VERSION></version>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICFMService_CXP9030213</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>
+

@@ -1,0 +1,5 @@
+<INCLUDE NODE: ALL ::: RENAME <SERVICE_GROUP_ID> >
+         <litp:component-ref id="<COMPONENT_REF>">
+            <component><COMPONENT></component>
+         </litp:component-ref>
+

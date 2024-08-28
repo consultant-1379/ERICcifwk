@@ -1,0 +1,322 @@
+#!/bin/bash -a
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+#
+# cifwkError:
+# Display relevant cifwkError information and send Email
+#
+cifwkError() {
+    printLog " ! [$(getLogTime)] $*"
+    [ ! -z "${LOG_FILE}" ] && log "Please see ${LOG_FILE} for more information"  
+    sendEmail
+    exit 1
+}
+
+#
+# checkMysql:
+# Check that we can connect to mysql without a password
+# There should be a ~/.my.cnf file with the correct
+# username and password in it to make DB connections
+# Also populate the TBLS variable with only the cireports tables from the DB
+#
+checkMysql() {
+    log "Checking mysql connection .. "    
+    TBLS=`$_MYSQL --skip-column-names ${CIFWKDB} <<EOF | $_EGREP -v "^auth_" | $_EGREP -v "^django_"
+    SHOW TABLES
+EOF
+    `
+    [ $? -ne 0 ] && cifwkError "Could not connect to the database - are you sure you have a username and password configured in ~/.my.cnf?"
+}
+
+#
+# dumpSchema:
+# Function to dump the Schema information from the DB
+# Takes either 2 or 3 parameters
+#    1) The database to connect to
+#    2) The file to dump the DB info into
+#    3) Other connection info (This is a optional parameter)
+#
+dumpSchema() {
+    DB=$1
+    FILE=$2
+    [ ! -z "${3}" ] && OPTS="$3"
+    if [ "${OPTS}" = "specific_tables" ] ; then
+        MY_TBLS=${TBLS}
+        OPTS=""
+    fi
+    # Only dump the database schema, not the data, for the cireports tables
+    # pass any arguments as tables
+    $_MYSQLDUMP ${OPTS} --no-data ${DB} ${MY_TBLS} > ${FILE} 2>> ${LOG_FILE}
+    [ $? -ne 0 ] && cifwkError "dumpSchema failed"
+    OPTS=""
+    MY_TBLS=""
+}
+
+#
+# createTestDB:
+# Create a Test Database
+# Takes one parameter
+#    1) The database to create
+#
+createTestDB() {
+    DB=$1
+
+    # Drop the user implicitly - if it doesn't exist we'll ignore the error
+    $_MYSQL <<EOF > /dev/null 2>&1
+DROP USER ${DBTESTUSR}@localhost;
+EOF
+
+    log "Creating database ${DB}"
+    $_MYSQL -v -v -v <<EOF >> ${LOG_FILE} 2>&1
+DROP DATABASE IF EXISTS ${DB};
+
+CREATE DATABASE ${DB};
+CREATE USER ${DBTESTUSR}@localhost;
+GRANT ALL PRIVILEGES ON ${DB}.* TO ${DBTESTUSR}@localhost;
+EOF
+    [ $? -ne 0 ] && cifwkError "Failed to create ${DB}"
+}
+
+#
+# dropTestDB:
+# Drop the Test Database
+# Takes one parameter
+#    1) The database to delete
+#
+dropTestDB() {
+    DB=$1
+
+    log "Dropping database ${DB}"
+    $_MYSQL -v -v -v <<EOF >> ${LOG_FILE} 2>&1
+
+    DROP USER ${DBTESTUSR}@localhost;
+    DROP DATABASE ${DB};
+EOF
+    [ $? -ne 0 ] && cifwkError "Failed to drop ${DB}"
+}
+
+#
+# testCifwkDDL:
+# Function to load the CIFWK sql file into the Test database
+# Takes 2 parameters
+#    1) The DDL file which contains the SQL to create the relevant tables etc ..
+#    2) The file to dump the schema skeleton from the DB into
+#
+testCifwkDDL() {
+    CIFWKDB_DDL=$1
+    SAVE_SCHEMA=$2
+
+    createTestDB cifwkdb_schtest
+
+    log "Importing SQL ${CIFWKDB_DDL} to cifwkdb_schtest"
+    $_MYSQL --no-defaults -v -v -v -v -v --user=${DBTESTUSR} cifwkdb_schtest < ${CIFWKDB_DDL} >> ${LOG_FILE} 2>&1
+    [ $? -ne 0 ] && cifwkError "Failed to load cifwkdb_schtest"
+
+    if [ ! -z "${SAVE_SCHEMA}" ] ; then
+        log "Dumping schema back out to ${SAVE_SCHEMA}"
+        dumpSchema cifwkdb_schtest ${SAVE_SCHEMA} "--no-defaults --user=${DBTESTUSR}"
+    fi
+    dropTestDB cifwkdb_schtest
+}
+
+#
+# testMigrate:
+# imports the base schema into the test DB and then adds the migrate schema on top of it
+# then dumps the result out into a file
+# Takes 3 parameters
+#    1) The current DB Schema
+#    2) The Migrate sql file that has been generated with the differences since last update
+#    3) The file to collate these (1 & 2 above) together
+#
+testMigrate() {
+    BASE_SCHEMA=$1
+    MIGRATE_SQL=$2
+    MIGRATED_SCHEMA=$3
+
+    createTestDB cifwkdb_schtest
+
+    log "importing base schema from ${BASE_SCHEMA}"
+    $_MYSQL --no-defaults --user=${DBTESTUSR} cifwkdb_schtest < ${BASE_SCHEMA} >> ${LOG_FILE} 2>&1
+    [ $? -ne 0 ] && cifwkError "Failed to load cifwkdb_schtest with ${BASE_SCHEMA}"
+
+    log "executing migrate schema from ${MIGRATE_SQL}"
+    $_MYSQL --no-defaults -v -v -v -v --show-warnings --user=${DBTESTUSR} cifwkdb_schtest < ${MIGRATE_SQL} >> ${LOG_FILE} 2>&1
+    if [ $? -ne 0 ] ; then
+        $_ECHO "Migrate schema:" >> ${LOG_FILE}
+        $_CAT ${MIGRATE_SQL} >> ${LOG_FILE}
+        $_ECHO >> ${LOG_FILE}
+        cifwkError "Failed to update cifwkdb_schtest with ${MIGRATE_SQL}"
+    fi
+
+    if [ ! -z "${MIGRATED_SCHEMA}" ] ; then
+        log "Dumping schema back out to ${MIGRATED_SCHEMA}"
+        dumpSchema cifwkdb_schtest ${MIGRATED_SCHEMA} "--no-defaults --user=${DBTESTUSR}"
+    fi
+
+    dropTestDB cifwkdb_schtest
+}
+
+#
+# extractMigSql:
+# get the sql differences between the version to be upgraded to and the version currently installed
+# Takes 2 parameters
+#    1) The Migrate sql file that is in the Upgrade Directory
+#    2) A new file which only contains the Migrate statements since the current version installed
+#
+extractMigSql() {
+    MIGRATE_SQL=$1
+    MIGRATE_FROM_TO_SQL=$2
+
+    $_AWK '
+BEGIN { found = 0; }
+$1 ~ /^--$/ && $2 ~ /^END$/ && $3 == ENVIRON["FROM_VERSION"] { found = 1; }
+found == 1 {print $0; }
+' ${MIGRATE_SQL} > ${MIGRATE_FROM_TO_SQL}
+
+    [ ! -s ${MIGRATE_FROM_TO_SQL} ] && cifwkError "Could not find ${FROM_VERSION} in ${MIGRATE_SQL}"
+
+    NUM_VALID_LINES=$($_EGREP -v '^--|^[:space:]*$' ${MIGRATE_FROM_TO_SQL} | $_WC -l | $_AWK '{print $0}')
+    if [ ${NUM_VALID_LINES} -eq 0 ] ; then
+        log "No Database Schema changes found since ${FROM_VERSION}"
+        log "No Database Upgrade required"
+        SCHEMA_CHANGE=1
+    fi
+}
+
+#
+# If an email address has been supplied then send a mail to that address
+#
+sendEmail() {
+    if [ ! -z "${EMAIL_ADDRESS}" ] ; then
+        $_TAIL -1 ${LOG_FILE} | $_GREP Completed > /dev/null
+        if [ $? -eq 0 ] ; then
+            RESULT="Successfully Completed"
+        else
+            RESULT="Failed"
+        fi
+        $_GREP '\[2' ${LOG_FILE} > /tmp/upgradelog.$$ 2>&1
+        mail -s "CIFWK Upgrade ${NEW_CIFWK_VER}: ${RESULT}" -c ${GROUP_EMAIL_ADDRESS} ${EMAIL_ADDRESS} < /tmp/upgradelog.$$
+        $_RM /tmp/upgradelog.$$
+    fi
+}
+
+#
+# updateLink:
+# Function to Update the Sym Link of the CIFWK to point
+# latest to the newest version we are Upgrading to
+#
+updateLink() {
+    log "Verifying link of CI Software @ Version:${NEW_CIFWK_VER}" 
+    cd ${CIFWK_ROOT}
+    $_RM -f ${CIFWK_ROOT}/latest
+    $_LN -s ${NEW_CIFWK_VER} latest
+}
+
+#
+# diffSchema:
+# compare the current DB schema installed with that of the one to be installed 
+# Takes 2 parameters
+#    1) A File containing the current schema in the DB
+#    2) A File containing the latest schema to be upgraded to
+#
+diffSchema() {
+        
+    log "Comparing schemas ..."
+    log "          1) ${1}"
+    log "          2) ${2}"
+    LOADED_SCHEMA=$1
+    MIGRATED_SCHEMA=$2
+
+    for SCHEMA in $LOADED_SCHEMA $MIGRATED_SCHEMA ; do
+        # Strip out
+        #  - the AUTO_INCREMENT values
+        #  - PARTITION numbers 
+        #    we have to remove "," from the end of line
+        $_CAT $SCHEMA | $_SED -e 's/auto_increment/AUTO_INCREMENT/g' -e 's/AUTO_INCREMENT=[0-9]* //' -e 's/,$//' | \
+            $_EGREP -v 'PARTITION P[0-9]*' | \
+            $_EGREP -v 'Dump completed on' > $SCHEMA.filtered
+    done
+
+    $_DIFF $LOADED_SCHEMA.filtered $MIGRATED_SCHEMA.filtered >> ${LOG_DIR}/schemaDiffs 2>&1
+    [ $? -ne 0 ] && SCHEMA_CHANGE=1
+}
+
+#
+# Get the options passed to the script and assign them out
+#
+while getopts  "v:r:d:e:l:g:" flag
+do
+    case "$flag" in
+        v) NEW_CIFWK_VER="${OPTARG}";;
+        r) CIFWK_ROOT="${OPTARG}";;
+        d) CIFWKDB="${OPTARG}";;
+        e) EMAIL_ADDRESS="${OPTARG}";;
+        g) GROUP_EMAIL_ADDRESS="${OPTARG}";;
+        l) LOG_FILE="${OPTARG}";;
+        *) printf "Usage: %s -v Version [-r cifwk root directory ] [-d cifwkdb] [-e email address] [-g group email address][-l log file]\n" $0
+        exit 1;;
+    esac
+done
+
+
+FROM_VERSION=$($_LS -l ${CIFWK_ROOT}/latest | $_AWK '{print $NF}')
+MIGRATE_SQL="${CIFWK_ROOT}/${NEW_CIFWK_VER}/sql/migrate.sql"
+CIFWKDB_DDL="${CIFWK_ROOT}/${NEW_CIFWK_VER}/sql/cifwk.sql"
+
+# TODO: Integrate with an overall backup strategy - for now we'll just dump to the
+# upgrade dir
+BACKUP_DIR="${LOG_DIR}/backup"
+
+DBTESTUSR="schtestusr"
+SCHEMA_CHANGE=0 
+
+checkMysql
+
+log "Migrating from ${FROM_VERSION} to ${NEW_CIFWK_VER}"
+log "Extracting steps from ${MIGRATE_SQL}"
+MIGRATE_FROM_TO_SQL=${LOG_DIR}/migrate.sql
+extractMigSql ${MIGRATE_SQL} ${MIGRATE_FROM_TO_SQL}
+
+if [ ${SCHEMA_CHANGE} -ne 1 ]; then
+    log "Check cifwk.dll"
+    LOADED_SCHEMA=${LOG_DIR}/cifwkdb_${NEW_CIFWK_VER}_loaded.sql
+    testCifwkDDL ${CIFWKDB_DDL} ${LOADED_SCHEMA}
+
+    log "Check that migrating from current schema matches cifwk.sql"
+    CURRENT_SCHEMA=${LOG_DIR}/cifwkdb_${FROM_VERSION}_current.sql
+    dumpSchema ${CIFWKDB} ${CURRENT_SCHEMA} specific_tables
+    MIGRATED_SCHEMA=${LOG_DIR}/cifwkdb_${NEW_CIFWK_VER}_migrated.sql
+    testMigrate ${CURRENT_SCHEMA} ${MIGRATE_FROM_TO_SQL} ${MIGRATED_SCHEMA}
+    diffSchema ${LOADED_SCHEMA} ${MIGRATED_SCHEMA}
+
+    #
+    # If we get this far then we are going to to the upgrade/migrate
+    #
+    
+    # Backup the database (including the column names and data)
+    if [ ! -z "${BACKUP_DIR}" ] ; then
+        log "Backup ${CIFWKDB} to ${BACKUP_DIR}"
+        if [ -d "${BACKUP_DIR}" ] ; then
+            $_RM -rf ${BACKUP_DIR}
+        fi
+
+        $_MKDIR -p ${BACKUP_DIR}/${CIFWKDB}
+        $_CHMOD -R 777 ${BACKUP_DIR}
+
+        $_MYSQLDUMP --complete-insert ${CIFWKDB} > ${BACKUP_DIR}/${CIFWKDB}/backup.sql 2>> ${LOG_FILE}
+        [ $? -ne 0 ] && cifwkError "Backup of schema failed" 
+    fi
+    # Do the migrate
+    log "Applying the migrate .."
+    $_MYSQL -v -v -v ${CIFWKDB} < ${MIGRATE_FROM_TO_SQL} >> ${LOG_FILE} 2>&1
+    [ $? -ne 0 ] && cifwkError "Migrate failed"
+fi
+
+updateLink
+log "Upgrade to ${NEW_CIFWK_VER} Completed"
+exit 0

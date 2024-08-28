@@ -1,0 +1,6 @@
+<INCLUDE NODE: MS >     
+litp /inventory/deployment1/cluster1/vcs_config update vcs_csgvip="<CSG_IP>" vcs_csgnic="<CSG_NIC>" vcs_lltlinklowpri1="<LLT_LOW_PRI>" vcs_lltlink2="<LLT_LINK2>" vcs_lltlink1="<LLT_LINK1>"    vcs_csgnetmask="<CSG_NETMASK>" vcs_clusterid="<VCS_NETID>" vcs_gconetmask="<GCO_NETMASK>" vcs_gconic="<GCO_NIC>" vcs_gcovip="<GCO_IP>" gco="1"
+# This allocate call creates the neccessary VCS groups and resources
+# cmw_cluster_config searches through the service groups for resources that cannot be controlled/monitored by CMW
+litp /inventory/deployment1/cluster1/cmw_cluster_config allocate
+

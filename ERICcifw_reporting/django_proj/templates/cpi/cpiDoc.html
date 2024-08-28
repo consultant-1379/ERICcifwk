@@ -1,0 +1,157 @@
+{% extends "cireports/base.html" %}
+{% if products %}
+    {% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+    {% block content %}
+         <script type="text/javascript">
+            (function($) {
+             var timeout = 600000;
+             $(document).ready(function() {
+                 function doCPIDocRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{product.name}}/cpiDocList/{{version}}/{{identity.cpiDrop}}/",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('div.full-details').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('div.full-details').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        complete: scheduleRequest
+                        });
+                   }
+                   function scheduleRequest() {
+                        
+                        setTimeout(doCPIDocRequest, timeout);
+                   }
+                   
+                   doCPIDocRequest();
+                   scheduleRequest();
+                 });
+
+             })(jQuery);
+        </script>
+        <script type="text/javascript">
+            function toggle(id,img) {
+                var e = document.getElementById(id);
+                var f = document.getElementById(img);
+                if (e.style.display == ''){
+                    e.style.display = 'none';
+                    f.src = '/static/images/Plus.png'
+                }
+                else {
+                    e.style.display = '';
+                    f.src = '/static/images/Minus.png'
+                }}
+            function toggle2(id, link) {
+                var e = document.getElementById(id);
+                if (e.style.display == '') {
+                    e.style.display = 'none';
+                    link.innerHTML = 'Expand';
+                } else {
+                    e.style.display = '';
+                    link.innerHTML = 'Collapse';
+                }
+                }
+		</script>
+
+            {% if "Procus" in product.name and eniqAdmin == "yes" %} 
+                <div id="generic-title">
+                    <div id="text-container" >{{ product.name }} Drop {{ version }} CPI Baseline  & SDI </div>
+                </div>
+                <div class="full-details">
+                    <table id='documents-table'>
+                        Sorry. You are not authorized to view ENIQ Procus Library Details
+                    </table>
+                </div>
+            {% else %}
+                <div id="generic-title">
+                    <div id="text-container" >{{ product.name }} Drop {{ version }} CPI Baseline  & SDI
+                        {% with identity.endbuild|timeuntil as timeleft %}
+                            {% if timeleft != "0 minutes" %}
+                                <a class="img" href="/{{ product.name }}/addCPIDocument/{{ version }}/{{identity.cpiDrop}}/" title="Add CPI Document to Drop {{ version }}"><img src="/static/images/create.png"/></a>
+                                <a class="img" href="/{{ product.name }}/batchimport/{{ version }}/{{identity.cpiDrop}}/" title="Import Document from Excel"><img src="/static/images/download.png"/></a>
+                                {% if admin == "yes" or eniqAdmin == "yes" %}
+                                    {% if identity.lastModified %}
+                                            <a class="img" href="/{{ product.name }}/cpibuild/{{ version }}/{{identity.cpiDrop}}" title="Build CPI" onclick="$('img#build').attr('src','/static/images/cpiloading.gif')"><img src="/static/images/Build.jpg" id="build"/></a>
+                                    {% else %}
+                                            <a class="img" href="#" title="Build CPI" onclick="$('img#build').attr('src','/static/images/cpiloading.gif')"><img src="/static/images/cpibuild.png" id="build" style="display:none"/></a>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                        <a class="img" href="/{{ product.name }}/searchcpi/{{ version }}/{{identity.cpiDrop}}/" title="Search CPI Baseline/SDI"><img src="/static/images/search.png" style="display:inline" id="search" /></a>
+                        <a class="img" href="#" title="Contacting Dwaxe"><img src="/static/images/cpiloading.gif" style="display:none" id="cpiloading"/></a>
+                        <a class="img" href= {{ confluenceUrl }} title="CPI Library Build Automation" target="_blank"><img src="/static/images/question.png"/></a>
+                    </div>
+                </div> <div><br> <br> </div>
+                <font face="Times New Roman" size=3>
+                <div class="full-details">
+                    {% if identity  %}
+                        <table>
+                            <tr>
+                                <td><b>{{user.group}}Last Build:</b> </td>
+                                <td> {{ identity.lastBuild}}  </td>
+                            </tr>
+                            <tr>
+                                <td><b> Last Modified </b></td>
+                                <td>{{identity.lastModified}}</td>
+                            <tr>
+                                <td> <b> Status </b></td>
+                                <td>
+                                    {% if identity.status == 'Failed' %}
+                                        <font color="red">
+                                    {% elif identity.status == 'Passed' %}
+                                        <font color = "green">
+                                    {% else %}
+                                        <font color = "violet">
+                                    {% endif %}
+                                    {{identity.status }}
+                                    </font>
+                                </td>
+                            </tr>
+                            {% if docObjList %}
+                                <tr>
+                                    <td> <b> Download </b> </td>
+                                        <td> <a href = "/{{ product.name }}/downloadsdi/{{ version }}/{{identity.cpiDrop}}/">SDI</a> | <a href = "/{{ product.name }}/downloadexcel/{{ version }}/{{identity.cpiDrop}}/">Excel</a>  
+                                        {% if identity.status == "Passed" %} 
+                                            | <a href = "{{ fetchSdiUrl }} ">Alex Lib</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if identity.status %}
+                                    <tr> <td><b> Log </b> </td>
+                                        <td > <a href = " {{ logUrl }} " target=_blank>Publishing Log</a></td>
+                                    </tr>
+                                {% endif %}
+                                {% if identity.status == "Passed" %}
+                                    <tr> <td> <b> Show Library </b></td>
+                                        <td> <a href = " {{ libraryURL }} ">Library </a></td>
+                                    </tr>
+                                    {% if admin == "yes" or eniqAdmin == "yes" %}
+                                        <tr><td><b>Upload to</b></td>
+                                            <td> <a href = " {{ calStore }}" target=_blank>CAL Store</a> | 
+                                                  <a href = " {{ cpiStore }}" target=_blank>CPI Store</a>
+                                            </td></tr>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        </table>
+                    {% endif %}
+                <br><br>
+              
+                    <table>
+                    <tr>
+                        <img src="/static/images/docProcess.gif">
+                    </tr>
+                    </table>
+                </div>
+                </font>
+            {% endif %}
+        
+    {% endblock %}
+{% endif %}

@@ -1,0 +1,132 @@
+{% load setVar %}
+
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+
+<script>
+    $(function() {
+        $( "#virtualImageUploadError" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+<script>
+    $(function() {
+        $( "#virtualImageUploadWarning" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+<script>
+    $(function() {
+        $( "#virtualImageUploadInfo" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+<div>
+    <p>
+        <b>Return To <a href="/dmt/verify/deployment/{{ clusterDetails.id }}/">Verify Deployment Service VMs</a> for deployment {{ clusterDetails.name }}</b><br><br>
+        Results for VM Service verification against deployment : <a href="/dmt/clusters/{{ clusterDetails.id }}/">{{ clusterDetails.name }}</a><br>
+        <img src="/static/images/failed.png" alt="Error" height="20" width="20"> icon illustrates a error to the user this should be investigated before proceeding with an installation.<br>
+        <img src="/static/images/warning.png" alt="Warning" height="20" width="20"> icon illustrates a warning to the user that the user can ignore if the user is aware of the issue. <br>
+        <img src="/static/images/info.png" alt="Info" height="22" width="22"> icon illustrates info for the user, stating that item(s) that are in the sed but not in the deployment description so no need to register.<br>
+    </p>
+</div>
+Go to Deployment <a href="/dmt/clusters/{{ clusterDetails.id }}/">{{ clusterDetails.name }}</a><br><br>
+<h2>Service VM Report</h2>
+<div class="full-sub-details">
+    <table width="100%">
+        <tr>
+            <th class="title">
+                <div class="table-title">Virtual Image Section Upload Report</div>
+            </th>
+        </tr>
+    </table>
+    {% if result %}
+        <div id="virtualImageUploadError">
+            <h3><img src="/static/images/failed.png" alt="Error" height="20" width="20"> Errors</h3>
+            <div>
+                <table  class="general-table" width="100%">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    <tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "ERROR" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/failed.png" alt="Error" height="20" width="20"></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                            </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                        <td>No Errors Found</td>
+                        <td></td>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        <div id="virtualImageUploadWarning">
+            <h3><img src="/static/images/warning.png" alt="Warning" height="20" width="20"> Warnings</h3>
+            <div>
+                <table class="general-table" width="100%">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    <tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "WARNING" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/warning.png" alt="Warning" height="20" width="20"></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                            </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                        <td>No Warnings Found</td>
+                        <td></td>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        <div id="virtualImageUploadInfo">
+            <h3><img src="/static/images/info.png" alt="Info" height="22" width="22"> Info</h3>
+            <div>
+                <table class="general-table" width="100%">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    <tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "INFO" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/info.png" alt="Info" height="22" width="22"></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                            </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                        <td>No Info Found</td>
+                        <td></td>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    {% else %}
+        There is no issues to report all seems good between the deployment description entered and the SED version for the service vm's.<br>
+        Return to the <a href="/dmt/verify/deployment/{{ clusterDetails.id }}/">Verify Deployment Service VMs</a><br>
+    {% endif %}
+</div>

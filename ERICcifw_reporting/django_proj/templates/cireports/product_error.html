@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %} Product Error {% endblock %}
+
+{% block content %}
+{% if error %}
+    PRODUCT ERROR: {{ error }}
+{%else %}
+    PRODUCT ERROR: Try Again. 
+{%endif%}
+{% endblock %}

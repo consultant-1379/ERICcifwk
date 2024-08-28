@@ -1,0 +1,20 @@
+<INCLUDE NODE: pmservice >
+  <litp:component-def id="pmservice">
+    <name>pm</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <install-source><EARWAR_FILE></install-source>
+      <name><EARWAR_NAME></name>
+      <service>jee_tor</service>
+      <version><PACKAGE_VERSION></version>
+      <litp:jms-queue-def id="jms_cli_cons_q">
+        <jndi>EventBasedMediationClient</jndi>
+        <name>queue/MediationClientConsumerQueue,java:jboss/exported/jms/queue/MediationClientConsumerQueue</name>
+      </litp:jms-queue-def>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICpmservice_CXP9030101</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>

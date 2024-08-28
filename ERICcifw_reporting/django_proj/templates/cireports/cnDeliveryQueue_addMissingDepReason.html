@@ -1,0 +1,16 @@
+{% extends "base_newlookandfeel.html" %}
+    {% block title %} Adding Missing Dependencies Reason for Cloud Native Delivery Group {% endblock %}
+    {% block content %}
+        <div id="hidden_drop_div" style="display:none">{{ dropNumber }}</div>
+        <div id="hidden_dg_div" style="display:none">{{ deliveryGroupNumber }}</div>
+        <script type="text/javascript" src='/static/cnDeliveryQueue_addMissingDepReason.js'></script>
+        <div class="general-container">
+            <h2 class="generalPageNewLook-title"> Adding Missing Dependencies Reason for delivery group {{ deliveryGroupNumber }} </h2>
+            <div class="delivery-form-container">
+                <div class="delivery-info">
+                    <textarea id='add_missing_dep_comment' name="Comment for Missing Dependencies" placeholder="Please input the reason for having missing dependencies" rows="4" cols="100"></textarea><br>
+                    <input type="button" class="btn-default" value="Update Comment" id="edit_queue">
+                </div>
+            </div>
+        </div>
+    {% endblock %}

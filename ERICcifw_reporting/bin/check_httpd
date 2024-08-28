@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+MAILLIST="robert.blee@ericsson.com,xiangkai.tang@ericsson.com,jithin.raju@ericsson.com,richard.da.silva@ericsson.com,william.wren@ericsson.com"
+RESTARTLEVEL=5
+WARNINGLEVEL=10
+
+RUNNING=$($_PS -ef | $_GREP httpd | $_WC -l)
+if [ "${RUNNING}" -lt "${RESTARTLEVEL}" ]
+then
+    $_ECHO "ACTION REQUIRED: RESTARTING HTTP: HTTP Processes below ${RESTARTLEVEL}. -- Current running HTTP Processes is: ${RUNNING}" | $_MAILX -S smtp=$SMTP_SERVER -s "ACTION REQUIRED: RESTARTING HTTP: HTTP processes below ${RESTARTLEVEL}" ${MAILLIST}
+    /proj/lciadm100/cifwk/latest/etc/init.d/cifwk-httpd restart
+elif [ "${RUNNING}" -lt "${WARNINGLEVEL}" ]
+then
+    $_ECHO "ACTION REQUIRED: HTTP Processes below ${WARNINGLEVEL}. -- Current running HTTP Processes is: ${RUNNING}" | $_MAILX -S smtp=$SMTP_SERVER -s "ACTION REQUIRED: HTTP processes below ${WARNINGLEVEL}" ${MAILLIST}
+fi

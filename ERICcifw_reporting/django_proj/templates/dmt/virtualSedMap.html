@@ -1,0 +1,99 @@
+{% extends "dmt/base.html" %}
+{% load setVar %}
+
+{% block title %}System Deployment Description{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+
+<div id="generic-title">
+    <div id="text-container">Set SED Version to Master for Virtual Environment
+        <a class="img" href="/dmt/UploadSED/" title="Submit a New SED"><img src="/static/images/create.png"/></a>
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Maintenance+of+SED+within+the+CI+Portal" title="Maintenance of SED within the Portal" target="_blank"><img src="/static/images/question.png"/></a>
+    </div>
+</div>
+<div class="generic-text">
+    <br>
+    <table id="managementServer-table">
+        {% if allSedData %}
+
+<form enctype="multipart/form-data" name="obsoleteform" method="post" action="/dmt/MapVirtSED/">{% csrf_token %}
+
+            <tr>
+                <th>Version</th>
+                <th>Created on</th>
+                <th>Jira Number</th>
+                <th>Uploaded by</th>
+                <th>Set To Master Virtual</th>
+                <th>User</th>
+                <th>Date Set</th>
+            </tr>
+            {% for item in allSedData %}
+                <tr>
+                    {% if item.version == selected %}
+                        <td class="selected">
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        <a href="/dmt/MapVirtSED/{{ item.version }}/">{{ item.version }}</a></td>
+                    {% if item.dateInserted == selected %}
+                        <td class="selected">
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{ item.dateInserted }}
+                    </td>
+                    {% if item.jiraNumber == selected %}
+                        <td class="selected">
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{ item.jiraNumber }}
+                    </td>
+                    {% if item.user == selected %}
+                        <td class="selected">
+                    {% else %}
+                        <td>
+                    {% endif %}
+                    {{ item.user }}
+                    </td>
+                    <td>
+                    {% if item.id == sedMasterObject.sedMaster_virtual_id %}
+                        <input type="radio" name="master" value='{{ item.id }}' checked="checked">
+                        <td>{{ sedMasterObject.sedUser }}</td>
+                        <td>{{ sedMasterObject.dateUpdated }}</td>
+                    {% else %}
+                        <input type="radio" name="master" value='{{ item.id }}'>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+
+            {% else %}
+                <tr>No SED Information Can be found</tr>
+            {% endif %}
+<input type="submit" value="Set to Master" title="Set to Master"></input>
+</form>
+     </table>
+<div id="managementServer-details">
+{% if selected %}
+    {% if singleSedData %}
+        <table id="managementServerClick-table">
+            <h3>SED Version: {{ singleSedData.version }} </h3>
+            <textarea rows="40" cols="100" readonly>{{ singleSedData.sed }}</textarea>
+       </table>
+    {% endif %}
+    <br>
+</div>
+</div>
+{% endif %}
+{% endblock %}

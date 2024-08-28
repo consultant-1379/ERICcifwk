@@ -1,0 +1,32 @@
+#### Command : Sucess Comment : Error Comment
+#### Make a Variable so we can use it through the commands 
+installdir=$( echo "autodeploy_`date '+%Y%m%d-%H:%M:%S'`" ) : \# : Setting Variable for install Directory : Unable to set variable for install Directory
+#### Make the directory to store the install tar in
+mkdir -p /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir} : \# : Created Directory untar Litp Install tar file : Unable to Create Directory to untar Litp Install tar file
+#### Copy the install tar from the upload directory to the new extracting location
+cp /opt/ericsson/nms/litp/bin/cifw_autodeploy/*.tar /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/install.tar : \# : Copying tar file to install Directory : Unable to Copy File to install Dir
+#### Cd to the new Directory
+cd /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/ : \# : Change directory to install Directory : Unable to change directory to install Directory
+#### Untar the tarfile
+tar xvf /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/install.tar : \# : Untarring Litp Tar File : Unable to Untar Litp Tar File
+#### Changing Permissions on tar file content
+chmod +x /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/* : \# : Changing permission for content of tar file : Unable to change permission for content of tar file
+#### Run the Clean all Command to ensure the LMS is a fresh installation
+/opt/ericsson/nms/litp/bin/samples/clean_up/clean_all.sh : \# : Running Clean All on LMS : Unable to Run Clean All on LMS
+#### Load the definition XML
+litp / load /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/definition-overall-template.xml : \# : Loading the definition XML : Unable to Load the Definition XML
+#### Load the inventory XML
+litp / load /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/inventory-overall-template.xml : \# : Loading the inventory XML : Unable to Load the inventory XML
+#### Printout the definition and inventory to the log file for trouble shooting later
+litp / show -rl : \# : Storing inventory and definition info to the Log file : Unable to Store inventory and definition info to the Log file
+#### Run the install commands to re-install the LMS according to the definition/inventorya XML's
+/opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/single_blade.sh : \# : Running install Script : Unable to Run install Script
+#### Sleep for 3 minutes for puppet to configure cobbler
+sleep 200 : \# : Sleeping for 3 minutes for puppet to configure cobbler : Unable to sleep for 3 minutes
+#### The next three commands are all for the one command when you boot the mgt to are asked to press the any key twice to start the boot
+#### Boot the mgt Server
+/opt/ericsson/nms/litp/bin/samples/single_blade/single_blade_bootmgr.sh : Press any key to continue : Booting the LMS Server : Unable to Boot LMS Server
+#### Is Cobbler ready for distro import
+h : Press any key to continue : Is Cobbler Ready for distro import : Cobbler is not Ready for distro import
+#### Is Cobbler iready with a distro & profile.
+h : \# : Is Cobbler ready with a distro & profile : Cobbler is not Ready for distro & profile

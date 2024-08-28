@@ -1,0 +1,3 @@
+<INCLUDE NODE: SC PL >
+litp /inventory/site1/tipc/<TIPC_ADDRESS_ID> enable
+

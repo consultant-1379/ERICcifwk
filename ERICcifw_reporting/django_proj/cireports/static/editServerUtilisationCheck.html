@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <h3 class="modal-title">Edit Check Information!</h3>
+</div>
+<div class="modal-body">
+    <form ng-submit="edit.ok(edit.id,description,testcase,enabled)">
+      <div class="form-group" ng-init="description = edit.description">
+        <label for="description" class="control-label">Server Check Description:</label>
+        <input type="text" ng-model="description" name="description" required class="form-control">
+      </div>
+      <div class="form-group" ng-init="testcase = edit.testcase">
+        <label for="testcase" class="control-label">Check:</label>
+        <textarea type="text" ng-model="testcase" name="testcase" required class="form-control"></textarea>
+      </div>
+      <div ng-show="edit.enabled" class="enabled" ng-init="enabled = edit.enabled">
+        <label><input type="checkbox" ng-model="enabled" checked> Enabled</label>
+      </div>
+      <div ng-hide="edit.enabled" class="enabled" ng-init="enabled = edit.enabled">
+        <label><input type="checkbox" ng-model="enabled">Enabled</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="edit.cancel()">Cancel</button>
+      </div>
+    </form>
+</div>

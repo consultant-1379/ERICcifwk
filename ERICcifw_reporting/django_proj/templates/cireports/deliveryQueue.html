@@ -1,0 +1,107 @@
+{% extends "base_newlookandfeel.html" %}
+{% load replaceCommaWithLinebreak %}
+{% if product %}
+    {% block title %}{{ product.name }} Queue for Drop {{ drop }} {% endblock %}
+    {% block content %}
+    <link rel=StyleSheet href="/static/deliveryQueue.css" type="text/css" />
+    <script type="text/javascript" src='/static/deliveryQueue.js'></script>
+        <div id="hidden_product_div" style="display:none">{{ product }}</div>
+        <div id="hidden_drop_div" style="display:none">{{ drop }}</div>
+        <div id="hidden_group_div" style="display:none">{{ grpid }}</div>
+        <div id="hidden_editPerms_div" style="display:none">{{ editPerms }}</div>
+        <div id="hidden_userPerms_div" style="display:none">{{ userPerms }}</div>
+        <div id="hidden_permsSummary_div" style="display:none">{{ permsSummary }}</div>
+        <div id="hidden_frozen_div" style="display:none">{{ frozen }}</div>
+        <div class="delivery-queue-container">
+            <div class="delivery-queue-title"> {{ product.name }} Queue for Drop {{ drop }} {% if frozen != 'False' %}: This Drop was Frozen on: {{frozen}} {% endif %}<a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com" title="Delivery Queue Info" target="_blank"><img src="/static/images/question.png"/></a>
+           </div>
+           <div class="layout-bar">
+            <form id="fcDeliverForm" method="post" action="/api/deliverAutoCreated/{{ product }}/{{ drop }}/" >
+            <a href="/{{ product.name }}/drops/{{ drop }}">Drop:{{ drop }}</a>
+            {% if editPerms and frozen == 'False' %}
+                |<a href="/{{ product.name }}/multipleDeliveries"> Create New Delivery Group</a>
+            {% else %}
+                |<span title="{{ permsSummary }}"> Create New Delivery Group</span>
+            {% endif %}
+                |<a href="/{{ product }}/drops/{{ drop }}/obsoleteInfo"> Obsoletion History</a>
+                |<a href="/{{ product }}/queue/{{ drop }}/csv"> Export Data</a>
+                |<a href="/{{ product }}/drop/{{ drop }}/ISOdeliverygroups"> Media Artifact to Group Mappings</a>
+                {% if mtgPerms and frozen == 'False' %}
+                    |<a href="javascript:void(0)" onclick="checkFormAction('Are you sure you want to Deliver all of the Auto Created Groups in the Queued tab?', 'fcDeliverForm');"> Deliver Queued Fast Commit Groups</a>
+                {% elif frozen == 'False' %}
+                    |<span title="Only Maintrack Guardians can use this feature"> Deliver Queued Fast Commit Groups</span>
+                {% else %}
+                    |<span title="This Drop is Frozen: Auto Created Groups cannot be delivered automatically."> Deliver Queued Fast Commit Groups</span>
+                {% endif %}
+                <input type="hidden" name="user" value="{{ user.username }}">
+            </form>
+
+           </div>
+        <br>
+    <div>
+        <div id='tabSection' style="display:none" data-tabSection="{{ tabItem }}"></div>
+           <div class="tablinksborder">
+            <ul class="tab">
+                <li><a id="queued-tab"  href="javascript:void(0);" class="tablinks" onclick="openItem('queued')">Queued</a></li>
+                <li><a id="delivered-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('delivered')">Delivered</a></li>
+                <li><a id="obsoleted-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('obsoleted')">Obsoleted</a></li>
+                <li><a id="deleted-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('deleted')">Deleted</a></li>
+                {% if mtgPerms == True %}
+                    {% if autoDeliveryDisabled == False %}
+                        <li><a id="panic-tab-enabled" href="javascript:void(0);" class="tablinks" onclick="stopAutoDelivery({{dropid}},true)">Stop Auto Delivery</a></li>
+                    {% else %}
+                        <li><a id="panic-tab-disabled" href="javascript:void(0);" class="tablinks" onclick="stopAutoDelivery({{dropid}}, false)">Start Auto Delivery</a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+           </div>
+            <div id="queued" class="tabcontent">Loading...</div>
+            <div id="delivered" class="tabcontent">Loading...</div>
+            <div id="obsoleted" class="tabcontent" >Loading...</div>
+            <div id="deleted" class="tabcontent" >Loading...</div>
+        </div>
+    </div>
+    {% if actionPerf == "success" %}
+        <script>
+            $(window).load(function(){
+                greetMsg("Group Successfully Delivered")
+            });
+        </script>
+    {% elif actionPerf == "multiDelivery" %}
+        <script>
+            $(window).load(function(){
+                greetMsg("{{ popUpMessage }}")
+            });
+        </script>
+    {% elif actionPerf == "obsoleted" %}
+        <script>
+            $(window).load(function(){
+                greetMsg("Group Successfully Obsoleted")
+            });
+        </script>
+    {% endif %}
+    <div class="modal"></div>
+<script type="text/javascript">
+   function openItem(name) {
+       var i, tabcontent, tablinks;
+       tabcontent = document.getElementsByClassName("tabcontent");
+       for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+       }
+       tablinks = document.getElementsByClassName("tablinks");
+       for (i = 0; i < tablinks.length; i++) {
+           tablinks[i].className = tablinks[i].className.replace(" active", "");
+       }
+       document.getElementById(name).style.display = "block";
+       document.getElementById(name + "-tab").className += " active";
+   }
+   function checkFormAction(msg, formId) {
+       var go = confirm(msg);
+       if (go == true) {
+           document.getElementById(formId).submit();
+           $("body").addClass('loading');
+       }
+}
+</script>
+    {% endblock %}
+{% endif %}

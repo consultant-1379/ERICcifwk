@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+   Copyright (c) 2008-2012 Sonatype, Inc.
+
+   All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/pro/attributions
+   Sonatype and Sonatype Nexus are trademarks of Sonatype, Inc. Apache Maven is a trademark of the Apache Foundation.
+   M2Eclipse is a trademark of the Eclipse Foundation. All other trademarks are the property of their respective owners.
+
+  -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <mirrors>
+    <mirror>
+      <!-- This sends everything else to /public -->
+      <id>nexus</id>
+      <mirrorOf>external:*,!prototype</mirrorOf>
+      <url>https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus/content/groups/public</url>
+    </mirror>
+  </mirrors>
+  <profiles>
+    <profile>
+      <id>nexus</id>
+      <!-- Enable snapshots for the built in central repo to direct -->
+      <!-- all requests to nexus via the mirror -->
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases>
+        <enabled>true</enabled>
+        <!-- updatePolicy>always</updatePolicy -->
+      </releases>
+          <snapshots>
+        <enabled>true</enabled>
+        <!-- updatePolicy>always</updatePolicy -->
+      </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+      <properties>
+        <jiraUser>lciadm100</jiraUser>
+        <jiraPassword>lciadm100</jiraPassword>
+        <company-name>Ericsson LMI Athlone</company-name>
+      </properties>
+    </profile>
+  </profiles>
+  <activeProfiles>
+      <!-- make the profile active all the time -->
+    <activeProfile>nexus</activeProfile>
+      </activeProfiles>
+
+
+  <pluginGroups>
+    <!-- define the sonatype plugin group, so the nexus plugins will work without typing the groupId -->
+    <pluginGroup>org.sonatype.plugins</pluginGroup>
+    <pluginGroup>org.jacoco</pluginGroup>
+  </pluginGroups>
+  <servers>
+    <server>
+      <id>releases</id>
+      <username>lciadm100</username>
+      <password>{rZpij+nEnpUHweNiAIooF68DwKOshO6ivAccMDnNGhc/+JWQRkvwSnUMlIY375Oa}</password>
+    </server>
+    <server>
+      <id>sonvis_releases</id>
+      <username>jkadm100</username>
+      <password>{mfy0SqvZJrwHT+fFBY/nMbd8nVAYy9vdPqrcLLw7ZNY=}</password>
+      <!--  old hub password:  {mfy0SqvZJrwHT+fFBY/nMbd8nVAYy9vdPqrcLLw7ZNY=}  -->
+    </server>
+    <server>
+      <id>snapshots</id>
+      <username>lciadm100</username>
+      <password>{rZpij+nEnpUHweNiAIooF68DwKOshO6ivAccMDnNGhc/+JWQRkvwSnUMlIY375Oa}</password>
+    </server>
+    <server>
+      <id>site</id>
+      <username>lciadm100</username>
+      <password>{rZpij+nEnpUHweNiAIooF68DwKOshO6ivAccMDnNGhc/+JWQRkvwSnUMlIY375Oa}</password>
+    </server>
+    <server>
+      <id>mysql</id>
+      <username>root</username>
+      <password>ciroot2</password>
+      <!-- username>cireports</username>
+      <password>Changed by eeicjon on 2013-01-04 {t0KQLjPTSxIH+B6tElLSp7mMlw19fGZvbjKBS8QOu8o=}</password -->
+    </server>
+    <server>
+      <id>nexus</id>
+      <username>lciadm100</username>
+      <password>{rZpij+nEnpUHweNiAIooF68DwKOshO6ivAccMDnNGhc/+JWQRkvwSnUMlIY375Oa}</password>
+    </server>
+    <server>
+      <id>enm_iso_local</id>
+      <username>lciadm100</username>
+      <password>{DzFqXD1aaJIHOjkaVsmqii1qWm4V2vKA6UgyPMSmafw=}</password>
+     <!-- old hub password:  {DzFqXD1aaJIHOjkaVsmqii1qWm4V2vKA6UgyPMSmafw=}  -->
+    </server>
+    <server>
+      <id>axis_tesware_repo</id>
+      <username>lciadm100</username>
+      <password>{rZpij+nEnpUHweNiAIooF68DwKOshO6ivAccMDnNGhc/+JWQRkvwSnUMlIY375Oa}</password>
+    </server>
+    <server>
+        <id>docker</id>
+        <username>lciadm100</username>
+        <configuration>
+           <email>PDLUCTUREE@pdl.internal.ericsson.com</email>
+        </configuration>
+        <password>APEMvkTSJSfTvTunSQgjHzRELf</password>
+    </server>
+  </servers>
+</settings>

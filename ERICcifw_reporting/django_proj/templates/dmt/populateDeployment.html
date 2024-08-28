@@ -1,0 +1,468 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %} {% endblock %}
+
+{% block content %}
+<script>
+    $( document ).ready(function() {
+        formNumUser = 0;
+        function removeUserAction(id){
+            var proceed = confirm("Do you really want to remove this User Input?");
+            if (proceed) {
+                $("#userDiv_"+id).remove();
+                var userFound = 0;
+                for (var i = 0; i<formNumUser; i++) {
+                     var user = $('#user_'+i).val();
+                     if (typeof user === 'undefined'){
+                         continue;
+                     }else{
+                         userFound = 1;
+                     }
+                }
+            }
+        }
+        $('#addVmUser').click(addVmUsers);
+        $('#addToPostData').click(addPostData);
+        $('#file').change(processInputFile);
+        var versions = [];
+        var fileInput = $('#file');
+        var sedFileObj = {};
+        var versionSelectBox;
+        var url;
+
+        $('#sedVersion').on('change', function optionalDD(){
+            var deploymentId = $('#deploymentId').val();
+            if (deploymentId == "") {
+                alert("Please choose a Deployment ID.");
+                location.reload();
+                return
+            }
+            var divIPFormStr = ""
+            var divDDFormStr = ""
+            divIPFormStr =  divIPFormStr + "<div style='margin-left:2%; width:50%;'  id=emptyDDForm> <h3>Choose Source of Assigned Ranges To Deployment: </h3> </div> <tr><td width='30%'><b class='table-title' style='margin-left:40px; margin-right:130px'>Populate the deployment with</b> <td width='49%';><INPUT TYPE='radio' ID='ipm' NAME='choiceIP' VALUE='populateIP'> MANUAL <br><INPUT TYPE='radio' ID='ipdns' NAME='choiceIP' VALUE='populateDNSIP' CHECKED> DNS</td> </tr>"
+            divDDFormStr =  divDDFormStr + "<div style='margin-left:2%; width:50%;'  id=nearlyemptyDDForm> <h3>Assigned Ranges To Deployment: </h3> <div id='ipRangeMessage'></div> <h3>Optional: </h3> <b class='table-title'>Enter Deployment Description Version Information</b> <br><br><table class='general-table'>";
+            divDDFormStr =  divDDFormStr + " <tr><td width='30%'><b class='table-title' style='margin:10px'>Version</b></td> <td width='49%'><select id='depDescVersion' style='height:70%; width:90%;margin:10px'>";
+            {% for version in ddVersions %}
+              divDDFormStr =  divDDFormStr +  "<option value='{{ version }}'>{{ version }}";
+              {% if version == latestVersion %}
+              divDDFormStr =  divDDFormStr + "  - Latest Good";
+              {% endif %}
+              divDDFormStr =  divDDFormStr + "</option>";
+            {% endfor %}
+            divDDFormStr =  divDDFormStr + "</select></td> </tr> <tr> <td width='30%'><b class='table-title' style='margin:10px'>Type</b></td> <td width='49%'><select id='depDescType' style='height:70%; width:90%;margin:10px'>";
+            {% for ddType in ddTypes %}
+               divDDFormStr =  divDDFormStr + "<option value='{{ ddType.dd_type }}'>{{ ddType.dd_type }}</option>";
+            {% endfor %}
+            divDDFormStr =  divDDFormStr +"</select></td></tr>";
+            divDDFormStr =  divDDFormStr + "<tr><td width='30%'><b class='table-title' style='margin:10px'>Capacity Type</b></td> <td width='49%'><input type='radio' name='capacityType' id='capacityType' value='test' checked='checked'> Test <input type='radio' name='capacityType' id='capacityType' value='production'> Production</td></tr>";
+            divDDFormStr =  divDDFormStr +"<tr> <td width='30%'><b class='table-title' style='margin:10px'>File Name</b></td><td width='49%%'><select id='depDescFileName' style='height:70%; width:90%;margin:10px'> </select></td> </tr> <tr><td width='30%'><b class='table-title' style='margin:10px'>Populate the deployment with</b> <td width='49%'><INPUT TYPE='radio' NAME='choiceDD' VALUE='populateDD' checked> Only Service VMs listed in the deployment description(DD)<br><INPUT TYPE='radio' NAME='choiceDD' VALUE='populateSED'> All Service VMs listed within the SED file</td> </tr> </table> <br> </div>";
+
+            $("#emptyDDForm").append(divIPFormStr);
+            $("#nearlyemptyDDForm").append(divDDFormStr);
+            $('#depDescVersion').val('{{latestVersion}}');
+            populate_deployment_descriptions_select();
+            setDDSelectUpdatedListeners()
+            $('input[name="choiceIP"]').click(function () {
+                ipRangeChoice();
+                $("#nearlyemptyDDForm").empty();
+                var deploymentId = $('#deploymentId').val();
+                populateIpRanges(deploymentId, url);
+                $("#nearlyemptyDDForm").append(divDDFormStr);
+                populate_deployment_descriptions_select();
+                setDDSelectUpdatedListeners();
+            });
+            var ipRangeItem = [];
+            ipRangeItems();
+            ipRangeMsg = "";
+            ipRangeChoice(deploymentId);
+            populateIpRanges(deploymentId, url);
+        });
+
+        function setDDSelectUpdatedListeners() {
+            $('#depDescVersion').change(function () {
+                populate_deployment_descriptions_select();
+            });
+            $('#depDescType').change(function () {
+                populate_deployment_descriptions_select();
+            });
+            $("input:radio[name=capacityType]").click(function () {
+                populate_deployment_descriptions_select();
+            });
+        }
+
+        function ipRangeChoice(deploymentId){
+            var deploymentId = $('#deploymentId').val();
+            if (document.getElementById('ipdns').checked) {
+                ip_choice = document.getElementById('ipdns').value;
+                url =  "/api/deployment/" + deploymentId + "/vm/service/dns/ip/range/data/all/";
+            }
+            else if (document.getElementById('ipm').checked){
+                ip_choice = document.getElementById('ipm').value;
+                url = "/api/deployment/" + deploymentId + "/vm/service/ip/range/data/all/";
+            }
+        }
+
+        function populate_deployment_descriptions_select() {
+          var dd_select_box = $("#depDescFileName");
+          $.ajax({
+           url: "/api/deployment/deploymentDescriptions/version/" + $('#depDescVersion').val() + "/type/" + $('#depDescType').val()+"/capacityType/"+$('input[name=capacityType]:checked').val()+"/",
+           dataType: "json",
+           success: function(json) {
+               var dd_items = [];
+               dd_select_box.find('option').remove();
+               $.each(json.deploymentDescription, function(i, item) {
+                    dd_select_box.append('<option value="' + item.name + '" id="' + item.name + '">' + item.name + '</option>');
+                    dd_items.push(item.name);
+               });
+           },
+           error: function(xhr, textStatus, errorThrown) {
+               dd_select_box.find('option').remove();
+               dd_select_box.append('<option value="" id="">No Data</option>');
+               alert("Issue retrieving the list of Deployment Descriptions: " + (errorThrown ? errorThrown : xhr.status));
+           }
+         });
+        }
+        function ipRangeItems(){
+            item = ""
+            return $.ajax({
+                url: "/api/deployment/range/items",
+                dataType: "json",
+                success: function (json) {
+                    ipRangeItem = json
+                    for(var i=0;i<json.length;i++ ){
+                        item += json[i].ipType + ",";
+                    }
+                    ipRangeItem = item.split(',');
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving revisions for "+artifact+": " + (errorThrown ? errorThrown : xhr.status));
+                }
+            });
+        }
+
+        function populateIpRanges(deploymentId, url){
+            alertMissingEntries = 0;
+            type = "";
+            ipRangeMsg ="";
+            ipRangeMsg += "<table class='general-table'>"
+            ipRangeItem = "";
+            ipRangeItems();
+            return $.ajax({
+                url,
+                dataType: "json",
+                success: function (json) {
+                    for(var i=0;i<json.length;i++ ){
+                        type = json[i].ipTypeName
+                        if ( type.indexOf("IPv6") == 0 ){
+                           startIP = json[i].ipv6AddressStart
+                           endIP = json[i].ipv6AddressEnd
+                        } else {
+                           startIP = json[i].ipv4AddressStart
+                           endIP = json[i].ipv4AddressEnd
+                        }
+                        ipRangeMsg += "<tr><td width='30%'><b class='table-title'>" + type + "</b></td><td width='49%'><span style='margin:10px'>" + startIP + " --> " + endIP + "</span></td></tr>"
+                    }
+                    if(ipRangeMsg.indexOf("IP") == -1 ) {
+                        var ipRangeType = "";
+                        if (document.getElementById('ipm').checked){
+                            ipRangeType = "MANUAL";
+                        } else {
+                            ipRangeType = "DNS";
+                        }
+                        alert("There are NO " + ipRangeType +" IP RANGES assigned to this deployment.\nThis functionality will not work without the range(s) assigned.\n\nPlease see the \"?!\" icon at the top of the page for info on how to add ranges to you your deployment");
+                        return
+                    }
+                    var arrayRangeItemLength = ipRangeItem.length;
+                    for (var i = 0; i < arrayRangeItemLength; i++) {
+                        if ( ipRangeMsg.indexOf(ipRangeItem[i]) == -1 ){
+                            ipRangeMsg += "<tr><td width='30%'><h3 style='margin:10px'>" + ipRangeItem[i] + "</h3></td><td><h3 style='color:red;margin:10px'>NOT Attached to Deployment</h3></td></tr>";
+                            alertMissingEntries = 1;
+                        }
+                    }
+                    ipRangeMsg += "</table>"
+                    $('#ipRangeMessage').html(ipRangeMsg)
+                    if(alertMissingEntries == 1) {
+                        alert("All the different ranges types are not assigned to the deployment.\nThis functionality may not fully work when there are missing range types\n\nPlease see the \"?!\" icon at the top of the page for info on how to add ranges to your deployment\n\nIf you are happy with not all the ranges assigned then please proceed...");
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving revisions for "+artifact+": " + (errorThrown ? errorThrown : xhr.status));
+                }
+            });
+        }
+
+        function processInputFile(){
+            if (!window.FileReader) {
+                alert('Your browser is not supported.\nPlease ensure your browser support HTML5(e.g Chrome)')
+            }
+            var txtMsg = "";
+            var input = fileInput.get(0);
+            // Create a reader object
+            var reader = new FileReader();
+            if (input.files.length) {
+                var textFile = input.files[0];
+                reader.readAsText(textFile);
+                $(reader).on('load', processFile);
+                for (var i = 0; i < input.files.length; i++) {
+                    var file = input.files[i];
+                    if ('name' in file) {
+                        txtMsg += "File Name: " + file.name + "";
+                    }
+                    if ('size' in file) {
+                        txtMsg += " Size: " + file.size + " bytes ";
+                    }
+                }
+                $("#emptyFileForm").append(
+                        "<div id=emptyFileForm> <div style='color:#0000FF' id='message'></div> <table class='general-table' style='width:50%'> <tr> <td colspan='2' width='100%' align='right'><textarea id='sedFileTextArea' style='width:100%;height:150px;'></textarea></td></tr></table> <br></div>");
+                $("#message").append(txtMsg);
+            } else {
+                alert('Please upload a file before continuing')
+            }
+        }
+
+        function processFile(e) {
+            var file = e.target.result,
+                results;
+            if (file && file.length) {
+                sedFileObj.results = file.split("\n");
+                $('#sedFileTextArea').val(file);
+            }
+        }
+
+        function addVmUsers(){
+            $('#noUser').attr('disabled', true);
+            $('#noUser').attr('checked', false);
+            var divUserFormStr = ""
+            divUserFormStr = divUserFormStr + "<div style='margin-left:2%' id='userDiv_"+formNumUser+"'> <br> <table class='general-table' style='width:49%'><tr><td style='border: 0px'></td><td style='float:right; border: 0px'> <a id='userRemoves_"+formNumUser+"' class='img'> <img src='/static/images/delete.png' width='25px' height='25px' title='Remove User Input'/></a> </td> </tr><tr> <td width='49%' style='margin:10px'><b class='table-title' style='margin:10px'>User Name</b></td> <td width='49%'><input id='userName_"+formNumUser+"' maxlength='10' style='height:70%; width:90%;margin:10px'></td> </tr><tr><td width='49%'><b class='table-title' style='margin:10px'>User Password</b></td><td width='49%'><input id='userPassword_"+formNumUser+"' maxlength='50' style='height:70%; width:90%;margin:10px'></td> </tr> <tr> <td width='49%'><b class='table-title' style='margin:10px'>User Type</b></td><td width='49%'><select id='userType_"+formNumUser+"' style='height:70%; width:90%;margin:10px'> <option value='None'>Select Option</option>"
+            {% for type in userTypes %}
+            divUserFormStr = divUserFormStr + "<option value='{{ type.name }}'>{{ type.name }}</option>"
+            {% endfor %}
+            divUserFormStr = divUserFormStr + "</select></tr></table> <br> </div>"
+            $("#emptyUserForm").append(divUserFormStr);
+            $('#userRemoves_'+formNumUser).click(function() {
+               var id = $(this).attr('id');
+               var selectId = id.split('_').pop();
+               removeUserAction(selectId)
+            });
+            $('#user_'+formNumUser).change(function() {
+               var id = $(this).attr('id');
+               var jira = $('#'+id).val();
+               var selectId = id.split('_').pop();
+               user_box = $('#user_'+selectId);
+            });
+            formNumUser = formNumUser + 1;
+        }
+        function addPostData() {
+            var sedVersionData =  $('#sedVersion').val().split(' ')[0];
+
+            if ( sedVersionData == "None") {
+                sedVersionData = "";
+            }
+            if(typeof sedFileObj.results === 'undefined'){
+                sedFileObj.results = "";
+                var results = "";
+            }
+            else{
+                var results = $('textarea#sedFileTextArea').val().split("\n");
+            }
+            var deploymentId = $('#deploymentId').val();
+            var proceed = "";
+            var msg = "";
+            var userItems = [];
+            if (deploymentId == "") {
+                alert("Please choose a Deployment ID.");
+                if (results == ""){
+                    sedFileObj.results = undefined;
+                }
+                $('#addToPostData').attr('disabled', false);
+                return
+            }
+            if (sedFileObj.results != "" && sedVersionData != "") {
+                alert("Please choose either to \"Upload a Pre Populated SED File\" or \"Select a SED Template Version\" both options are not permitted.");
+                location.reload();
+                return
+            }
+            if (sedFileObj.results == "" && sedVersionData == "") {
+                alert("Please select one of the options, \"Upload a Pre Populated SED File\" or \"Select a SED Template Version\"");
+                $('#addToPostData').attr('disabled', false);
+                return
+            }
+            var depDescVersion = $('#depDescVersion').val();
+            var depDescType = $('#depDescType').val();
+            var depDescFileName = $('#depDescFileName').val();
+            var populateDDorSED = "";
+            var populateDnsorMan = "";
+            if (depDescVersion === undefined && depDescType === undefined && depDescFileName === undefined ){
+                depDescVersion = "";
+                depDescType = "";
+                depDescFileName = "";
+            }
+            else if (depDescVersion == "None" && depDescType == "None" && depDescFileName == "" ){
+                depDescVersion = "";
+                depDescType = "";
+                depDescFileName = "";
+            }
+            else{
+                if ( depDescVersion === undefined) {
+                    depDescVersion = "";
+                }
+                else if (depDescVersion == "None") {
+                    alert("Please choose a deployment description version.");
+                    if (results == ""){
+                        sedFileObj.results = undefined;
+                    }
+                    return
+                }
+                if ( depDescType === undefined) {
+                    depDescType = "";
+                }
+                else if (depDescType == "None") {
+                    alert("Please choose a deployment description type.");
+                    if (results == ""){
+                        sedFileObj.results = undefined;
+                    }
+                    return
+                }
+                var depDescFileName = $('#depDescFileName').val();
+                if ( depDescFileName === undefined) {
+                    depDescFileName = "";
+                }
+                else if (depDescFileName == "") {
+                    alert("Please choose a deployment description file.");
+                    if (results == ""){
+                        sedFileObj.results = undefined;
+                    }
+                    return
+                }
+                populateDDorSED = $("input[name=choiceDD]:checked").val();
+                populateDnsorMan = $("input[name=choiceIP]:checked").val();
+            }
+            if (formNumUser != 0) {
+                userMsg = "INFO: New Users have been defined so they will overwrite the existing users for the service VMs"
+            }
+            else{
+                userMsg = "Warning: No Users have been defined so there will be no users defined for the service VMs, any users already defined will be removed"
+            }
+
+            for (var i = 0; i<formNumUser; i++) {
+                var user = $('#userName_'+i).val();
+                var userPassword = $('#userPassword_'+i).val();
+                var userType = $('#userType_'+i).val();
+                if(typeof user === 'undefined'){
+                    continue;
+                }
+                if (user == "" || userPassword == "" || userType == "None"){
+                    window.alert("Please ensure all credential info is populated");
+                    if (results == ""){
+                        sedFileObj.results = undefined;
+                    }
+                    $('#addToPostData').attr('disabled', false);
+                    return
+                }
+                userItems.push({'userName': user, 'userPassword': userPassword, 'userType': userType});
+            }
+            var revisions = {
+                'deploymentId':deploymentId,
+                'file':results,
+                'sedVersion':sedVersionData,
+                'users' :userItems,
+                'loginUser' : {{ loginUser }},
+                'depDescVersion' : depDescVersion,
+                'depDescType' : depDescType,
+                'depDescFileName' : depDescFileName,
+                'populateDDorSED' : populateDDorSED,
+                'populateDnsorMan' : populateDnsorMan,
+                'depDescPackage' : '{{ deploymentTemplatePackage }}'
+            };
+            msg = "This action is going to alter the information attached to the Service VM within the deployment.\nThis can take up 15 minutes or more to complete, depending on the Deployment.\n\n" + userMsg + "\n\n*************************************************************************\nDO NOT \"REFRESH\" THIS PAGE DURING THIS PROCESS AS THIS WILL CORRUPT THE DEPLOYMENT\n*************************************************************************\n\nDo you want to proceed?"
+            proceed = confirm(msg);
+
+            if (proceed) {
+              $('body').addClass('loading');
+              $('#addToPostData').attr('disabled', true);
+              $.ajax({
+                    type: "POST",
+                    url: "/dmt/populate/deployment/execute/",
+                    datatype: "json",
+                    data: JSON.stringify(revisions),
+                    success: function (json, status, xhr) {
+                        var ct = xhr.getResponseHeader("content-type") || "";
+                        if (ct.indexOf('json') > -1) {
+                            $('body').removeClass('loading');
+                            window.alert(json['ERROR'])
+                            location.reload();
+                        }
+                        else{
+                            $('body').removeClass('loading');
+                            $('div#mainWindow').html(json);
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert("Issue submitting deployment information, Internal Server Error.\n\nPlease Contact an Administrator.");
+                        $('body').removeClass('loading');
+                        location.reload();
+                    }
+              });
+            }else{
+                location.reload();
+            }
+        }
+    });
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Populate Deployment Service VMs
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Upload+a+Prepopulated+SED+to+the+CI+Axis+Portal" title="Upload Pre Populated SED For VM Service Creation" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <div id='mainWindow'>
+        {% if deploymentId %}
+           <div class="layout-bar"><a href="/dmt/clusters/{{ deploymentId }}/">Return to Deployment</a></div>
+           <br>
+        {% endif %}
+        <table class="general-table"  style="width:50%">
+            <tr>
+                <td width="50%"><b class="table-title" style='margin:10px'>Deployment ID</b></td>
+                <td width="50%">
+                {% if deploymentId %}
+                    <input style='margin:10px' value="{{ deploymentId }}" id="deploymentId" disabled="disabled">
+                {% else %}
+                    <input style='margin:10px' id="deploymentId">
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        <h3 style="width:50%">Choose One of the following</h3>
+        <table class="general-table" style="width:50%">
+            <tr>
+                <td width="50%"><b class="table-title" style='margin:10px'>Upload a Pre Populated SED File</b></td>
+                <td width="50%"><input style='margin:10px' id="file" type="file" size="40"></td>
+            </tr>
+        </table>
+        <div id=emptyFileForm class="generic-text" style = "float:left; display:inline-block; width:100%;"></div>
+        <b>Or</b>
+        <table class="general-table" style="width:50%">
+            <tr>
+                <td width="50%"><b class="table-title" style='margin:10px'>Select a SED Template Version</b></td>
+                <td width="50%"><select id="sedVersion" style='height:70%; width:90%;margin:10px'>
+                    <option value="None">Select Option</option>
+                    {% for version in sedTemplateVersions %}
+                        <option value="{{ version }}">{{ version }}</option>
+                    {% endfor %}
+                </select></td>
+            </tr>
+        </table>
+        <div id=emptyDDForm class="generic-text" style = "float:left; display:inline-block; width:100%;">
+        </div>
+        <div id=nearlyemptyDDForm class="generic-text" style = "float:left; display:inline-block; width:100%;">
+        </div>
+        <h3 style="width:50%">Optional: Enter user infomation to attach to the Service VM's</h3>
+        <div id=emptyUserForm class="generic-text" style = "float:left; display:inline-block; width:100%;">
+        </div>
+        <input type="button" value="Add Service VM Users" id="addVmUser">
+        <br>
+        <br>
+        <input type="button" class="styled-button-2" id="addToPostData" value="Submit" />
+        <br>
+    </div>
+    <div class="modal"></div>
+{% endblock %}

@@ -1,0 +1,679 @@
+<INCLUDE NODE: MS >
+<litp:definition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:litp="http://www.ericsson.com/litp" xsi:schemaLocation="http://www.ericsson.com/litp litp.xsd" id="definition" version="LITP 1.0.23 CSA 113 068 R1L">
+  <require></require>
+  <litp:cmw-cluster-config-def id="cmw_cluster_config">
+    <litp:cmw-campaign-generator-def id="campaign_generator"/>
+    <litp:cmw-etf-generator-def id="etf_generator"/>
+  </litp:cmw-cluster-config-def>
+  <litp:cmw-component-def id="cmw_installer">
+  <litp:component-def id="cobbler">
+    <litp:kickstart-manager-def id="ksmanager"/>
+    <litp:cobbler-service-def id="bootservice">
+      <name>bootservice</name>
+    </litp:cobbler-service-def>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-help>
+  <litp:component-def id="firewallsmain">
+    <litp:firewalls-main-def id="config"/>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-FMService>
+  <litp:component-def id="hyperica">
+    <litp:hyperic-agent-def id="hyagent"/>
+  </litp:component-def>
+  <litp:component-def id="hyperics">
+    <litp:hyperic-server-def id="hyserver"/>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-jee_asgard-only>
+  <Append Here File: jboss-component-def-jee_tor-only>
+  <Append Here File: jboss-component-def-jee_torSSO-only>
+  <Append Here File: jboss-component-def-jee_torUI-only>
+  <litp:component-def id="libvirt">
+    <litp:logrotate-def id="libvirtd_logrotate_rules">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>libvirtd</name>
+      <path>/var/log/libvirt/*.log</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>4</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>50M</size>
+    </litp:logrotate-def>
+    <litp:logrotate-def id="libvirtd_qemu_rules">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>libvirtd.qemu</name>
+      <path>/var/log/libvirt/qemu/*.log</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>4</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>50M</size>
+    </litp:logrotate-def>
+    <litp:vm-service-def id="vmservice"/>
+  </litp:component-def>
+  <litp:component-def id="logrotate_litp">
+    <litp:logrotate-def id="litp">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>litp</name>
+      <path>/var/log/litp.log /var/log/litp/*.log</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>6</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>50M</size>
+    </litp:logrotate-def>
+  </litp:component-def>
+  <litp:component-def id="logrotate_rules">
+    <litp:logrotate-def id="jboss_logs">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>jboss</name>
+      <path>/var/log/jboss.log /var/log/jboss/*/*.log</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>6</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>50M</size>
+    </litp:logrotate-def>
+    <litp:logrotate-def id="syslog">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>syslog</name>
+      <path>/var/log/messages /var/log/secure /var/log/maillog /var/log/iptables.log /var/log/spooler /var/log/boot.log /var/log/cron</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>6</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>100M</size>
+    </litp:logrotate-def>
+  </litp:component-def>
+  <litp:component-def id="logrotate_server_rules">
+    <litp:logrotate-def id="jboss_logs">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>jboss</name>
+      <path>/var/log/jboss.log /var/log/jboss/*/*.log</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>6</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>512M</size>
+    </litp:logrotate-def>
+    <litp:logrotate-def id="syslog">
+      <compress>true</compress>
+      <create>false</create>
+      <dateext>true</dateext>
+      <dateformat>-%Y%m%d-%s</dateformat>
+      <delaycompress>true</delaycompress>
+      <name>syslog</name>
+      <path>/var/log/messages /var/log/secure /var/log/maillog /var/log/spooler /var/log/boot.log /var/log/cron /var/log/iptables.log /var/log/litp.log</path>
+      <postrotate>service rsyslog restart || true</postrotate>
+      <rotate>6</rotate>
+      <sharedscripts>true</sharedscripts>
+      <size>1G</size>
+    </litp:logrotate-def>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-psmc>
+  <litp:component-def id="msrepository">
+    <litp:repository-def id="repo1">
+      <name>LITP_REPO</name>
+      <service>site_yum_repo_litp</service>
+    </litp:repository-def>
+    <litp:repository-def id="repo2">
+      <name>CUSTOM_REPO</name>
+      <service>site_yum_repo_custom</service>
+    </litp:repository-def>
+    <litp:repository-def id="repo3">
+      <name>RHEL_6.2</name>
+      <service>site_yum_repo_rhel</service>
+    </litp:repository-def>
+    <litp:repository-service-def id="yum_repo1">
+      <name>pp_yum_repo_litp</name>
+      <protocol>http</protocol>
+      <uri>/litp</uri>
+    </litp:repository-service-def>
+    <litp:repository-service-def id="yum_repo2">
+      <name>pp_yum_repo_custom</name>
+      <protocol>http</protocol>
+      <uri>/cobbler/ks_mirror/node-iso-x86_64/custom</uri>
+    </litp:repository-service-def>
+    <litp:repository-service-def id="yum_repo3">
+      <name>pp_yum_repo_rhel</name>
+      <protocol>http</protocol>
+      <uri>/cobbler/ks_mirror/node-iso-x86_64</uri>
+    </litp:repository-service-def>
+  </litp:component-def>
+  <litp:component-def id="mysqlserver">
+    <litp:mysql-server-def id="config"/>
+  </litp:component-def>
+  <litp:component-def id="nfsshares">
+    <litp:nfs-export-def id="share1">
+      <guest>*</guest>
+      <options>rw,sync,no_root_squash</options>
+      <share>/exports/cluster</share>
+    </litp:nfs-export-def>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-pmmedcom>
+  <Append Here File: jboss-component-def-pmmedcore>
+  <Append Here File: jboss-component-def-pmservice>
+  <Append Here File: jboss-component-def-ps>
+  <Append Here File: jboss-component-def-prescontainer>
+  <Append Here File: jboss-component-def-launcher>
+  <litp:component-def id="rd_rsyslog_client">
+    <litp:rsyslog-client-def id="rsyslog_client">
+      <rlCentralHost>SC-1</rlCentralHost>
+    </litp:rsyslog-client-def>
+  </litp:component-def>
+  <litp:component-def id="rd_rsyslog_server">
+    <litp:rsyslog-server-def id="rsyslog_server">
+      <rlCentralHost>SC-1</rlCentralHost>
+    </litp:rsyslog-server-def>
+  </litp:component-def>
+  <litp:component-def id="rd_sudoers">
+    <litp:sudoers-def id="sudo_admin">
+      <cmds>/usr/sbin/useradd,/usr/sbin/userdel,/usr/sbin/groupadd,/usr/sbin/groupdel,/bin/cat,/usr/sbin/litpedit,/bin/sed</cmds>
+      <requirePasswd>FALSE</requirePasswd>
+      <sudorole>ADMIN</sudorole>
+      <users>litp_admin</users>
+    </litp:sudoers-def>
+    <litp:sudoers-def id="sudo_backup">
+      <cmds>/usr/bin/netbackup</cmds>
+      <requirePasswd>TRUE</requirePasswd>
+      <sudorole>BACKUP</sudorole>
+      <users>litp_admin,litp_user</users>
+    </litp:sudoers-def>
+    <litp:sudoers-def id="sudo_troubleshoot">
+      <cmds>/usr/bin/dig,/usr/bin/host,/usr/sbin/lsof,/usr/bin/ltrace,/usr/bin/sar,/usr/bin/screen,/usr/bin/strace,/usr/sbin/tcpdump,/bin/traceroute,/usr/bin/vim,/sbin/service,/bin/mount,/bin/umount,/usr/bin/virsh,/bin/kill,/sbin/reboot,/sbin/shutdown,/usr/bin/pkill,/sbin/pvdisplay,/sbin/dmsetup,/sbin/multipath,/usr/bin/cobbler,/usr/bin/tail,/sbin/vgdisplay,/sbin/lvdisplay,/bin/rm,/opt/ericsson/nms/litp/litp_landscape/landscape,/usr/bin/which,/sbin/lltconfig,/sbin/gabconfig,/opt/VRTSvcs/bin/hastatus,/opt/VRTSvcs/bin/hacf</cmds>
+      <requirePasswd>TRUE</requirePasswd>
+      <sudorole>TROUBLESHOOT</sudorole>
+      <users>litp_admin</users>
+    </litp:sudoers-def>
+    <litp:sudoers-def id="sudo_verify">
+      <cmds>/sbin/iptables -L</cmds>
+      <requirePasswd>FALSE</requirePasswd>
+      <sudorole>VERIFY</sudorole>
+      <users>litp_verify</users>
+    </litp:sudoers-def>
+    <litp:sudoers-main-def id="sudo_main">
+      <name>sudo_main</name>
+    </litp:sudoers-main-def>
+  </litp:component-def>
+  <litp:component-def id="rd_users">
+    <litp:group-def id="group_litp_jboss">
+      <gid>205</gid>
+      <name>litp_jboss</name>
+    </litp:group-def>
+    <litp:group-def id="group_litp_user">
+      <gid>481</gid>
+      <name>litp_user</name>
+    </litp:group-def>
+    <litp:user-def id="litp_admin">
+      <gid>0</gid>
+      <home>/users/litp_admin</home>
+      <name>litp_admin</name>
+      <seluser>unconfined_u</seluser>
+      <uid>480</uid>
+      <umask>022</umask>
+    </litp:user-def>
+    <litp:user-def id="litp_jboss">
+      <gid>205</gid>
+      <home>/users/litp_jboss</home>
+      <name>litp_jboss</name>
+      <seluser>unconfined_u</seluser>
+      <uid>308</uid>
+      <umask>022</umask>
+    </litp:user-def>
+    <litp:user-def id="litp_user">
+      <gid>481</gid>
+      <home>/users/litp_user</home>
+      <name>litp_user</name>
+      <seluser>user_u</seluser>
+      <uid>481</uid>
+      <umask>022</umask>
+    </litp:user-def>
+  </litp:component-def>
+  <litp:component-def id="repository">
+    <litp:repository-def id="repo1">
+      <name>LITP_REPO</name>
+      <service>pp_yum_repo_litp</service>
+    </litp:repository-def>
+    <litp:repository-def id="repo2">
+      <name>CUSTOM_REPO</name>
+      <service>pp_yum_repo_custom</service>
+    </litp:repository-def>
+    <litp:repository-def id="repo3">
+      <name>RHEL_6.2</name>
+      <service>pp_yum_repo_rhel</service>
+    </litp:repository-def>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-securitysvc>
+  <Append Here File: jboss-component-def-singlesignon>
+  <Append Here File: jboss-component-def-topsync>
+  <litp:component-def id="troubleshooting">
+    <litp:package-def id="tool1">
+      <ensure>installed</ensure>
+      <name>sysstat</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool10">
+      <ensure>installed</ensure>
+      <name>vim-enhanced</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool11">
+      <ensure>installed</ensure>
+      <name>file</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool2">
+      <ensure>installed</ensure>
+      <name>procps</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool3">
+      <ensure>installed</ensure>
+      <name>bind-utils</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool4">
+      <ensure>installed</ensure>
+      <name>lsof</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool5">
+      <ensure>installed</ensure>
+      <name>ltrace</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool6">
+      <ensure>installed</ensure>
+      <name>screen</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool7">
+      <ensure>installed</ensure>
+      <name>strace</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool8">
+      <ensure>installed</ensure>
+      <name>tcpdump</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+    <litp:package-def id="tool9">
+      <ensure>installed</ensure>
+      <name>traceroute</name>
+      <repository>RHEL_6.2</repository>
+    </litp:package-def>
+  </litp:component-def>
+  <Append Here File: jboss-component-def-tss-service>
+  <Append Here File: jboss-component-def-upg_mgr>
+  <litp:lde-component-def id="lde">
+    <litp:tipc-address-def id="tipc">
+      <pool>tipc</pool>
+    </litp:tipc-address-def>
+  </litp:lde-component-def>
+  <litp:rhel-component-def id="os">
+    <profile>linux</profile>
+    <litp:rhel-component-def id="osms">
+      <profile>node-iso-x86_64</profile>
+      <litp:firewalls-def id="fw_basetcp">
+        <dport>22,80,111,443,3000,25151,9999,2163,6389</dport>
+        <name>001 basetcp</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_baseudp">
+        <dport>67,69,123,623,25151</dport>
+        <name>010 baseudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_hyperic">
+        <dport>57004,57005,57006</dport>
+        <name>003 hyperic</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_icmp">
+        <name>100 icmp</name>
+        <proto>icmp</proto>
+        <provider>iptables</provider>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_icmpv6">
+        <name>100 icmpv6</name>
+        <proto>ipv6-icmp</proto>
+        <provider>ip6tables</provider>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_netbackup">
+        <dport>13724,1556,13783,13722</dport>
+        <name>012 netbackup</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_nfstcp">
+        <dport>662,875,2020,2049,4001,4045</dport>
+        <name>002 nfstcp</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_nfsudp">
+        <dport>662,875,2020,2049,4001,4045</dport>
+        <name>011 nfsudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_syslog">
+        <dport>514</dport>
+        <name>004 syslog</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_syslog_udp">
+        <dport>514</dport>
+        <name>004 syslogudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:ip-address-def id="ip_ext">
+        <net_name>ext</net_name>
+        <pool>external</pool>
+      </litp:ip-address-def>
+      <litp:ntp-client-def id="ntp1">
+        <service>ntp_1</service>
+      </litp:ntp-client-def>
+    </litp:rhel-component-def>
+    <litp:rhel-component-def id="ossc">
+      <profile>node-iso-x86_64</profile>
+      <litp:firewalls-def id="fw_CMWjboss1">
+        <dport>8009,8080,8443,3528,3529,7500,45700,7600,57600,55200,54200,45688</dport>
+        <name>36 CMWjboss1</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_CMWjboss2">
+        <dport>5445,5455,23364,8090,4447,4712,4713</dport>
+        <name>37 CMWjboss2</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_UIserv">
+       <dport>8666</dport>
+       <name>006 uiserv</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_basetcp">
+        <dport>22,80,111,161,162,443,1389,3000,25151,7788,9999,2163,6389</dport>
+        <name>001 basetcp</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_baseudp">
+        <dport>111,123,623,1129,9876,25151</dport>
+        <name>010 baseudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_hyperic">
+        <dport>57004, 57005, 57006</dport>
+        <name>003 hyperic</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_icmp">
+        <name>100 icmp</name>
+        <proto>icmp</proto>
+        <provider>iptables</provider>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_icmpv6">
+        <name>100 icmpv6</name>
+        <proto>ipv6-icmp</proto>
+        <provider>ip6tables</provider>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_jboss">
+        <dport>8080,9990,9876,54321</dport>
+        <name>008 jboss</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_jeeTORSSO">
+        <dport>14080,15990,15999,15876,60321,18353,51841,51854</dport>
+        <name>007 jeeTORSSO</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_netbackup">
+        <dport>13724,1556,13783,13722</dport>
+        <name>012 netbackup</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_nfstcp">
+        <dport>662,875,2020,2049,4001,4045</dport>
+        <name>002 nfstcp</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_nfsudp">
+        <dport>662,875,2020,2049,4001,4045</dport>
+        <name>011 nfsudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_remoting">
+        <dport>4463,4563,4663,4763</dport>
+        <name>35 remoting</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_sc1_groupPort">
+        <dport>9892</dport>
+        <name>31 groupPort</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_sc1_hazelcastudp">
+        <dport>57429</dport>
+        <name>32 hazelcastudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_sc1_hazelcastudprange1">
+        <dport>15901,15902,15903,15904,15905,15906,15907,15908,15909,15910</dport>
+        <name>33 hazelcastudprange1</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_sc1_hazelcastudprange2">
+        <dport>15911,15912,15913,15914,15915,15916,15917,15918,15919,15920,15921</dport>
+        <name>34 hazelcastudprange2</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_syslog">
+        <dport>514</dport>
+        <name>004 syslog</name>
+      </litp:firewalls-def>
+      <litp:firewalls-def id="fw_syslogudp">
+        <dport>514</dport>
+        <name>005 syslogudp</name>
+        <proto>udp</proto>
+      </litp:firewalls-def>
+      <litp:ntp-client-def id="ntp1">
+        <service>ntp_1</service>
+      </litp:ntp-client-def>
+      <litp:ntp-service-def id="ntp_l2">
+        <name>ntp_l2</name>
+      </litp:ntp-service-def>
+    </litp:rhel-component-def>
+    <litp:rhel-component-def id="rhel">
+      <profile>node-iso-x86_64</profile>
+    </litp:rhel-component-def>
+    <litp:generic-system-def id="system">
+      <pool>systems</pool>
+    </litp:generic-system-def>
+    <litp:ip-address-def id="ip">
+      <net_name>mgmt</net_name>
+      <pool>management</pool>
+    </litp:ip-address-def>
+    <litp:kickstart-def id="ks"/>
+  </litp:rhel-component-def>
+  <Append Here File: jboss-vcs-cluster-component>
+  <litp:deployment-def id="deployment1">
+    <litp:cluster-def id="cluster1">
+      <litp:component-ref id="cmw_cluster_config">
+        <component>cmw_cluster_config</component>
+      </litp:component-ref>
+      <litp:component-ref id="cmw_installer">
+        <component>cmw_installer</component>
+      </litp:component-ref>
+      <Append Here File: jboss-vcs-component-ref>
+      <Append Here File: node-def-sc1-only>
+      <Append Here File: node-def-sc-only>
+      <Append Here File: node-def-pl-only>
+      <litp:service-group-def id="Asgard">
+        <availability_model>nway-active</availability_model>
+        <node_list>sc1,sc2</node_list>
+        <version>1.0.0</version>
+        <litp:service-instance-def id="si">
+          <active-count>2</active-count>
+          <version>1.0.0</version>
+          <litp:component-ref id="jee">
+            <component>jee_asgard</component>
+          </litp:component-ref>
+        </litp:service-instance-def>
+      </litp:service-group-def>
+      <Append Here File: jboss-service-group-def-group>
+    </litp:cluster-def>
+    <litp:node-def id="ms1">
+      <nodetype>management</nodetype>
+      <litp:solution-ref id="ms_node">
+        <solution-name>ms_node</solution-name>
+      </litp:solution-ref>
+    </litp:node-def>
+    <litp:ntp-service-def id="ntp_1">
+      <external>True</external>
+      <name>ntp_1</name>
+    </litp:ntp-service-def>
+    <litp:repository-service-def id="yum_repo1">
+      <external>True</external>
+      <name>site_yum_repo_litp</name>
+      <protocol>file</protocol>
+      <uri>/var/www/html/litp</uri>
+    </litp:repository-service-def>
+    <litp:repository-service-def id="yum_repo2">
+      <external>True</external>
+      <name>site_yum_repo_custom</name>
+      <protocol>file</protocol>
+      <uri>/var/www/html/custom</uri>
+    </litp:repository-service-def>
+    <litp:repository-service-def id="yum_repo3">
+      <external>True</external>
+      <name>site_yum_repo_rhel</name>
+      <protocol>file</protocol>
+      <uri>/var/www/html/rhel</uri>
+    </litp:repository-service-def>
+  </litp:deployment-def>
+  <litp:solution-def id="litp_sc_node">
+    <description>litp_sc_nodev1</description>
+    <name>litpscnodev1</name>
+    <solution_type>BASIC</solution_type>
+    <version>1.1.1</version>
+    <litp:component-ref id="firewallsmain">
+      <component>firewallsmain</component>
+    </litp:component-ref>
+    <litp:component-ref id="hypericagent">
+      <component>hyperica</component>
+    </litp:component-ref>
+    <litp:component-ref id="lde">
+      <component>lde</component>
+    </litp:component-ref>
+    <litp:component-ref id="logrotate_rules">
+      <component>logrotate_rules</component>
+    </litp:component-ref>
+    <litp:component-ref id="os">
+      <component>os/ossc</component>
+    </litp:component-ref>
+    <Append Here File: jboss-component-ref-group-apache_sc2>
+    <litp:component-ref id="rd_sudoers">
+      <component>rd_sudoers</component>
+    </litp:component-ref>
+    <litp:component-ref id="repository">
+      <component>repository</component>
+    </litp:component-ref>
+    <litp:component-ref id="syslog">
+      <component>rd_rsyslog_client</component>
+    </litp:component-ref>
+    <litp:component-ref id="troubleshooting">
+      <component>troubleshooting</component>
+    </litp:component-ref>
+    <litp:component-ref id="users">
+      <component>rd_users</component>
+    </litp:component-ref>
+  </litp:solution-def>
+  <litp:solution-def id="ms_node">
+    <description>msnodev1</description>
+    <name>msnodev1</name>
+    <solution_type>BASIC</solution_type>
+    <version>1.1.1</version>
+    <litp:component-ref id="firewallsmain">
+      <component>firewallsmain</component>
+    </litp:component-ref>
+    <litp:component-ref id="hypericagent">
+      <component>hyperica</component>
+    </litp:component-ref>
+    <litp:component-ref id="hypericserver">
+      <component>hyperics</component>
+    </litp:component-ref>
+    <litp:component-ref id="libvirt">
+      <component>libvirt</component>
+    </litp:component-ref>
+    <litp:component-ref id="logrotate_litp">
+      <component>logrotate_litp</component>
+    </litp:component-ref>
+    <litp:component-ref id="logrotate_rules">
+      <component>logrotate_rules</component>
+    </litp:component-ref>
+    <litp:component-ref id="ms_boot">
+      <component>cobbler</component>
+    </litp:component-ref>
+    <litp:component-ref id="mysqlserver">
+      <component>mysqlserver</component>
+    </litp:component-ref>
+    <litp:component-ref id="nfsshares">
+      <component>nfsshares</component>
+    </litp:component-ref>
+    <litp:component-ref id="os">
+      <component>os/osms</component>
+    </litp:component-ref>
+    <litp:component-ref id="rd_sudoers">
+      <component>rd_sudoers</component>
+    </litp:component-ref>
+    <litp:component-ref id="repository">
+      <component>msrepository</component>
+    </litp:component-ref>
+    <litp:component-ref id="syslog">
+      <component>rd_rsyslog_client</component>
+    </litp:component-ref>
+    <litp:component-ref id="troubleshooting">
+      <component>troubleshooting</component>
+    </litp:component-ref>
+    <litp:component-ref id="users">
+      <component>rd_users</component>
+    </litp:component-ref>
+  </litp:solution-def>
+  <litp:solution-def id="primary_node">
+    <description>primarynodev1</description>
+    <name>primarynodev1</name>
+    <solution_type>BASIC</solution_type>
+    <version>1.1.1</version>
+    <litp:component-ref id="firewallsmain">
+      <component>firewallsmain</component>
+    </litp:component-ref>
+    <litp:component-ref id="hypericagent">
+      <component>hyperica</component>
+    </litp:component-ref>
+    <litp:component-ref id="lde">
+      <component>lde</component>
+    </litp:component-ref>
+    <litp:component-ref id="logrotate_server_rules">
+      <component>logrotate_server_rules</component>
+    </litp:component-ref>
+    <litp:component-ref id="os">
+      <component>os/ossc</component>
+    </litp:component-ref>
+    <Append Here File: jboss-component-ref-group-apache_sc1>
+    <litp:component-ref id="rd_sudoers">
+      <component>rd_sudoers</component>
+    </litp:component-ref>
+    <litp:component-ref id="repository">
+      <component>repository</component>
+    </litp:component-ref>
+    <litp:component-ref id="syslog_central">
+      <component>rd_rsyslog_server</component>
+    </litp:component-ref>
+    <litp:component-ref id="troubleshooting">
+      <component>troubleshooting</component>
+    </litp:component-ref>
+    <litp:component-ref id="users">
+      <component>rd_users</component>
+    </litp:component-ref>
+  </litp:solution-def>
+</litp:definition>
+

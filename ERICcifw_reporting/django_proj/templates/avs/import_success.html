@@ -1,0 +1,18 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">AVS import for User Story {{userStory}} has been successful
+        </div>
+    </div>
+    <div class="generic-text"> 
+        <H3>Java</H3>
+        <a href="/avs/avs_view_skeleton/{{fileMap.java}}">View the Java Test Skeleton: {{fileMap.java}}</a></br>
+        <a href="/avs/avs_download_skeleton/{{fileMap.java}}">Download the Java Test Skeleton: {{fileMap.java}}</a></br>
+        <a href="/avs/stories/{{ userStory }}/zip">Download the TAF TC Classes Zip </a></br>
+    </div>
+    
+{% endblock %}
+

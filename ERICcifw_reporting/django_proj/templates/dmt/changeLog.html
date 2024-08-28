@@ -1,0 +1,56 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% block title %}Change Log Information{% endblock %}
+{% block content %}
+<script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+        $(document).ready(function()
+         {
+            $(".tableLogSort").tablesorter();
+         });
+        function clickAction() {
+            $("body").addClass('loading');
+        }
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">{{ displayName }}</h2>
+{% if logs %}
+<div class="layout-bar"> <div class="changelog-sort">
+        {% if id %}
+        <a href="/dmt/clusters/{{ id }}/">Return to Deployment</a> |
+    <a {% if dateSort == "All" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %}  href="/dmt/log/{{type}}/{{id}}/?dateSort=All" title="Display All User Log Activity">All</a> | <a {% if dateSort == "Today" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %}  href="/dmt/log/{{type}}/{{id}}/?dateSort=Today" title="Display Today's User Log Activity">Today</a> | <a {% if dateSort == "Week" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %} href="/dmt/log/{{type}}/{{id}}/?dateSort=Week" title="Display the Last 7 Days of User Log Activity">Week</a> | <a {% if dateSort == "Month" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %} href="/dmt/log/{{type}}/{{id}}/?dateSort=Month" title="Display the Last 31 Days of User Log Activity">Month</a>
+    {% else %}
+    <a {% if dateSort == "All" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %}  href="/dmt/log/{{type}}/?dateSort=All" title="Display All User Log Activity">All</a> | <a {% if dateSort == "Today" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %}  href="/dmt/log/{{type}}/?dateSort=Today" title="Display Today's User Log Activity">Today</a> | <a {% if dateSort == "Week" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %} href="/dmt/log/{{type}}/?dateSort=Week" title="Display the Last 7 Days of User Log Activity">Week</a> | <a {% if dateSort == "Month" %} class="changelog-sortActive" {% else %} onClick="clickAction()" {% endif %} href="/dmt/log/{{type}}/?dateSort=Month" title="Display the Last 31 Days of User Log Activity">Month</a>
+    {% endif %}
+</div>
+</div>
+ <br>
+ <table class="general-table">
+    <thead>
+        <tr>
+            <th width="15%">Date</th>
+            <th width="10%">UserName</th>
+            <th width="20%">Node</th>
+            <th width="55%">Comment</th>
+        </tr>
+    </thead>
+        {% for item in logs %}
+             {% for items in item.logDetails %}
+                <tr>
+                    <td>{{ items.action_time }}</td>
+                    <td>{{ items.user.username }}</td>
+                    <td>{{ items.object_repr }}</td>
+                    {% if items.change_message %}
+                        <td>{{ items.change_message }}</td>
+                    {% else %}
+                        <td>NA</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+<div class="modal"></div>
+{% endblock %}

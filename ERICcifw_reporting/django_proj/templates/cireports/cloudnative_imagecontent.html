@@ -1,0 +1,44 @@
+{% extends "base_newlookandfeel.html" %}
+{% if imageRevObj %}
+    {% block title %} {{ imageRevObj.image.image_name}} Image Content Information{% endblock %}
+    {% block content %}
+    <link rel=StyleSheet href="/static/general.css" type="text/css" />
+    <div class="artifact-container">
+        <h2 class="generalPageNewLook-title">
+            {{ imageRevObj.image.image_name }} {{ imageRevObj.image.image_product_number }} Content Information
+        </h2>
+        <table class="general-table" style="width:50%; box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <tr>
+                <td width="40%"><b>Image Version</b></td>
+                <td>{{ imageRevObj.version }}</td>
+            </tr>
+            <tr>
+                <td width="40%"><b>Parent Image Name</b></td>
+                <td><a href="cloudnative/getCloudNativeImageContent/{{ imageRevObj.parent.image.image_name }}/{{ imageRevObj.parent.version }}/">{{ imageRevObj.parent.image.image_name }} {{ imageRevObj.parent.version }}</a></td>
+            </tr>
+        </table>
+        <br>
+        {% if imageContent %}
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <br>
+            <thead>
+                <tr>
+                    <th>Package Name</th>
+                    <th>Package Version</th>
+                </tr>
+            </thead>
+            {% for item in imageContent %}
+            <tr>
+                <td><a target="_blank" href="/prototype/packages/{{ item.package_revision.package.name }}/">{{ item.package_revision.package.name }}</a></td>
+                <td>{{ item.package_revision.version }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div id="generic-sub-title">
+            <br>No Information in Database for
+        </div>
+        {% endif %}
+    </div>
+    {% endblock %}
+{% endif %}

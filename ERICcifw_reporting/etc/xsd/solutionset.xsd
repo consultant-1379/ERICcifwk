@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="solutionset">
+		<xs:complexType>
+			<xs:sequence>
+				<!-- Solutiuon Set name -->
+				<xs:element name="name" type="solutionsetNameType"
+					minOccurs="1" maxOccurs="1" />
+					
+				<!-- Solution Set description -->
+				<xs:element name="description" type="xs:string"
+					minOccurs="1" maxOccurs="1" />
+
+				<!-- Solution Set version in numerical format -->
+				<xs:element name="version" type="versionType" minOccurs="0"
+					maxOccurs="1"/>				
+
+				<!-- License details -->
+				<xs:element name="licensing" type="solutionsetLicenseType" minOccurs="1" maxOccurs="1"/>
+				
+				<!-- Solution Set type -->
+				<xs:element name="type" type="solutionsetType" minOccurs="1" maxOccurs="1"/>
+				
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element> <!-- "solutionset" -->
+
+
+    <xs:simpleType name="solutionsetNameType">
+    	<xs:annotation>
+			<xs:documentation>
+				This defines a Solution Set's name.
+			</xs:documentation>
+		</xs:annotation>
+    	<xs:restriction base="xs:string">
+    		<xs:pattern value="[A-Za-z0-9]+"></xs:pattern>
+    	</xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="versionType">
+    	<xs:annotation>
+			<xs:documentation>
+				A generic version type of the format X.Y.Z
+			</xs:documentation>
+		</xs:annotation>
+    	<xs:restriction base="xs:string">    		            	
+        	<xs:pattern value="[0-9]+\.[0-9]+\.[0-9]+"/>            	
+    	</xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="solutionsetDependencyType">
+    	<xs:annotation>
+			<xs:documentation>
+				This defines a Solution Set dependency.
+			</xs:documentation>
+		</xs:annotation>
+    	<xs:sequence>
+    		<xs:element name="name" type="solutionsetNameType" minOccurs="1" maxOccurs="1"/>
+    		<xs:element name="minversion" type="solutionsetNameType" minOccurs="1" maxOccurs="1"/>
+    	</xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="solutionsetDependencyListType">
+    	<xs:annotation>
+			<xs:documentation>
+				This is the list of Solution Set dependencies.
+			</xs:documentation>
+		</xs:annotation>
+    	<xs:sequence>
+    		<xs:element name="solutionsetdependency" type="solutionsetDependencyType" minOccurs="1" maxOccurs="1"/>    		
+    	</xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="solutionsetLicenseType">
+		<xs:annotation>
+			<xs:documentation>
+				Licensing details for this solution set
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="licencetype" minOccurs="1"
+			maxOccurs="1">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="[A-Za-z0-9]" />
+				</xs:restriction>
+			</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="solutionsetType">
+		<xs:annotation>
+			<xs:documentation>
+				The Solution Set's type
+			</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="basic" />
+			<xs:element name="commercial" />
+		</xs:choice>
+	</xs:complexType>
+</xs:schema>

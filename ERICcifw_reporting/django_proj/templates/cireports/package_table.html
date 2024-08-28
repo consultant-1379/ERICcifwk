@@ -1,0 +1,244 @@
+{% load guardian_tags %}
+{% load setVar %}
+{% load nexusUrl %}
+{% load forlooptemplates %}
+
+{% block content %}
+<script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+    $(document).ready(function()
+        {
+        $(".tablesort").tablesorter();
+        });
+</script>
+{% spaceless %}
+<table id="package-revisions" class="artifact-table">
+    <thead>
+        {# Set up the headers for the table based on if they are activated for the product or not #}
+        <tr>
+            {% if product.pkgName %}<th colspan="3">Name</th>{% endif %}
+            {# {% if product.pkgNumber %}<th>Number</th>{% endif %} #}
+            {% if product.pkgVersion %}<th>Version</th>{% endif %}
+            {% if product.type %}<th>Type</th>{% endif %}
+            {% if product.pkgRState %}<th>RState</th>{% endif %}
+            {% if product.date %}<th>Date Created</th>{% endif %}
+            {% if product.size %}<th>Size(MB)</th>{% endif %}
+            {% if product.platform %}<th>Platform</th>{% endif %}
+            {% if product.category %}<th>Media Category</th>{% endif %}
+            {% if product.intendedDrop %}<th>Intended Drop</th>{% endif %}
+            {% if product.deliveredTo %}<th>Delivered To</th>{% endif %}
+            {% if product.prototypeBuild %}<th>3PP Build</th>{% endif %}
+            {% if product.kgbTests %}<th>KGB Tests</th>
+                {% if product.teamRunningKgb %}<th colspan="2" title="The team that ran the KGB test">Team</th>{% endif %}
+            {% endif %}
+            {% if product.cidTests %}<th>CID Tests</th>{% endif %}
+            {% if product.cdbTests %}<th>CDB Tests</th>{% endif %}
+            {% if product.name != "None" %}
+               {% if product.isoIncludedIn %}<th>Included In</th>{% endif %}
+            {% endif %}
+            {% if product.deliver %}<th colspan="2">Deliver</th>{% endif %}
+            {% if not package.0.package.testware == True %}
+            {% if product.name != "None" %}
+                {% if product.pri %}
+                    <th>PRI</th>
+                {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if product.obsolete %}<th>Obsoleted From</th>{% endif %}
+        </tr>
+    </thead>
+    {# Loop through each Package Revision and display the information #}
+    {% for item in package %}
+        <tr>
+
+            {# Package Name #}
+            {% if product.pkgName %}
+                {% if item.category__name == "image" %}
+                <td colspan="3" align=center><a href="/{{ product.name }}/imageContent/{{ item.id }}/{{ item.version }}">{{ item.package__name }}</a></td>
+                {% else %}
+                    <td colspan="3" align=center>{{ item.package__name }}</td>
+                {% endif %}
+            {% endif %}
+
+            {# Package Number {% if product.pkgNumber %} <td align=center>{{ item.package.package_number }}</td> {% endif %} #}
+
+            {# Package Version #}
+            {% if product.pkgVersion %}
+                <td align=center><a href="{{ item.nexusUrl }}">{{ item.version }}</a></td>
+            {% endif %}
+
+            {# Package Type #}
+            {% if product.type %}
+                <td align=center>{{ item.m2type }}</td>
+            {% endif %}
+
+            {# Package RState #}
+            {% if product.pkgRState %}
+                <td align=center>{{ item.RState }}</td>
+            {% endif %}
+
+            {# Date the Package was created #}
+            {% if product.date %}
+                <td align=center>{{ item.date_created }}</td>
+            {% endif %}
+            {# Artifact Size Information #}
+            {% if product.size %}
+                <td align=center>{{ item.size }}</td>
+            {% endif %}
+            {# Platform Column #}
+            {% if product.platform %}
+                {% if item.platform = None %}
+                    <td align=center></td>
+                {% else %}
+                    {% if item.platform = "i386"%}
+                        <td align=center>x86</td>
+                    {% else %}
+                        <td align=center>{{ item.platform }}</td>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {# Category Column #}
+            {% if product.category %}
+                {% if  item.isoExclude %}
+                    {% if  item.infra %}
+                        <td align=center>{{ item.category__name }}:Exclude<br>Infrastructure</td>
+                    {% else %}
+                        <td align=center>{{ item.category__name }}:Exclude</td>
+                    {% endif %}
+                {% else %}
+                    {% if  item.infra %}
+                        <td align=center>{{ item.category__name }}<br>Infrastructure</td>
+                    {% else %}
+                        <td align=center>{{ item.category__name }}</td>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {# The Drop that this Package version is intending to deliver to #}
+            {% if product.intendedDrop %}
+                <td align=center>{{ item.autodrop }}</td>
+            {% endif %}
+
+            {# Display any previous Drops that this version may have already delivered to #}
+            {% if product.deliveredTo %}
+              <td align=center>
+                {% for drop in drops %}
+                  {% if drop.released and drop.package_revision__id == item.id %}
+                      {% if product.name != "None" and drop.drop__release__product__id == product.id %}
+                           <a href="/{{ product }}/drops/{{ drop.drop__name }}">{{ drop.drop__name }}</a><br>
+                      {% else %}
+                           <a href="/{{ drop.drop__release__product__name }}/drops/{{ drop.drop__name }}">{{ drop.drop__release__product__name }}:{{ drop.drop__name }}</a><br>
+                      {% endif %}
+                  {% endif %}
+                {% endfor %}
+               </td>
+            {% endif %}
+
+            {# Display if it was built with a prototype 3pp or not #}
+            {% if product.prototypeBuild %}
+                {% if item.non_proto_build == "true" %}
+                    <td align=center>False</td>
+                {% else %}
+                    <td align=center>True</td>
+                {% endif %}
+            {% endif %}
+            {# KGB Test Results #}
+            {% if product.kgbTests %}
+                <td align=center class="compile"><p align="center">
+                {% if item.kgb_test == "not_started" %}
+                    <img src="/static/images/{{item.kgb_test}}.png" alt="{{item.kgb_test}}" class="status-summary-img">
+                {% else %}
+                    {% if item.kgb_snapshot_report = True %}
+                       <a href="/{{ product }}/returnresults/{{ item.package__name }}/{{ item.version }}/kgb/{{ item.m2type }}"><img src="/static/images/snapshot_{{item.kgb_test}}.png" alt="snapshot_{{item.kgb_test}}" title="Snapshot(s) Used in KGB Testing" class="status-summary-img"></a>
+                    {% else %}
+                       <a href="/{{ product }}/returnresults/{{ item.package__name }}/{{ item.version }}/kgb/{{ item.m2type }}"><img src="/static/images/{{item.kgb_test}}.png" alt="{{item.kgb_test}}" class="status-summary-img"></a>
+                   {% endif %}
+                <span style="display:none">{{item.kgb_test}}</span></p></td>
+            {% endif %}
+            {# Team KGB #}
+                {% if product.teamRunningKgb %}
+                    {% if item.team_running_kgb__parent__element %}
+                        <td colspan="2" align=center title="The team that ran the KGB test">{{ item.team_running_kgb__parent__element }} - {{ item.team_running_kgb__element}}</td>
+                    {% else %}
+                        <td colspan="2" align=center title="The team that ran the KGB test">No Team Specified</td>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {# CID Test Results #}
+            {% if product.cidTests %}
+                {% if item.cid_test == "not_started" %}
+                    <td align=center class="unit_test"><p align="center"><img src="/static/images/{{item.cid_test}}.png" alt="{{item.cid_test}}" width="40" height="40"><span style="display:none">{{item.cid_test}}</span></p></td>
+                {% else %}
+                    <td align=center class="compile"><p align="center"><a href="/{{ product }}/returnresults/{{ item.package__name }}/{{ item.version }}/cid/{{ item.m2type }}"><img src="/static/images/{{item.cid_test}}.png" alt="{{item.cid_test}}" width="40" height="40"></a><span style="display:none">{{item.cid_test}}</span></p></td>
+                {% endif %}
+            {% endif %}
+
+            {# CDB Test Results #}
+            {% if product.cdbTests %}
+                {% if item.cdb_test == "not_started" %}
+                    <td align=center class="unit_test"><p align="center"><img src="/static/images/{{item.cdb_test}}.png" alt="{{item.cdb_test}}" width="40" height="40"><span style="display:none">{{item.cbd_test}}</span></p></td>
+                {% else %}
+                    <td align=center class="compile"><p align="center"><a href="/{{ product }}/returnresults/{{ item.package__name }}/{{ item.version }}/cdb/{{ item.m2type }}"><img src="/static/images/{{item.cdb_test}}.png" alt="{{item.cdb_test}}" width="40" height="40"></a><span style="display:none">{{item.cdb_test}}</span></p></td>
+                {% endif %}
+                {% endif %}
+
+            {# Display any ISO builds this revision has been included in #}
+            {% if product.name != "None" %}
+              {% if product.isoIncludedIn %}
+                <td align=center>
+                        {% for isoMapping in isoMappings %}
+                            {% if isoMapping.package_revision_id == item.id %}
+                                <a href="/{{ product }}/isoVersionList/{{ item.package__name }}/{{ item.version }}/{{ item.platform }}/{{ item.m2type }}">ISO(s)</a><br>
+                                {{ forloop|break }}
+                            {% endif %}
+                        {% endfor %}
+                </td>
+              {% endif %}
+            {% endif %}
+            {# Deliver the package revision (If not built with a 3pp prototype) #}
+            {% if product.deliver %}
+                {% if item.non_proto_build == "true" %}
+                    <td align=center colspan="2">
+                        {% if product.name != "None" %}
+                            {% if product.name != "ENM" %}
+                                <a id="deliver_{{ item.RState }}" href="/{{ product }}/delivery/{{ item.package__name }}/{{ item.version }}/{{ item.platform }}/{{ item.m2type }}">Deliver&nbsp;this</a>
+                            {% else %}
+                                <a id="deliver_{{ item.RState }}" href="/{{ product.name }}/multipleDeliveries/?package={{ item.package__name }}&version={{ item.version }}">Deliver&nbsp;to&nbsp;queue</a>
+                            {% endif %}
+                        {% else %}
+                            <a id="new_deliver_{{ item.RState }}" href="/{{ product }}/delivery/{{ item.package__name }}/{{ item.version }}/{{ item.platform }}/newPackageRelease/{{ item.m2type }}">Deliver&nbsp;this</a>
+                        {% endif %}
+                    </td>
+                {% else %}
+                    <td align=center>---</td>
+                {% endif %}
+            {% endif %}
+            {% if not item.package__testware == True %}
+            {# Product Revision Information (PRI) Column #}
+            {% if product.pri %}
+                {% if product.name != "None" %}
+                    <td align=center><a href="/{{ product }}/pri/{{ item.package__package_number }}/{{ item.platform }}/{{ item.version }}/{{ item.m2type }}">PRI</a></td>
+                {% endif %}
+            {% endif %}
+            {% endif %}
+            {# Obsolete Column shows if this version has been removed/obsoleted from any drops #}
+            {% if product.obsolete %}
+              <td align=center>
+                  {% for drop in drops %}
+                    {% if drop.obsolete and drop.package_revision__id == item.id %}
+                       {% if product.name != "None" and drop.drop__release__product__id == product.id %}
+                          <a href="/{{product}}/drops/{{ drop.drop__name }}/obsoleteInfo/">{{drop.drop__name}}</a><br>
+                       {% else %}
+                          <a href="/{{drop.drop__release__product__name}}/drops/{{ drop.drop__name }}/obsoleteInfo/">{{ drop.drop__release__product__name }}:{{ drop.drop__name}}</a><br>
+                       {% endif %}
+                   {% endif %}
+                 {% endfor %}
+              </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+{% endspaceless %}
+{% endblock %}

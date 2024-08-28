@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solutionset xmlns:tor-ss="http://www.ericsson.com/tor-ss"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+    xs:schemaLocation="http://www.ericsson.com/tor-ss ../xsd/solutionset.xsd">
+    <name>TOR Solution Set 1</name>
+    <description>
+        This is an attempt at starting to map out what a solution set might look like.
+        It does not actually describe a solution to any problem - except the problem of
+        defining what a solution set might look like.
+    </description>
+    <version>1.0.0</version>
+</solutionset>

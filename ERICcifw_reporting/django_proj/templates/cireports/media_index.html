@@ -1,0 +1,33 @@
+{% extends "cireports/base.html" %}
+{% if product %}
+
+    {% block title %}{{ product.name }} Media {% endblock %}
+    {% block content %}
+        <div id="generic-title">
+            <div id="text-container">{{ product.name }} Media <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/ISO" title="ISO Help" target="_blank"><img src="/static/images/question.png"/></a></div>
+        </div>
+        <div class="full-details">
+            <br>
+            <div class="generic-text">
+                {% if isos %}
+                    <table id="iso-table">
+                        <tr>
+                            <th>ISO Artifact</th>
+                        </tr>
+                        {% for item in isos %}
+                            <tr>
+                                <td align="center"><a href="/{{ product.name }}/iso/{{ item }}">{{ item }}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <table class="iso-table">
+                        <tr>
+                            <td><p><center>No Information Available in the Database</center></p></td>
+                        </tr>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}

@@ -1,0 +1,107 @@
+#!/bin/bash
+#
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; pwd)
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+# mod_ssl needs a pass-phrase from the user.
+INITLOG_ARGS=""
+
+prog=$(basename $0)
+TDIR=$(cd $(dirname $0) ; pwd)
+
+# etc dir is the directory up from this one
+ETCDIR=$(dirname $TDIR)
+
+
+RETVAL=0
+STOP_TIMEOUT=${STOP_TIMEOUT-10}
+RABBIT_MQDIR=("/proj/lciadm100/tools/rabbitmq/latest")
+RABBIT_MQPIDFILE="${RABBIT_MQDIR}/var/"
+RABBIT_MQSERVER="/sbin/rabbitmq-server"
+RABBIT_MQCTL="/sbin/rabbitmqctl"
+RABBIT_MQADMIN="/sbin/rabbitmqadmin"
+RABBIT_MQCONFIG=${BASEDIR}"/etc/rabbitMQ.cfg"
+
+#Start Rabbit MQ
+start() {
+        echo -n $"Starting $prog: "
+        startcommand="${RABBIT_MQDIR}${RABBIT_MQSERVER} start -detached"
+        echo -n " Running: " $startcommand 
+        $startcommand
+        STARTRETVAL=$?
+        echo -n $"Applying Config"
+        $_SLEEP 5
+        loadconfigcommand="${RABBIT_MQDIR}${RABBIT_MQADMIN} import ${RABBIT_MQCONFIG}"
+        echo -n " Running: " ${loadconfigcommand}
+        $loadconfigcommand
+        CONFIGRETVAL=$?
+        echo
+        RETVAL=$((${CONFIGRETVAL}+${STARTRETVAL}))
+        [ $RETVAL = 0 ]
+        return $RETVAL
+}
+
+#Stop Rabbit MQ 
+stop() {
+        echo -n $"Stopping $prog: "
+        stopcommand="${RABBIT_MQDIR}${RABBIT_MQCTL} stop"
+        echo -n "Running: " $stopcommand 
+        $stopcommand
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ]
+        return $RETVAL
+}
+
+#Rabbit MQ Status
+status() {
+    echo -n $"Status $prog: "
+    statuscommand="${RABBIT_MQDIR}${RABBIT_MQCTL} status" 
+    echo -n "Running: " $statuscommand
+    $statuscommand
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ]
+    return $RETVAL 
+}
+#Restart MQ Server stoping on pid file
+restart() {
+    rabbitMQPID=$(${RABBIT_MQDIR}${RABBIT_MQCTL} status | $_EGREP pid | sed 's/[^0-9]*//g')
+    echo ${rabbitMQPID} >> ${RABBIT_MQPIDFILE}
+    echo -n $"Stopping $prog: on PID $RABBIT_MQPIDFILE"
+    stopcommand="${RABBIT_MQDIR}${RABBIT_MQCTL} stop $RABBIT_MQPIDFILE"
+    echo -n "Running: " $stopcommand
+    $stopcommand
+    rmpidFile=$(/bin/rm -rf $RABBIT_MQPIDFILE)
+    echo -n $"Starting $prog: "
+    start
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ]
+    return $RETVAL
+}
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+    status
+	;;
+  restart)
+	restart
+	;;
+  *)
+	echo $"Usage: $prog {start|stop|status|restart}"
+	RETVAL=2
+esac
+
+exit $RETVAL

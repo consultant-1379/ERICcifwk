@@ -1,0 +1,30 @@
+#! /bin/bash
+# Checks for message bus consumer process and restarts if not there process 
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+export PYTHONPATH=/proj/lciadm100/cifwk/latest/lib/python:/proj/lciadm100/cifwk/latest/django_proj/:/proj/lciadm100/cifwk/ERICcifwk/latest/lib/python
+
+PATTERN="$_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/eiffel_monitor_daemon.py.*start$"
+
+stop_start_messagebus(){
+    $_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/eiffel_monitor_daemon.py stop
+    $_SLEEP 2
+    $_PYTHON /proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/eiffel_monitor_daemon.py start
+    $_SLEEP 2
+    $_ECHO "Message Bus Consumer restarted on `$_HOSTNAME`" | $_MAILX -S smtp=$SMTP_SERVER -s "Message Bus Consumer restarted on `$_HOSTNAME`" PDLCIAXISC@pdl.internal.ericsson.com
+}
+
+if  $_PGREP -f "${PATTERN}"  >/dev/null ;then
+    $_ECHO "Message bus consumer running"
+    val=$(/proj/lciadm100/cifwk/latest/bin/check_messagebus_queue_length.sh)
+    val=$(($val))
+    if [ ${val} -gt 10 ]; then
+        stop_start_messagebus
+    fi
+else
+    $_ECHO "Message bus consumer not running"
+    stop_start_messagebus
+fi

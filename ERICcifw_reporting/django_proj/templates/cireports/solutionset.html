@@ -1,0 +1,46 @@
+{% extends "cireports/base.html" %}
+{% if product %}
+    {% block title %} {{ product.name }} {{ solset.name }} {% endblock %}
+    {% block content %}
+    <script type="text/javascript">
+        (function($) {
+         $(document).ready(function() {
+             oldhtml = "";
+             function doRequest() {
+                $.ajax({
+                    type: 'GET',
+                    url: "/{{ product.name }}/solutionsets/{{ solset.name }}/xml/",
+                    dataType: 'html',
+                    cache: false,
+                    success: function(html, textStatus) {
+                        if (html != oldhtml) {
+                            $('table.solset-revisions').replaceWith(html);
+                            oldhtml = html;
+                        }
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                         if (xhr.status != 0)
+                            {
+                                $('table.solset-revisions').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                    }, 
+                    });
+                   }
+                   doRequest();
+                 });
+             })(jQuery);
+     </script>
+
+    <div id="generic-title">
+       <div id="text-container">{{ product.name }} Solution Set Data For {{ solset.name }}: {{ solset.product_number }}</div>
+    </div>
+    <br>
+    <div id="generic-sub-title">
+        <br><br><br>
+        <table class="solset-revisions">
+            <tr><td> Loading Data ... </td></tr>
+        </table>
+    </div>
+
+    {% endblock %}
+{% endif %}

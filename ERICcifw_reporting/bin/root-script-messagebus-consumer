@@ -1,0 +1,37 @@
+#!/bin/bash
+# chkconfig: 2345 20 80
+#            |   |  |
+#            |   |  +--Stop priority
+#            |   +-----Start priority
+#            +---------Default runlevels
+# description: Message Bus Consumer init.d script
+# processname: message-bus-consumer
+# logfile: /proj/lciadm100/cifwk/logs/messagebus/messagebus.log
+#
+# Source CI Framework global environment, if available.
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+_PWD=pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; $_PWD)
+if [ -f ${BASEDIR}/etc/global.env ]; then
+        . ${BASEDIR}/etc/global.env
+else
+    _ECHO=/bin/echo
+    _SU=/bin/su
+fi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+DESC="Message Bus Consumer"
+MSG_BUS_CONSUMER=/proj/lciadm100/cifwk/latest/etc/init.d/message-bus-consumer
+USER=lciadm100
+
+
+### Main Logic ###
+$_ECHO "$1 ${DESC} Service as ${USER}"
+$_SU - ${USER} -c "${MSG_BUS_CONSUMER} $1" &
+
+exit 0
+

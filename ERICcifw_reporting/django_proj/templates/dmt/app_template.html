@@ -1,0 +1,31 @@
+{% extends "dmt/base.html" %}
+
+{% block title %} {% endblock %}
+
+{% block content %}
+<h3>Application Template : {{ template.name }}</h3>
+<a href="/dmt/{{ template.name }}/startapp">Start an Instance of this Template</a>
+<p/>
+<table border=1>
+    <thead>VMs</thead>
+    <tr>
+        <th>Name</th>
+        <th>Hostname</th>
+        <th>Type</th>
+        <th>IP Address(es)</th>
+    </tr>
+    {% for k,v in vmInfo.items %}
+    <tr>
+        <td>{{ k }}</td>
+        <td>{{ v.hostname }}</td>
+        <td>{{ v.type }}</td>
+        <td>
+        {% for i in v.ipaddresses %}
+            {{ i }}<br/>
+        {% endfor %}
+    </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

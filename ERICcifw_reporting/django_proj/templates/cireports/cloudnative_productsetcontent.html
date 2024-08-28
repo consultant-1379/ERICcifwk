@@ -1,0 +1,215 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} cENM Product Set Content {% endblock %}
+{% block content %}
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    });
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">cENM Product Set Content</h2>
+    <button class="glyphicon glyphicon-info-sign" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Helm Revision Page"></button>
+    <br><br>
+    <table class="general-table" style="width:30%;  box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+        <tr>
+            <td width="50%"><b>Product Set</b></td>
+            <td><a href="/ENM/content/{{ drop }}/{{ product_set_version }}">{{ product_set_version }}</a></td>
+        </tr>
+    </table>
+    <br>
+    <div class="sub-title"><b>Current Status</b></div>
+        <br>
+            <table class="drop-cdbs status-summary">
+               <tr>
+                    {% for confLevel, status in cnProductSetStatus.items %}
+                    <td style="padding: 0 20px">
+                        <p class="cdb-title"> {{ confLevel }}</p>
+                        <img src="/static/images/{{ status }}.png" alt="{{ status }}" wdith="40" height="40"><br><br><b>State is:</b> {{ status }}<br>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </table>
+    <br>
+    {% if deployUtilsRev %}
+        <h3>Deployment Utilities</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <br>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                </tr>
+            </thead>
+            {% for deployUtil in deployUtilsRev %}
+            <tr>
+                <td>{{ deployUtil.product.product_name }}</td>
+                <td>{{ deployUtil.version }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h3>Deployment Utilities</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <tr>
+                <td>No Deployment Utilities association with this Product Set Version</td>
+            </tr>
+        </table>
+    {% endif %}
+    <br><br>
+    {% if deployUtilDetRev %}
+        <h3>Deployment Utility Detail</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <br>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                    <th>Gerrit SHA</th>
+                    <th>Size</th>
+                    <th>Created</th>
+                    <th>Deployment Utility Download</th>
+                </tr>
+            </thead>
+            {% for deployUtilDet in deployUtilDetRev %}
+            <tr>
+                <td>{{ deployUtilDet.product.product_name }}</td>
+                <td>{{ deployUtilDet.version }}</a></td>
+                <td><a href="https://gerrit-gamma.gic.ericsson.se/gitweb?p={{ deployUtilDet.product.repo_name }}.git;a=commitdiff;h={{ deployUtilDet.gerrit_repo_sha }}">{{ deployUtilDet.gerrit_repo_sha }}</a></td>
+                <td>{{ deployUtilDet.size|filesizeformat }}</td>
+                <td>{{ deployUtilDet.created }}</td>
+                <td><a href="{{ deployUtilDet.dev_link }}"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h3>Deployment Utility Detail</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <tr>
+                <td>No Deployment Utility Detail association with this Product Set Version</td>
+            </tr>
+        </table>
+    {% endif %}
+    <br><br>
+    {% if csarRevList %}
+        <h3>CSAR</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <br>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                    <th>Gerrit Sha</th>
+                    <th>Size (MB)</th>
+                    <th>Created</th>
+                    <th>CSAR Download</th>
+                    <th>Published CSAR Download</th>
+                </tr>
+            </thead>
+            {% for csarRev in csarRevList %}
+                <tr>
+                    <td>{{ csarRev.product.product_name }}</td>
+                    <td>{{ csarRev.version }}</td>
+                    <td><a href="https://gerrit-gamma.gic.ericsson.se/gitweb?p={{ csarRev.product.repo_name }}.git;a=commitdiff;h={{ csarRev.gerrit_repo_sha }}">{{ csarRev.gerrit_repo_sha }}</a></td>
+                    <td>{{ csarRev.size }}</td>
+                    <td>{{ csarRev.created }}</td>
+                    <td><a href="{{ csarRev.dev_link }}"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+                    {% if csarRev.verified %}
+                        <td><a href="{{ csarRev.product.published_link }}/{{ csarRev.product.product_name }}/{{ csarRev.product.product_name }}-{{ csarRev.version }}.csar"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+                    {% else %}
+                        <td><a href="{{ csarRev.product.published_link }}/{{ csarRev.product.product_name }}/{{ csarRev.product.product_name }}-{{ csarRev.version }}.csar"><button class="glyphicon glyphicon-minus-sign" type="button" style="color: red" class="btn btn-secondary" title="CSAR hasn't been verified yet" disabled></button></a></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h3>CSAR</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <tr>
+                <td>No CSAR association with this Product Set Version</td>
+            </tr>
+        </table>
+    {% endif %}
+    <br><br>
+    {% if integrationValueFilesList %}
+        <h3>Integration Values File </h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <br>
+            {% if integrationValueFilesList %}
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Integration Values File Download</th>
+                        <th>Published Integration Values File Download</th>
+                    </tr>
+                </thead>
+                {% for integrationValueFileRev in integrationValueFilesList %}
+                    <tr>
+                        <td>{{ integrationValueFileRev.product.product_name }}</td>
+                        <td>{{ integrationValueFileRev.version }}</td>
+                        <td><a href="https://arm.epk.ericsson.se/artifactory/proj-enm-dev-internal-helm/eric-enm-integration-values/{{ integrationValueFileRev.product.product_name }}-{{ integrationValueFileRev.version }}.yaml"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+                        {% if integrationValueFileRev.verified %}
+                            <td><a href="https://arm.epk.ericsson.se/artifactory/proj-enm-helm/eric-enm-integration-values/{{ integrationValueFileRev.product.product_name }}-{{ integrationValueFileRev.version }}.yaml"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+                        {% else %}
+                            <td><a href="https://arm.epk.ericsson.se/artifactory/proj-enm-helm/eric-enm-integration-values/{{ integrationValueFileRev.product.product_name }}-{{ integrationValueFileRev.version }}.yaml"><button class="glyphicon glyphicon-minus-sign" type="button" style="color: red" class="btn btn-secondary" title="Integration value file hasn't been verified yet" disabled></button></a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>No Integration Values File association with this Product Set Version</td>
+                </tr>
+            {% endif %}
+        </table>
+    {% else %}
+        <h3>Integration Value Files</h3>
+        <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <tr>
+                <td>No Integration value files associated with this Product Set Version</td>
+            </tr>
+        </table>
+    {% endif %}
+    <br><br>
+    {% if listOfIntegrationCharts %}
+    <h3>Integration Charts</h3>
+    <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+        <br>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Gerrit SHA</th>
+                <th>Size</th>
+                <th>Created</th>
+                <th>Integration Chart Download</th>
+                <th>Published Integration Chart Download</th>
+            </tr>
+        </thead>
+        {% for integration in listOfIntegrationCharts %}
+        <tr>
+            <td>{{ integration.product.product_name }}</td>
+            <td><a href="cloudnative/getCloudNativeHelmRevision/{{ default_product_set_version }}/{{ integration.product.product_name }}/{{ integration.version }}/">{{ integration.version }}</a></td>
+            <td><a href="https://gerrit-gamma.gic.ericsson.se/gitweb?p={{ integration.product.repo_name }}.git;a=commitdiff;h={{ integration.gerrit_repo_sha }}">{{ integration.gerrit_repo_sha }}</a></td>
+            <td>{{ integration.size|filesizeformat }}</td>
+            <td>{{ integration.created }}</td>
+            <td><a href="{{ integration.dev_link }}"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+            {% if integration.verified %}
+                <td><a href="{{ integration.product.published_link }}/{{ integration.product.product_name }}/{{ integration.product.product_name }}-{{ integration.version }}.tgz"><button class="glyphicon glyphicon-download" type="button" class="btn btn-secondary"></button></a></td>
+            {% else %}
+                <td><a href="{{ integration.product.published_link }}/{{ integration.product.product_name }}/{{ integration.product.product_name }}-{{ integration.version }}.tgz"><button class="glyphicon glyphicon-minus-sign" style="color: red" type="button" class="btn btn-secondary" title="integration chart hasn't been verified yet" disabled></button></a></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <h3>Integration Charts</h3>
+    <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+        <tr>
+            <td>No Integration chart association with this Product Set Version</td>
+        </tr>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

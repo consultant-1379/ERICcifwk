@@ -1,0 +1,8 @@
+<INCLUDE NODE: SC PL >
+      <litp:tipc-address id="<TIPC_ADDRESS_ID>">
+        <address><TIPC_ADDRESS></address>
+        <netid><NODE_NETID></netid>
+        <nodenumber><TIPC_NODE_NUMBER></nodenumber>
+        <require></require>
+        <vlan></vlan>
+      </litp:tipc-address>

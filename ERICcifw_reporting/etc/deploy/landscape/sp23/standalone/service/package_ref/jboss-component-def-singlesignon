@@ -1,0 +1,17 @@
+<INCLUDE NODE: singlesignon >
+  <litp:component-def id="singlesignon">
+    <name>singlesignon</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <app-type>war</app-type>
+      <install-source><EARWAR_FILE></install-source>
+      <name><EARWAR_NAME></name>
+      <service>jee_torSSO</service>
+      <version><PACKAGE_VERSION></version>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICsinglesignon_CXP9022934</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>

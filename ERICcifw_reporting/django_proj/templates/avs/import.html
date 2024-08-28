@@ -1,0 +1,25 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI FWK AVS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">AVS: Upload Mind Map
+        </div>
+    </div>
+
+    <div class="generic-text">
+        <br>
+        <h3>Please select an Automated Verification Spec Mind Map from your local system and click the Import</h3>
+        <br>
+        <form enctype="multipart/form-data" name="import_AVS" method="post" action="../avs_submit/">{% csrf_token %}
+            <table id="avsEpics-table">
+                {{ form.as_table }} 
+                <tr>
+                    <td width="10%"></td>
+                    <td><input type="submit" value="Import"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{% endblock %}

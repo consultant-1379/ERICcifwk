@@ -1,0 +1,100 @@
+#!/bin/bash
+# chkconfig: 2345 20 80  
+#            |   |  |   
+#            |   |  +--Stop priority    
+#            |   +-----Start priority   
+#            +---------Default runlevels    
+# description: Message Bus Consumer init.d script
+# processname: message-bus-consumer     
+# logfile: /proj/lciadm100/cifwk/logs/messagebus/messagebus.log    
+#
+# Source CI Framework global environment, if available.     
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+_PWD=pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; $_PWD)
+if [ -f ${BASEDIR}/etc/global.env ]; then
+    . ${BASEDIR}/etc/global.env
+else
+   _ECHO=/bin/echo
+   _CAT=/bin/cat
+   _RM=/bin/rm
+   _SLEEP=/bin/sleep
+   _PYTHON=/usr/bin/python
+fi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+export PYTHONPATH=/proj/lciadm100/cifwk/latest/django_proj/:$PYTHONPATH
+
+DESC="Message Bus Consumer"  
+EIFFEL_MONITOR_DIR=/proj/lciadm100/cifwk/latest/django_proj/fem/management/commands/eiffel_monitor_daemon.py
+PID_FILE=/tmp/testdaemon.pid
+
+
+# Start the service Message Bus Consumer
+start() {
+        if [ -f "${PID_FILE}" ]; then
+           $_ECHO -n " ${DESC} Service is already running on -  "
+           $_CAT ${PID_FILE}
+           exit 1
+        else 
+            $_ECHO "Starting ${DESC} Service"
+            $_PYTHON ${EIFFEL_MONITOR_DIR} start 
+        fi
+        
+}
+
+# Stop the service Message Bus Consumer
+stop() {
+        $_ECHO "Stopping ${DESC} Service"
+        if [ -f "${PID_FILE}" ]; then
+            $_PYTHON ${EIFFEL_MONITOR_DIR} stop
+            $_RM -f ${PID_FILE}
+        fi               
+}
+
+# Status the service Message Bus Consumer
+status(){
+        if [ -f "${PID_FILE}" ]; then
+            $_ECHO -n "${DESC} Service is running on -  "
+            $_CAT ${PID_FILE}
+        else
+            $_ECHO "${DESC} Service not running."
+            exit 1
+        fi
+                       
+}
+
+#Restarting the service Message Bus Consumer 
+restart(){
+        $_ECHO "Restarting ${DESC} Service: "
+        stop
+        $_SLEEP 1
+        start
+}
+
+
+
+### Main Logic ###
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status
+        ;;
+  restart)
+        restart
+        ;;
+  *)
+        $_ECHO "${DESC} Service Usage: $0 {start|stop|restart|status}"
+        exit 2
+esac
+
+exit 0

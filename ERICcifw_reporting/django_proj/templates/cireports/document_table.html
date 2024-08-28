@@ -1,0 +1,72 @@
+{% extends "base_newlookandfeel.html" %}
+{% if products %}
+    {% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+    {% block content %}
+       <script type="text/javascript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title" id="text-container">{{ product.name }} Drop {{ version }} Document Baseline
+            <a class="img" href="/{{ product.name }}/addDocument/{{ version }}/" title="Register A Document for Drop {{ version }}"><img src="/static/images/create.png"/></a>
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Document+Baseline+Page" title="Document Baseline Help" target="_blank"><img src="/static/images/question.png"/></a>
+            <a class="img" href="/{{ product.name }}/{{ version }}/GATinformation" title="Generate GAT Information"><img src="/static/images/writegat.png"/></a>
+            <a class="img" href="/{{ product.name }}/{{ version }}/GenerateNodePRI" title="Generate Node PRI"><img src="/static/images/nodepri.png"/></a>
+        </h2>
+        <div class="full-details">
+            <br>
+            <table class="general-table" id='documents-table'>
+                <tr>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Document Number</th>
+                    <th>Revision</th>
+                    <th>Delivered To</th>
+                    <th>Delivered On</th>
+                    <th>Delivered By</th>
+                    <th>Comment</th>
+                    <th>CPI</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+                {% if docObjList %}
+                    {% for document in docObjList %}
+                        <tr>
+                            <td align=center>{{ document.document_type.type }}</td>
+                            <td align=center><a href="{{ document.link }}">{{ document.name }}</a></td>
+                            <td align=center>{{ document.author }}</td>
+                            <td align=center>{{ document.number }}</td>
+                            <td align=center>{{ document.revision }}</td>
+                            <td align=center>{{ document.drop.name }}</td>
+                            <td align=center>{{ document.deliveryDate }}</td>
+                            <td align=center>{{ document.owner }}</td>
+                            <td align=center>{{ document.comment }}</td>
+                            {% if document.cpi %}
+                                <td align=center>Yes</td>
+                            {% else %}
+                                <td align=center>No</td>
+                            {% endif %}
+                            <td style="text-align: left;">
+                                <a class="img" href="/{{ product.name }}/{{ version}}/{{ document.id }}/editDocument/" title="Edit {{ document.name }} Server"><img src="/static/images/edit.png"/></a>
+                             </td>
+                             <td style="text-align: left;">
+                                <a class="img" href="javascript:void(0)"
+                                    onClick="checkAction('Do you really want to Delete {{ document.id }} from Drop {{ version }}?', '/{{ product.name }}/{{ version}}/{{ document.id }}/deleteDocument/')" title="Delete {{ document.id }} Server"><img src="/static/images/delete.png"/></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <table id='documents-table'>
+                        Sorry There are no Documents Associated with {{ product }} Drop {{ version }}.
+                    </table>
+                {% endif %}
+            </table>
+        </div>
+        {% endblock %}
+    </div>
+    {% endif %}

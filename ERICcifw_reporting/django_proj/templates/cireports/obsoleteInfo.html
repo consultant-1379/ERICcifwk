@@ -1,0 +1,118 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Obsolete Package History{% endblock %}
+{% block content %}
+<script type="text/javascript" src="/static/toggleTabsOnClick.js"></script>
+      <div class="artifact-container">
+           <h2 class="generalPageNewLook-title">{{ product }} Obsolete History for {{ drop }}</h2>
+            <div class="layout-bar">
+                <a href="/{{ product.name}}/drops/{{ drop }}">Drop:{{ drop }}</a>
+                {% if product.name == "ENM" %}
+                 | <a href="/{{ product.name}}/queue/{{ drop }}">Delivery Queue</a>
+                {% endif %}
+            </div>
+            <br>
+            <div class="tablinksborder">
+              <ul class="tab">
+                {% if pkgs %}
+                 <li><a id="packages-tab" class="tablinks" href="javascript:void(0);">Packages</a></li>
+                {% endif %}
+                {% if testware %}
+                <li><a id="testware-tab" class="tablinks" href="javascript:void(0);">Testware</a></li>
+                {% endif %}
+            </ul>
+            </div>
+            {% if pkgs %}
+              <div id="packages" class="tabcontent">
+                <table class="artifact-table">
+                        <thead>
+                                <tr>
+                                        <th colspan="3">Name</th>
+                                        <th>Number</th>
+                                        <th>Version</th>
+                                        <th>RState</th>
+                                        <th>Date Created</th>
+                                        <th>Delivered By</th>
+                                        <th><font color="red">Obsoleted by</font></th>
+                                        <th colspan="4"><font color="red">Reason</font></th>
+                                        <th><font color="red">Date Obsoleted</font></th>
+                                </tr>
+                        </thead>
+
+         {% for item in pkgs %}
+                <tr>
+                    <!--Package Name-->
+                    <td align=center colspan="3"><a href="/{{ product }}/packages/{{ item.dpm.package_revision.package.name }}">{{ item.dpm.package_revision.artifactId }}</a></td>
+                    <!--Package Number-->
+                    <td align=center>{{ item.dpm.package_revision.package.package_number }}</td>
+                    <!--Version-->
+                    <td align=center>{{ item.dpm.package_revision.version }}</td>
+                    <!--RState-->
+                    <td align=center>{{ item.dpm.package_revision.getRState }}</td>
+                    <!--Date of package creation-->
+                    <td align=center>{{ item.dpm.date_created }}</td>
+                    <!--Signum of Product Deliverer-->
+                    <td align=center><a href="mailto:{{ item.dpm.deliverer_mail }}?Subject=Query regarding {{ item.dpm.package_revision.package.name }} {{ item.dpm.package_revision.version }}">{{ item.dpm.deliverer_name }}</a></td>
+                    <!--Signum of user who made obsoletion-->
+                    <td align=center><a href="mailto:{{ item.signum }}?Subject=Query regarding the obsoletion of {{ item.dpm.package_revision.package.name }} {{ item.dpm.package_revision.version }}">{{ item.signum }}</a></td>
+                    <!--Reason for obsoletion-->
+                    <td align=center colspan="4">{{ item.reason }}</td>
+                    <!--Time and date of obsoletion-->
+                    <td align=center>{{ item.time_obsoleted }}</td>
+
+                </tr>
+        {% endfor %}
+    </table>
+            </div>
+     {% endif %}
+     {% if testware %}
+      <div id="testware" class="tabcontent">
+         <table class="artifact-table">
+                        <thead>
+                                <tr>
+                                        <th colspan="3">Name</th>
+                                        <th>Number</th>
+                                        <th>Version</th>
+                                        <th>RState</th>
+                                        <th>Date Created</th>
+                                        <th>Delivered By</th>
+                                        <th><font color="red">Obsoleted by</font></th>
+                                        <th colspan="3"><font color="red">Reason</font></th>
+                                        <th><font color="red">Date Obsoleted</font></th>
+                                </tr>
+                        </thead>
+
+         {% for item in testware %}
+                <tr>
+                    <!--Package Name-->
+                    <td align=center colspan="3"><a href="/{{ product }}/packages/{{ item.dpm.package_revision.package.name }}">{{ item.dpm.package_revision.artifactId }}</a></td>
+                    <!--Package Number-->
+                    <td align=center>{{ item.dpm.package_revision.package.package_number }}</td>
+                    <!--Version-->
+                    <td align=center>{{ item.dpm.package_revision.version }}</td>
+                    <!--RState-->
+                    <td align=center>{{ item.dpm.package_revision.getRState }}</td>
+                    <!--Date of package creation-->
+                    <td align=center>{{ item.dpm.date_created }}</td>
+                    <!--Signum of Product Deliverer-->
+                    <td align=center><a href="mailto:{{ item.dpm.deliverer_mail }}?Subject=Query regarding {{ item.dpm.package_revision.package.name }} {{ item.dpm.package_revision.version }}">{{ item.dpm.deliverer_name }}</a></td>
+                    <!--Signum of user who made obsoletion-->
+                    <td align=center><a href="mailto:{{ item.signum }}?Subject=Query regarding the obsoletion of {{ item.dpm.package_revision.package.name }} {{ item.dpm.package_revision.version }}">{{ item.signum }}</a></td>
+                    <!--Reason for obsoletion-->
+                    <td align=center colspan="3">{{ item.reason }}</td>
+                    <!--Time and date of obsoletion-->
+                    <td align=center>{{ item.time_obsoleted }}</td>
+
+                </tr>
+        {% endfor %}
+          </table>
+        </div>
+        {% endif %}
+        </div>
+        {% if not obInfo %}
+                <br>
+                <br>
+                <br>
+                <!--Error message if no information or obsolete packages are present-->
+               <div align=center>No information found for {{ product}} {{ drop }}.</div>
+         {% endif %}
+{% endblock %}

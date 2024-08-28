@@ -1,0 +1,168 @@
+#!/bin/bash -a
+#
+# Build script for CI Framework
+#
+
+#
+# usage:
+# Print out the usage for this script
+#
+usage() {
+    $_CAT <<EOF
+    USAGE: $0 Git_Username
+           Provide a Git username to clone the CI FWK reporting repository
+EOF
+    exit 1
+}
+
+#
+# checkTag:
+# Searches the GIT repo for a TAG with todays date and build number
+# Will create a new TAG and Increment the build number if one is found
+# Otherwise it will create a new TAG with todays date
+#
+checkTag(){
+    cd ${BUILDDIR}/ERICcifw_reporting/
+    MYNUM=1
+    TAG="CIFWK_${GIT_TGDATE}"
+    # Check if tag exists
+    CHECKTAG=$($_GIT tag -l | $_EGREP ${TAG} | $_SORT -n | $_TAIL -1)
+    log "checktag is ${CHECKTAG}"
+    if [ ! -z ${CHECKTAG} ] ; then
+        # Check for existing tags created today
+        log "${CHECKTAG} found.. Checking for other TAGS created today"
+        TOPNUM=$($_GIT tag | $_EGREP "^${TAG}_[0-9][0-9]*$" | $_AWK -F'_' '{print $NF}' | $_SORT -n | $_TAIL -1)
+        if [ ! -z ${TOPNUM} ] ; then
+            #log "TOPNUM is ${TOPNUM}"
+            MYNUM=$($_EXPR ${TOPNUM} + 1)
+            PREV_TAG="${TAG}_${TOPNUM}"
+        fi
+    fi
+    TAG="${TAG}_${MYNUM}"
+    log "Tag to apply is ${TAG}"
+}
+
+#
+# createTar:
+# Rename the GIT REPO to match the TAG and tar & gzip it
+#
+createTar() {
+    cd ${BUILDDIR}/
+    $_CP -R ERICcifw_reporting ${TAG} 
+
+    $_TAR cf ${TAG}.tar ${TAG} >> ${LOG_FILE} 2>&1
+    if [ $? -ne 0 ] ; then
+        error "Could not create tar file"
+    fi
+
+    $_GZIP ${TAG}.tar
+    if [ $? -ne 0 ] ; then
+        error "Could not compress tar file"
+    fi
+
+    $_MV ${TAG}.tar.gz ${BASEDIR}
+    cd -
+}
+
+#
+# cleanUp:
+# Remove the temporary build directory containing the cloned GIT repository
+#
+cleanUp() {
+    log "Clean up of ${BUILDDIR}"
+    $_RM -rf ${BUILDDIR}
+}
+
+#
+# updateSql:
+# Append the GIT TAG to the migrate.sql if it exists
+#
+updateSql() {
+    if [ -f ${MIGRATESQL} ] ; then
+        log "Appending tag to migrate.sql"
+        $_ECHO >> ${MIGRATESQL}
+        $_ECHO "-- END ${TAG}" >> ${MIGRATESQL}
+    else
+        error "${MIGRATESQL} NOT found !!"
+    fi
+}
+
+#
+# updateSql:
+# Append the GIT TAG to the migrate.sql if it exists
+#
+verInfo() {
+    $_ECHO "${PROD_NUM}_${PROD_REV}" >> ${VFILE}
+    $_ECHO "CI Fwk BUILD ${TAG}" >> ${VFILE}
+}
+
+#
+# commitChanges:
+# If all is OK then commit the changes to the GIT repo
+#
+commitChanges() {
+    log "Committing changes to GIT"
+    $_GIT add ${MIGRATESQL} >> ${LOG_FILE} 2>&1
+    $_GIT commit -m "${GIT_USER} tagged the codebase with ${TAG} as part of automated build" >> ${LOG_FILE} 2>&1
+    $_GIT push >> ${LOG_FILE} 2>&1
+}
+
+#
+# applyTag:
+# Apply the newly created TAG to the current contents of the GIT repo
+# We will be able to use this TAG top return to this version of files if needed in the future
+#
+applyTag() {
+    log "Applying tag ${TAG} to latest code"
+    $_GIT tag -f ${TAG} >> ${LOG_FILE} 2>&1
+    $_GIT push --tags >> ${LOG_FILE} 2>&1
+    if [ $? -ne 0 ] ; then
+        error "Could not apply tag ${TAG}"
+    else
+        commitChanges
+        cleanUp
+        exit 0;
+    fi
+}
+
+#
+# cloneRepo:
+# Create a clone of the GIT repostitory
+#
+cloneRepo() {
+    $_MKDIR -p ${BUILDDIR}
+    cd ${BUILDDIR}
+    $_GIT clone ssh://${GIT_USER}@eselivm2v238l.lmera.ericsson.se:29418/com.ericsson.cifwk/ERICcifw_reporting >> ${LOG_FILE} 2>&1
+    if [ $? -ne 0 ] ; then
+        error "Could not clone repo to ${BUILDDIR}"
+    fi
+
+}
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+BUILDDIR=/tmp/$$_build
+GIT_TGDATE="$($_DATE "+%Y_%m_%d")"
+MIGRATESQL=${BUILDDIR}/ERICcifw_reporting/sql/migrate.sql
+VFILE=${BUILDDIR}/ERICcifw_reporting/versionInfo
+PROD_REV="R1A"
+PROD_NUM="CXP9030099"
+DATESTR="$($_DATE "+%Y%m%d_%H%M")"
+
+LOG_FILE=${BASEDIR}/buildlog.${DATESTR}
+[ ! -f ${LOG_FILE} ] && touch ${LOG_FILE}
+[ "$#" -eq 1 ] || usage
+GIT_USER=$1;
+log "Writing to Log File at ${LOG_FILE}"
+
+# Call the various functions above to create the Build Tar File
+cloneRepo
+checkTag
+updateSql
+verInfo
+createTar
+applyTag

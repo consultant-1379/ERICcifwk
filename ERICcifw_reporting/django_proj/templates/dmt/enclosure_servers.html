@@ -1,0 +1,99 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Blade Enslosure Details{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="deployment_container">
+     <h2 class="generalPageNewLook-title">
+         Hardware Enclosure Servers {{ enslosureServers }}
+        <a class="img" style="padding-left:5px;" href="/dmt/addEnclosure/" title="Register An Enslosure"><img src="/static/images/create.png"/></a>
+        <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+an+Enclosure" title="Enslosure Registration Help" target="_blank"><img src="/static/images/question.png"/></a>
+        <a class="img" style="padding-left:5px;" href="/dmt/log/enclosure/" title="User Activity Log for the Enclosure"><img src="/static/images/log.png"/></a>
+    </h2>
+<div id="server">
+    <p><b>For Information on Deployments <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Deployments" target="_blank">Visit This Confluence Page</a></b></p>
+    <table class="general-table">
+        {% if enclosureServers %}
+            <tr>
+                <th colspan="2">Name</th>
+                <th style="text-align: center;">Options</th>
+            </tr>
+            {% for item in enclosureServers %}
+             <tr>
+                   <td colspan="2"
+                    {% ifequal item.id|add:"0" selected|add:"0" %}
+                    class="selected"
+                    {% endifequal %}
+                    >
+
+                    <a href="/dmt/enclosure/{{ item.id }}/">{{ item.hostname }} (id: {{ item.id }})</a></td>
+                    <td style="text-align: center;" >
+                        <a class="img" href="/dmt/editEnclosure/{{ item.id }}/edit" title="Edit {{ item.hostname }} Server"><img src="/static/images/edit.png"/></a>
+                        <a class="img" href="javascript:void(0)"
+                            onClick="checkAction('Do you really want to Delete {{ item.hostname }}?', '/dmt/deleteEnclosure/{{ item.id }}/delete')" title="Delete {{ item.hostname }} Server"><img src="/static/images/delete.png"/></a>
+                    </td>
+                </tr>
+            {% endfor %}
+       {% else %}
+            <tr>No Hardware Enclosure Servers</tr>
+      {% endif %}
+  </table>
+</div>
+<div id="server-details">
+{% if selected %}
+    <br>
+    <h3>Enclosure Details for {{ enclosureServer.hostname }}</h3>
+    {% if enclosureServer %}
+        <table class="general-table">
+            <tr><th>Hostname:</th><td>{{ enclosureServer.hostname }}</td></tr>
+            <tr><th>Domain Name:</th><td>{{ enclosureServer.domain_name }}</td></tr>
+            <tr><th>Virtual Connect Domain Name:</th><td>{{ enclosureServer.vc_domain_name }}</td></tr>
+            <tr><th>Rack Name:</th><td>{{ enclosureServer.rackName }}</td></tr>
+            <tr><th>Enclosure Name:</th><td>{{ enclosureServer.name }}</td></tr>
+            <tr><th>On Board Admin IP 1 :</th><td>{{ ipOneObject.address }}</td></tr>
+            <tr><th>On Board Admin IP 2 :</th><td>{{ ipTwoObject.address }}</td></tr>
+            <tr><th>Virtual Connect IP 1 :</th><td>{{ ipThreeObject.address }}</td></tr>
+            <tr><th>Virtual Connect IP 2 :</th><td>{{ ipFourObject.address }}</td></tr>
+            <tr><th>Virtual Connect 1 bay location :</th><td>{{ enclosureServer.vc_module_bay_1 }}</td></tr>
+            <tr><th>Virtual Connect 2 bay location :</th><td>{{ enclosureServer.vc_module_bay_2 }}</td></tr>
+            <tr><th>SAN Switch IP 1 :</th><td>{{ ipFiveObject.address }}</td></tr>
+            <tr><th>SAN Switch IP 2 :</th><td>{{ ipSixObject.address }}</td></tr>
+            <tr><th>SAN Switch 1 bay location :</th><td>{{ enclosureServer.san_sw_bay_1 }}</td></tr>
+            <tr><th>SAN Switch 2 bay location :</th><td>{{ enclosureServer.san_sw_bay_2 }}</td></tr>
+            <tr><th>Uplink A Port 1 :</th><td>{{ enclosureServer.uplink_A_port1 }}</td></tr>
+            <tr><th>Uplink A Port 2 :</th><td>{{ enclosureServer.uplink_A_port2 }}</td></tr>
+            <tr><th>Uplink B Port 1 :</th><td>{{ enclosureServer.uplink_B_port1 }}</td></tr>
+            <tr><th>Uplink B Port 2 :</th><td>{{ enclosureServer.uplink_B_port2 }}</td></tr>
+       </table>
+    {% endif %}
+    <br>
+    <h3>Deployments Associated with {{ enclosureServer.hostname }}</h3>
+    {% if clusters %}
+    <table class="general-table">
+        <tr>
+            <th>Cluster</th>
+            <th>Server</th>
+            <th>Deployment ID</th>
+        </tr>
+       {% for c in clusters %}
+        <tr>
+            <td><a href="/dmt/clusters/{{ c.cluster.id }}/">{{ c.cluster.name }}</a></td>
+            <td>{{ c.server.hostname }}</td>
+            <td>{{ c.cluster.id }}</td>
+        </tr>
+       {% endfor %}
+   </table>
+    {% endif %}
+</div>
+</div>
+{% endif %}
+{% endblock %}
+

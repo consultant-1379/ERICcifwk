@@ -1,0 +1,15 @@
+<br>
+{% if changelog  %}
+    <br>
+    {% for change in changelog %}
+        {% if '***' in change %}
+            <h2>{{ change }}</h2>
+        {% else %}
+            <font size="2">{{ change }}</font>
+        {% endif %}
+        <br>
+    {% endfor %}
+    <br>
+{% else %}
+    <p><h2>Sorry there is no information found for the date range you supplied</h2></p>
+{% endif %}

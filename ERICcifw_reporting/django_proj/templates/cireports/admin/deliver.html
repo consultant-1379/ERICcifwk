@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Deliver a Package to a Sprint{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>List of packages:</h1>
+  {% for package in package_list %}
+    <h3>{{ package.name }}</h3>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %} Sed Error {% endblock %}
+
+{% block content %}
+{% if error %}
+    SED ERROR: {{ error }}
+{%else %}
+    SED ERROR: Try Again. 
+{%endif%}
+{% endblock %}

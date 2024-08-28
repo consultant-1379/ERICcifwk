@@ -1,0 +1,43 @@
+<INCLUDE NODE: jee_tor> 
+  <litp:component-def id="<JBOSS_ID>">
+    <name><JBOSS_ID></name>
+    <version>1.0.0</version>
+    <litp:package-def id="rpm">
+      <ensure>installed</ensure>
+      <name>jboss-eap-6.0.0-sfwk-ms-dps</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+    <litp:jee-container-def id="instance">
+      <command-line-options>-Djgroups.uuid_cache.max_age=5000</command-line-options>
+      <data-dir>/home/jboss/{rdni}/jboss_data</data-dir>
+      <home-dir>/home/jboss/{rdni}</home-dir>
+      <install-source>/opt/ericsson/nms/jboss/jboss-eap-6.0.tgz</install-source>
+      <instance-name>{rdni}</instance-name>
+      <log-dir>/var/log/jboss/{rdni}</log-dir>
+      <management-listener>{ip.address}</management-listener>
+      <management-password>shroot</management-password>
+      <management-user>root</management-user>
+      <name>jboss_tor</name>
+      <process-group>litp_jboss</process-group>
+      <process-user>litp_jboss</process-user>
+      <public-listener>{ip.address}</public-listener>
+      <public-port-base><PUBLIC_PORT_BASE></public-port-base>
+      <version>1.0.0</version>
+      <litp:ip-address-def id="ip">
+        <net_name>mgmt</net_name>
+        <pool>network</pool>
+      </litp:ip-address-def>
+      <litp:jee-property-def id="gcInterval">
+        <property>-Dsun.rmi.dgc.server.gcInterval</property>
+        <value>300</value>
+      </litp:jee-property-def>
+      <litp:jee-property-def id="jee_unsecure">
+        <property>-Djboss.bind.address.unsecure</property>
+        <value>127.0.0.1</value>
+      </litp:jee-property-def>
+      <litp:jee-property-def id="preferIPv4Stack">
+        <property>-Djava.net.preferIPv4Stack</property>
+        <value>true</value>
+      </litp:jee-property-def>
+    </litp:jee-container-def>
+  </litp:component-def>

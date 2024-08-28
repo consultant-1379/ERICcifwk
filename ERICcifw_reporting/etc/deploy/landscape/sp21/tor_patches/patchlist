@@ -1,0 +1,4 @@
+# Directory : Nexus url to Patches
+# This should be removed for SP23
+tor_patches : /com/ericsson/oss/pres/ERIC-httpd-UI-Camp/1.0.1/ERIC-httpd-UI-Camp-1.0.1.sdp
+tor_patches : /com/ericsson/oss/pres/ERIC-httpd-CXP9030291/1.0.1/ERIC-httpd-CXP9030291-1.0.1.sdp

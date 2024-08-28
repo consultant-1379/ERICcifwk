@@ -1,0 +1,166 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} Cloud Native Buildlog {% endblock %}
+{% block content %}
+<link rel=StyleSheet href="/static/cnBuildlog.css" type="text/css" />
+<link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+<script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src='/static/cnBuildlog.js'></script>
+<div id="cnbuildlog-container">
+    <h2 class="generalPageNewLook-title">Cloud Native ENM Buildlog</h2>
+    <div>
+        <label>Search :</label>
+        <input type="text" id = "search" placeholder="drop">
+        <button onclick="getSearchData()"><img src="/static/images/search_black_16px.svg"></button>
+    </div>
+    <table id="cnbuildlog-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+        <br>
+            <tr>
+                <th>Status</th>
+                <th>Test Phase</th>
+                <th>Deployment</th>
+                <th>From PS</th>
+                <th>To PS</th>
+                <th>UG/ Install/ Rollback</th>
+                <th>ADU</th>
+                <th>APTU</th>
+                <th>UI Links</th>
+                <th>RFA</th>
+                <th>Comments</th>
+                <th>Add Comment</th>
+                <th>Delete entry</th>
+            </tr>
+            {% for cnBuildLog in cnBuildLogData %}
+                <tr>
+                    {% if cnBuildLog.overall_status__state == 'in_progress' %}
+                        <td style="background-color:#ffdc10">ONGOING</td>
+                    {% elif cnBuildLog.overall_status__state == 'passed' %}
+                        <td style="background-color:#01ff13">PASSED</td>
+                    {% elif cnBuildLog.overall_status__state == 'failed' %}
+                        <td style="color:white; background-color:#c62c2c">FAILED</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.testPhase != null %}
+                        <td>{{cnBuildLog.testPhase}}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.deploymentName != null %}
+                        <td>{{cnBuildLog.deploymentName}}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.fromCnProductSetVersion__product_set_version != null %}
+                        <td><a href="/cloudnative/getCloudNativeProductSetContent/{{cnBuildLog.drop}}/{{cnBuildLog.fromCnProductSetVersion__product_set_version}}/" target="_blank">{{cnBuildLog.fromCnProductSetVersion__product_set_version}}</a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.toCnProductSetVersion__product_set_version != null %}
+                        <td><a href="/cloudnative/getCloudNativeProductSetContent/{{cnBuildLog.drop}}/{{cnBuildLog.toCnProductSetVersion__product_set_version}}/" target="_blank">{{cnBuildLog.toCnProductSetVersion__product_set_version}}</a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.Upgrade != null %}
+                        <td>
+                            <p>Upgrade</p>
+                            <a href="{{cnBuildLog.Upgrade.buildJobLink}} " target="_blank"> {{cnBuildLog.Upgrade.buildDate}}</a>
+                        </td>
+                    {% elif cnBuildLog.Install != null %}
+                        <td>
+                            <p>Install</p>
+                            <a href="{{cnBuildLog.Install.buildJobLink}}" target="_blank"> {{cnBuildLog.Install.buildDate}}</a>
+                        </td>
+                    {% elif cnBuildLog.Rollback != null %}
+                        <td>
+                            <p>Rollback</p>
+                            <a href="{{cnBuildLog.Rollback.buildJobLink}}" target="_blank"> {{cnBuildLog.Rollback.buildDate}}</a>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.ADU != null %}
+                        <td> <a href="{{cnBuildLog.ADU.reportLink}}" target="_blank"> {{cnBuildLog.ADU.status__state}}</a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.APTU != null %}
+                        <td> <a href="{{cnBuildLog.APTU.reportLink}}" target="_blank"> {{cnBuildLog.APTU.status__state}}</a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.UILinks != null %}
+                        <td> <a href="{{cnBuildLog.UILinks.reportLink}}" target="_blank"> {{cnBuildLog.UILinks.status__state}}</a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.RFA != null %}
+                        <td>
+                            <p>RFA : <a href="{{cnBuildLog.RFA.reportLink}}" target="_blank">{{cnBuildLog.RFA.percentage}}% </a></p>
+                            {% if cnBuildLog.RFAStaging != null %}
+                                <p>Staging : <a href="{{cnBuildLog.RFAStaging.reportLink}}" target="_blank">{{cnBuildLog.RFAStaging.percentage}}% </a></p>
+                            {% endif %}
+                            {% if cnBuildLog.RFAReRunner != null %}
+                                <p>Re-Runner : <a href="{{cnBuildLog.RFAReRunner.reportLink}}" target="_blank">{{cnBuildLog.RFAReRunner.percentage}}% </a></p>
+                            {% endif %}
+                        </td>
+                    {% elif cnBuildLog.RFAStaging != null %}
+                        <td>
+                            <p>Staging : <a href="{{cnBuildLog.RFAStaging.reportLink}}" target="_blank">{{cnBuildLog.RFAStaging.percentage}}% </a></p>
+                        </td>
+                    {% elif cnBuildLog.RFAReRunner != null %}
+                        <td>
+                            <p>Re-Runner : <a href="{{cnBuildLog.RFAReRunner.reportLink}}" target="_blank">{{cnBuildLog.RFAReRunner.percentage}}% </a></p>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if cnBuildLog.comments != null %}
+                        <td>
+                            {% for cnComment in cnBuildLog.comments %}
+                                {% if cnComment.comment != "" %}
+                                    <p>{{ cnComment.comment }} <button id = "{{cnComment.id}}" value="{{cnComment.comment}}" style="border:none; padding:0" onclick="displayEditPopup(this.id,this.value)"><img src="/static/images/pen.svg" title="Edit Comment"></button></p>
+                                {% endif %}
+                                {% if cnComment.cnJiraIssue__jiraNumber != null %}
+                                    <p><a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/{{cnComment.cnJiraIssue__jiraNumber}}" target="_blank">{{ cnComment.cnJiraIssue__jiraNumber }} </a><a id="{{cnComment.id}}" onclick="deleteJiraData(this.id)"><img src="/static/images/error_red_16px.svg" title="Delete Jira"></a></p>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td width="0.5%" style="text-align:center;" title="Add Comment">
+                        <a id="{{cnBuildLog.id}}" onclick="displayPopup(this.id)"><img src="/static/images/add_black_16px.svg" width=26 height=26></a>
+                    </td>
+                    <td width="0.5%" style="text-align:center;" title="Delete Entry">
+                        <a id="{{cnBuildLog.id}}" onclick="deleteEntry(this.id)"><img src="/static/images/error_red_16px.svg"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+    <div id=cnbuildlog-dialog title="Add Comment and JIRA Ticket" class="generic-text">
+        <form action="" id="cnbuildlog_add_form">
+            <label for='cnbuildlog_comment_label'>Comment: </label>
+            <textarea id='cnbuildlog_comment' name="Comment" class='cnbuildlog_dialog_form'></textarea><br>
+            <label for='cnbuildlog_jira_label'>JIRA:   </label>
+            <input type="text" id="cnbuildlog_jira" ><br><br>
+            <div style="text-align:center;">
+                <input id="add" type="button" value="Add" onclick="addCommentData()">
+                <div style="width:10px;height:auto;display:inline-block;"></div>
+                <input class="cancel" type="button" value="Cancel">
+            </div>
+        </form>
+    </div>
+    <div id=cnbuildlog-comment-edit-dialog title="Edit Comment" class="generic-text">
+        <form action="" id="cnbuildlog_edit_form">
+            <label for='cnbuildlog_edit_comment_label'>Comment: </label>
+            <textarea id='cnbuildlog_edit_comment' name="Comment" class='cnbuildlog_dialog_form'></textarea><br>
+            <div style="text-align:center;">
+                <input id="edit" type="button" value="Edit" onclick="editCommentData()">
+                <input id="delete" type="button" value="Delete" onclick="deleteCommentData()">
+                <div style="width:10px;height:auto;display:inline-block;"></div>
+                <input class="cancel" type="button" value="Cancel">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

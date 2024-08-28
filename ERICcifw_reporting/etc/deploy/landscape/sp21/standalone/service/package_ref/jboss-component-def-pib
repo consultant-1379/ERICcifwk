@@ -1,0 +1,30 @@
+<INCLUDE NODE: pib >
+<litp:component-def id="pib">
+    <name>pib</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <app-type>ear</app-type>
+      <install-source><EARWAR_FILE></install-source>
+      <name><EARWAR_NAME></name>
+      <service>jee_tor</service>
+      <version><PACKAGE_VERSION></version>
+      <litp:jms-topic-def id="sfw_availability_topic">
+        <jndi>SFWKsdkServiceAvailabilityTopic</jndi>
+        <name>/topic/sdk-service-availability-topic</name>
+      </litp:jms-topic-def>
+      <litp:jms-topic-def id="sfw_property_modification">
+        <jndi>SFWKsdkConfigPropertyModification</jndi>
+        <name>/topic/sdk-config-property-modification</name>
+      </litp:jms-topic-def>
+      <litp:jms-topic-def id="sfw_upgrade_core_topic">
+        <jndi>SFWKsdkUpgradeCoreTopic</jndi>
+        <name>/topic/sdk-upgrade-topic</name>
+      </litp:jms-topic-def>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICpib_CXP9030194</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>
+

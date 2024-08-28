@@ -1,0 +1,33 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Caution Report{% endblock %}
+
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">
+        {% if product != "None" %}
+        {{ product }}
+        {% else %}
+        {{ productSetName }}
+        {% endif %}
+        Caution Status Details {{ drop }} <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Manual+Caution+Status" title="Caution Status Help" target="_blank"><img src="/static/images/question.png"/></a>
+</h2>
+   {% if noReportDirectory %}
+        {{ noReportDirectory }}
+   {% else %}
+        <table class='general-table'>
+            {% autoescape off %}
+            {% if pageContent %}
+                {{ pageContent }}
+            {% endif %}
+            {% endautoescape %}
+            {% if productSet %}
+                <tr><th><b> Media Artifact (ISO): </b> </th><td>{{ media.mediaArtifact.name }}</td></tr>
+                <tr><th><b> Media Artifact (ISO) Version: </b> </th><td>{{ media.version }}</td></tr>
+            {% endif %}
+            <tr><th><b> Since: </b> </th><td>{{ since }}</td></tr>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,3 @@
+# Directory : Nexus url to Patches
+# Get Litp to formalise Packaging of Service Pack
+litp_patches : http://atclvm433.athtem.eei.ericsson.se:8081/nexus/content/repositories/iso/com/ericsson/nms/litp/LITPServicePack/Latest/LITPServicePack-Latest.tar.gz

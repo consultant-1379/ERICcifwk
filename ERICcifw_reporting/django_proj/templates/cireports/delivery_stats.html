@@ -1,0 +1,65 @@
+{% block content %}
+{% load extractDeliverer %}
+{% load nexusUrl %}
+<table class="general-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            {% if pkgAppearances.items %}
+                <th>Delivery Count</th>
+            {% endif %}
+            <th>Latest Version</th>
+            <th>Date Delivered</th>
+            {% if not drop or drop == "None" %}
+                <th>Drop Delivered To</th>
+            {% endif %}
+            <th>Delivered By</th>
+        </tr>
+    </thead>
+    {% for item in packages %}
+        <tr>
+            {% if item.obsolete %}
+                <td><font color="red">{{ item.package_revision.package.name }}</font></td>
+            {% else %}
+                <td>{{ item.package_revision.package.name }}</td>
+            {% endif %}
+            {% for pkgName, pkgCount in pkgAppearances.items %}
+                {% if pkgName == item.package_revision.package.name %}
+                    {% if pkgCount == 1 or pkgCount == 0 %}
+                        <td>{{ pkgCount }}</td>
+                    {% else %}
+                        <td align=center><a href="/{{ product }}/deliver_info/{{ release }}/{{ drop }}/{{ item.package_revision.package.name }}"><b>{{ pkgCount }}</b></a></td>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% if item.obsolete %}
+                <td><font color="red">{{ item.package_revision.version }} (obsoleted)</font></td>
+                <td><font color="red">{{ item.date_created }}</font></td>
+                {% if not drop or drop == "None" %}
+                    <td align=center><font color="red"><a href="/{{ product }}/deliver_info/{{ release }}/{{ item.drop.name }}">{{ item.drop.name }}</a></font></td>
+                {% endif %}
+                <td><font color="red">
+                {% if item.delivery_info|extractDeliverer == "" %}
+                    Automated Delivery
+                {% else %}
+                    {{ item.delivery_info|extractDeliverer }}
+                {% endif %}
+                </font></td>
+            {% else %}
+                <td>{{ item.package_revision.version }}</td>
+                <td>{{ item.date_created }}</td>
+                {% if not drop or drop == "None" %}
+                    <td align=center><a href="/{{ product }}/deliver_info/{{ release }}/{{ item.drop.name }}">{{ item.drop.name }}</a></td>
+                {% endif %}
+                <td>
+                {% if item.delivery_info|extractDeliverer == "" %}
+                    Automated Delivery
+                {% else %}
+                    {{ item.delivery_info|extractDeliverer }}
+                {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

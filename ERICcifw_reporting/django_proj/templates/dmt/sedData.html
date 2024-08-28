@@ -1,0 +1,108 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% load setVar %}
+
+{% block title %}System Deployment Description{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $('#master').click();
+        });
+</script>
+
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">System Environment Description (SED) for Deployments
+        <a class="img" style="padding-left:5px;" href="/dmt/UploadSED/" title="Submit a New SED"><img src="/static/images/create.png"/></a>
+        <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Maintenance+of+SED+within+the+CI+Portal" title="Maintenance of SED within the Portal" target="_blank"><img src="/static/images/question.png"/></a>
+        <a class="img" style="padding-left:5px;" href="/dmt/log/sed" title="User Activity Log for SED Template Deployment"><img src="/static/images/log.png"/></a>
+        </h2>
+        <div id="accordion">
+
+                {% if allSedData %}
+                {% for item in allSedData %}
+                {% if virtualMasterId == item.id%}
+                <h2 id="master">
+                    {%else%}
+                <h2>
+                    {% endif %}
+                    {% if item.linkText and item.iso %}
+                    SED: {{ item.version }} + {{ item.dateInserted }} + {{ item.user }} + {{ item.jiraNumber }} + {{ item.linkText }} + {{ item.iso.version }}
+                    {% elif item.iso %}
+                    SED: {{ item.version }} + {{ item.dateInserted }} + {{ item.user }} + {{ item.jiraNumber }} + {{ item.iso.version }}
+                    {% elif item.link %}
+                    SED: {{ item.version }} + {{ item.dateInserted }} + {{ item.user }} + {{ item.jiraNumber }} + {{ item.linkText }}
+                    {%  else %}
+                    SED: {{ item.version }} + {{ item.dateInserted }} + {{ item.user }} + {{ item.jiraNumber }}
+                    {% endif %}
+                    {% if masterId == item.id%}
+                    (TOR MASTER)
+                    {% else %}
+                    {% endif %}
+                    {% if virtualMasterId == item.id%}
+                    (ENM Virtualisation MASTER)
+                    {% else %}
+                    {% endif %}
+                </h2>
+                <div>
+                 <h3>System Environment Description Information
+                     <a class="img" href="/dmt/editSED/{{item.version}}/" title="Edit SED Details"><img src="/static/images/edit.png"/></a>
+                     <a class="img" href="javascript:void(0)" onClick="checkAction('Do you really want to set SED Version {{item.version}} as the Master SED?', '/dmt/MapVirtSED/{{item.version}}/')" title="Map a SED Version to Master for Virtual ENM"><img src="/static/images/masterENM.png"/></a>
+                </h3>
+    <table class="general-table">
+            <tr>
+                <th>Version</th>
+                <th>Created on</th>
+                <th>Jira Number</th>
+                <th>Uploaded by</th>
+                <th>ERIcoll SED</th>
+                <th>Media Artifact (ISO)</th>
+            </tr>
+            <tr>
+                    <td>
+                        {{ item.version }}
+                    </td>
+                    <td>
+                        {{ item.dateInserted }}
+                    </td>
+                    <td>
+                        {{ item.jiraNumber }}
+                    </td>
+                     <td>
+                        {{ item.user }}
+                    </td>
+                    <td>
+                    {% if item.link %}
+                        <a href="{{ item.link }}" title="Link to ERIcoll SED" >{{ item.linkText }}</a>
+                    {% endif %}
+                    </td>
+                    <td>
+                    {% if item.iso %}
+                        <a href="/{{ item.iso.drop.release.product.name }}/{{ item.iso.drop.name }}/mediaContent/{{ item.iso.version }}" title="Link to ISO Version" >{{ item.iso.drop.release.product.name }}:{{item.iso.version}}</a>
+                        {% endif %}
+                    </td>
+               </tr>
+               <tr>
+                  <td colspan="6">
+                     <textarea style="width:100%;" rows="50" readonly>{{ item.sed }}</textarea>
+                 </td>
+              </tr>
+            </table>
+    </div>
+        {% endfor %}
+        {% else %}
+        <table>
+            <tr>No SED Information Can be found</tr>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+   {% block title %}{{ product.name }} Packages & Testware List {% endblock %}
+   {% block content %}
+   <script type="text/javascript" src="/static/toggleTabsOnClick.js"></script>
+        <div class="artifact-container" >
+            <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">{{ product.name }} Packages & Testware ({{ count }}) <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Packages+&+Testware" title="Package & Testware Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <div class="tablinksborder">
+            <ul class="tab">
+                <li><a id="packages-tab" class="tablinks" href="javascript:void(0);" onclick="openItem('packages')">Packages</a></li>
+                <li><a id="testware-tab" class="tablinks" href="javascript:void(0);"  onclick="openItem('testware')">Testware</a></li>
+            </ul>
+         </div>
+           <div id="packages" class="tabcontent">
+            {% if packages %}
+                <table class="artifact-table" >
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Number</th>
+                            <th>PRI</th>
+                        </tr>
+                    </thead>
+                    {% for pkg in packages %}
+                        <tr>
+                            <td id="package"><a id="package_{{ pkg.name }}" href="/{{ product.name }}/packages/{{ pkg.name }}">{{ pkg.name }}</a></td>
+                            <td>{{ pkg.package_number }}</td>
+                            <td align=center><a href="/{{ product.name }}/pri/{{ pkg.package_number }}/">PRI</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p><b>Sorry there are no Packages associated with Product '{{ product.name }}'</b></p>
+            {% endif %}
+         </div>
+         <div id="testware" class="tabcontent">
+        {% if testware %}
+                <table class="artifact-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Number</th>
+                        </tr>
+                    </thead>
+                    {% for item in testware %}
+                        <tr>
+                            <td id="testware"><a id="testware_{{ item.name }}" href="/{{ product.name }}/packages/{{ item.name }}">{{ item.name }}</a></td>
+                            <td>{{ item.package_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p><b>Sorry there are no Testware associated with Product '{{ product.name }}'</b></p>
+            {% endif %}
+         </div>
+     </div>
+    {% endblock %}
+{% endif %}

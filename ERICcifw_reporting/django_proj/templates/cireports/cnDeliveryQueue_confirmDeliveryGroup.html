@@ -1,0 +1,42 @@
+{% extends "base_newlookandfeel.html" %}
+    {% block title %} CN Delivery Information {% endblock %}
+    {% block content %}
+        <div id="hidden_drop_div" style="display:none">{{ dropNumber }}</div>
+        <div id="hidden_dg_div" style="display:none">{{ deliveryGroupNumber }}</div>
+        <script type="text/javascript" src='/static/cnDeliveryQueue_confirmCNDeliveryGroup.js'></script>
+        <div class="general-container">
+            <h2 class="generalPageNewLook-title"> Cloud Native Delivery Confirmation Page for delivery group {{ deliveryGroupNumber }} </h2>
+            <div class="delivery-form-container">
+                <div class="delivery-info">
+                    <table class="general-table">
+                        <tr class="dg_confirm_ps_check">
+                            <td class="dg_conirm_cell">
+                                Is the product set version confirmed?
+                            </td>
+                            <td>
+                                <input type="radio" id="has_cn_ps_ver" name="cn_ps_check" value="True">
+                                <label for="yes">Yes</label>
+                                <input type="radio" id="no_cn_ps_ver" name="cn_ps_check" value="False" checked>
+                                <label for="no">No</label>
+                            </td>
+                        </tr>
+                        <tr class="dg_confirm_ps_version">
+                            <td class="dg_conirm_cell">
+                                Product Set Version
+                            </td>
+                            <td >
+                                <input id='cn_ps_ver' class="cn_delivery_confirm_ps_ver"></input>
+                            </td>
+                        </tr>
+                        <tr class="dg_confirm_submit">
+                            <td class="dg_conirm_cell"></td>
+                            <td class="dg_conirm_cell">
+                                <input type="button" class="btn-default" value="Submit" id="dg_confirm_btn">
+                            </td>
+                        <tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <div class="modal"></div>
+    {% endblock %}

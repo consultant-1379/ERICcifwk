@@ -1,0 +1,136 @@
+#!/bin/bash -a
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+LOG_FILE=${LOGS}/backup_log
+TARDIR=/var/cifwk/bkupTar.$$
+CURRENT_TIME=`date "+%Y-%m-%d_%H_%M_%S"`
+BACKUPDIR=/proj/gitadm100/db_backup
+CIFWK_FILE=${TARDIR}/cireports_${CURRENT_TIME}.sql
+GERRIT_FILE=${TARDIR}/gerrit_${CURRENT_TIME}.sql
+CIFWKDB="cireports"
+GERRITDB="fill_in_gerrit_db_name_here"
+EMAIL="mark.fahy@ericsson.com"
+# file name 
+TARNAME=db_backup.tar
+AUTODEPAREA=/net/10.45.202.11/export/cifwktaf/
+
+$_MKDIR -p ${TARDIR}
+log "tar dir is ${TARDIR}"
+
+#
+# checkMysql:
+# Check that we can connect to mysql without a password
+# There should be a ~/.my.cnf file with the correct
+# username and password in it to make DB connections
+# Also populate the TBLS variable with only the cireports tables from the DB
+#
+checkMysql() {
+    log "Checking mysql connection .. "    
+    TBLS=`$_MYSQL --skip-column-names ${CIFWKDB} <<EOF | $_EGREP -v "^auth_" | $_EGREP -v "^django_"
+    SHOW TABLES
+EOF
+    `
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL} 
+        error "Could not connect to the database - are you sure you have a username and password configured in ~/.my.cnf?"
+    fi
+}
+
+#
+# Send a mail to the group if there has been a problem with the DB backup 
+#
+sendEmail() {
+    ADDR="$1"
+    MSG="There has been a problem with the CIFWK DB Backup, Please Investigate"
+    echo ${MSG} | mail -s "CIFWK Information" ${ADDR}
+}
+
+#
+# createTar:
+# Function to create tar of the backed up DB schemas
+# Takes 2 parameters
+#    1) The name of the CI Reports Database Dump File
+#    2) The name of the Gerrit Database Dump File
+#
+createTar() {
+    log "Creating the Backup Database Tar file"
+    cd ${TARDIR}
+    CIFWK=$($_BASENAME $1)
+    if [ $2 ]; then
+        GERRIT=$($_BASENAME $2)
+    fi
+
+    $_TAR cf ${TARNAME} ${CIFWK} ${GERRIT} >> ${LOG_FILE} 2>&1
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL} 
+        error "Could not create tar file" 
+    fi
+    $_GZIP ${TARNAME}
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL} 
+        error "Could not compress tar file" 
+    fi
+    $_CP ${TARNAME}.gz ${BACKUPDIR}
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL} 
+        error "Could not copy tar file to backup directory ${BACKUPDIR}"
+    fi
+    cd ${BACKUPDIR}
+    $_RM -rf ${TARDIR}
+}
+
+# The function below is used be the autodeployment testing to copy the latest DB to the mount area to ensure
+# the latest data is available for testing
+copyTarToMountArea(){
+    log "Sending back up tar ball to ${AUTODEPAREA}"
+    TARNAME=${1}
+    BACKUPDIR=${2}
+    $_CP ${BACKUPDIR}/${TARNAME}.gz ${AUTODEPAREA}/${TARNAME}.gz
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "Could not send tar file ${TARNAME} to ${AUTODEPAREA}"
+        exit 1
+    fi
+}
+
+#
+# dumpSchema:
+# Function to dump the Schema information from the DB
+# Takes either 2 or 3 parameters
+#    1) The database to connect to
+#    2) The file to dump the DB info into
+#    3) Other connection info (This is a optional parameter)
+#
+dumpSchema() {
+    DB=$1
+    FILE=$2
+    log "Dumping DB ${DB}"
+    [ ! -z "${3}" ] && OPTS="$3"
+    if [ "${OPTS}" = "specific_tables" ] ; then
+        MY_TBLS=${TBLS}
+        OPTS=""
+    fi
+    # Dump the database schema, and all the data, for the cireports database
+    # pass any arguments as tables
+    $_MYSQLDUMP ${OPTS} ${DB} ${MY_TBLS} > ${FILE} 
+    if [ $? -ne 0 ] ; then
+        sendEmail ${EMAIL}
+        error "dumpSchema failed"
+    fi
+    OPTS=""
+    MY_TBLS=""
+}
+
+checkMysql
+dumpSchema ${CIFWKDB} ${CIFWK_FILE}
+# Commented for now, Backup will be required for the GERRIT DB also
+# dumpSchema ${GERRITDB} ${GERRIT_FILE}
+# createTar ${CIFWK_FILE} ${GERRIT_FILE}
+createTar ${CIFWK_FILE}
+copyTarToMountArea ${TARNAME} ${BACKUPDIR}
+exit 0

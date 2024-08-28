@@ -1,0 +1,31 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} GAT Information {% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">
+        <div id="text-container">{{drop.release.name}} ({{drop.release.track}}) GAT Information
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Document+Baseline+Page#DocumentBaselinePage-GATDocumentation" title="Document Baseline Help GAT" target="_blank"><img src="/static/images/question.png"/></a>
+        </div>
+    </h2>
+    <div class="generic-sub-title">
+        <br>
+        <p><b>Total Records found : {{ total }}</b></p>
+        <div class="generic-text">
+            {% for testcase,apData in tcData.items %}
+                <br>
+                <h4>{{ testcase.title }}</h4>
+                <b>Test ID: </b> {{ testcase.tcId }}<br>
+                <b>Purpose: </b>{{ testcase.desc }}<br>
+                <b>Prerequisite: </b>{{ testcase.pre }}<br>
+                {% for actionpoint,vpData in apData.items %}
+                    <b>Action: </b> {{actionpoint.desc }}<br>
+                    {% for verpoint in vpData %}
+                        <b>Result: </b> {{ verpoint.desc }} <br>
+                    {% endfor %}
+                    <br>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %} Drop Modification Error {% endblock %}
+
+{% block content %}
+    {% if error %}
+        ERROR: {{ error }}
+    {%else %}
+        ERROR: Please Try Again
+    {%endif%}
+{% endblock %}

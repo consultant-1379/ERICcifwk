@@ -1,0 +1,35 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}CIFWK Excellence Model Category Data{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Question Category Information
+        <a class="img" href="/excellence/addCategory/" title="Add Category"><img src="/static/images/create.png"/></a>
+    </h2>
+    <br>
+    <table class="general-table">
+        {% if categories %}
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                </tr>
+            </thead>
+            {% for category in categories %}
+                <tr>
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.version }}</td>
+                </tr>
+                {% endfor %}
+        {% endif %}
+    </table>
+</div>
+{% endblock %}

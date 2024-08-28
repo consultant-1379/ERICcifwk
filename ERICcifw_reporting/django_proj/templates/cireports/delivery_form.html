@@ -1,0 +1,66 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}Delivery Information {% endblock %}
+    {% block content %}
+        <div class="general-container">
+         <h2 class="generalPageNewLook-title"> {{ product.name }} Delivery Page </h2>
+         <div class="delivery-info">
+           <table class='general-table'>
+              <tr>
+                  <th>Package:</th><td>{{ package }}</td>
+              </tr>
+              <tr>
+                  <th>Version:</th><td>{{ version }}</td>
+              </tr>
+              {% if platform %}
+              <tr>
+                  <th>Platform:</th><td>{{ platform }}</td>
+              </tr>
+              {% endif %}
+           </table>
+        </div>
+        {% if incdrops %}
+            Has previously been delivered to Drop(s):<br>
+            {% for drop in incdrops %}
+            <li><a href="/{{ drop.drop.release.product.name }}/drops/{{ drop.drop.name }}">{{ drop.drop.release.product.name }}:{{ drop.drop.name }}</a></li>
+            {% endfor %}
+        {% else %}
+            Has not previously been delivered to any drops<br>
+        {% endif %}
+        <br>
+        {% if pkg_info.kgb_test != "passed" %}
+            Known Good Baseline test result: <font color="red"><b> {{ pkg_info.kgb_test }} </b></font>
+        {% else %}
+            Known Good Baseline test result: <font color="green"><b> {{ pkg_info.kgb_test }} </b></font>
+        {% endif %}
+        <br><br>
+        {% if pkg_info.kgb_test != "passed" %}
+            If you are sure you wish to continue and deliver this package even though <font color="red"><b> KGB testing is not complete</b></font> then enter the delivery information below
+        {% else %}
+            Enter the delivery information below
+        {% endif %}
+        <br><br>
+        {% if drops %}
+            <p><font color="red"><b>If Your Drop does not appear as an option to Deliver to, then the Drop is Frozen and no longer can deliver to it.
+        {% else %}
+            <p><font color="red"><b>No drops are available to deliver to, mean that all Drops are Frozen.
+        {% endif %}
+        <br><br>Please contact whoever takes care of the {{ product.name }}'s Drops for further information</b></font></p>
+        <h5>
+        {% if product != "None" %}
+             Delivery into {{ product }}
+        {% else %}
+             Please Fill in Below Form for Package initial Delivery
+        {% endif %}
+        </h5>
+        <div class="delivery-info">
+        <form enctype="multipart/form-data" name="deliveryform" method="post" action="/{{ product }}/doDelivery/{{ package }}/{{ version }}/{{ platform }}/{{ type }}/">{% csrf_token %}
+            <table class='general-table'>
+                {{ form }}
+                <tr><td bgcolor=#FFFFFF></td><td bgcolor=#FFFFFF><input type="submit" name="Deliver" onclick="this.value='Submitting ..';this.disabled='disabled'; this.form.submit();"></td></tr>
+            </table>
+        </form>
+      </div>
+    </div>
+    {% endblock %}
+{% endif %}

@@ -1,0 +1,15 @@
+<INCLUDE NODE: SC-1 > 
+      <litp:node-def id="<NODE_ID>">
+        <nodetype><NODE_TYPE></nodetype>
+        <primarynode>true</primarynode>
+        <litp:component-ref id="jee1">
+          <role>jee1</role>
+        </litp:component-ref>
+        <litp:component-ref id="jee2">
+          <role>jee2</role>
+        </litp:component-ref>
+        <litp:solution-ref id="<NODE_SOLUTION_ID>">
+          <solution-name>primary_node</solution-name>
+        </litp:solution-ref>
+      </litp:node-def>
+

@@ -1,0 +1,186 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+ {% block title %}
+
+    {% if bom %}
+        {{ product.name }} Difference in BOM Versions {{ drop }}
+    {% else %}
+        {{ product.name }} Difference in ISO Versions {{ drop }}
+    {% endif %}
+    {% endblock %}
+    {% block content %}
+    <script>
+        $(function() {
+            $( "#accordionUpdated" ).accordion({
+                active:true,
+                collapsible: true,
+                heightStyle: "content"
+            });
+            $( "#accordionAdded" ).accordion({
+                active:false,
+                collapsible: true,
+                heightStyle: "content"
+            });
+            $( "#accordionObsoleted" ).accordion({
+                active:false,
+                collapsible: true,
+                heightStyle: "content"
+            });
+            $( "#accordionDeliveryGroup" ).accordion({
+                active:false,
+                collapsible: true,
+                heightStyle: "content"
+            });
+
+        });
+
+
+        $(document).ready(function () {
+            $('.expandResult').click(function() {
+                $('#accordionUpdated > .ui-widget-content').show();
+                $('#accordionAdded > .ui-widget-content').show();
+                $('#accordionObsoleted > .ui-widget-content').show();
+                $('#accordionDeliveryGroup > .ui-widget-content').show();
+            });
+            $('.collapseResult').click(function() {
+                $('#accordionUpdated > .ui-widget-content').hide();
+                $('#accordionAdded > .ui-widget-content').hide();
+                $('#accordionObsoleted > .ui-widget-content').hide();
+                $('#accordionnDeliveryGroup > .ui-widget-content').hide();
+            });
+        });
+    </script>
+    <div class="general-container">
+         <h2 class="generalPageNewLook-title">
+            {% if bom %}
+                {{ product.name }} Difference Between BOM Version: {{ isoVersion }} & {{ previousIsoVer}}
+            {% else %}
+                {{ product.name }} Difference Between ISO Version: {{ isoVersion }} & {{ previousIsoVer}}
+            {% endif %}
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/pages/viewpage.action?pageId=110792110" title="Comparing versions Info" target="_blank"><img src="/static/images/question.png"/></a>
+        </h2>
+        {% if product.name == "ENM" %}
+               <a href="/{{ product }}/drop/{{ drop }}/ISOdeliverygroups"><b> Delivery Group Differences</b></a>
+        {% endif %}
+        <br><br>
+        <div><a href="javascript:void(0)" class="expandResult">Expand All</a> | <a href="javascript:void(0)" class="collapseResult">Collapse All</a></div><br>
+        {% if updated %}
+        <div id="accordionUpdated">
+            <h2>Updated Content</h2>
+            <div>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    {% if bom %}
+                        <th>New Version -  BOM({{ isoVersion }})</th>
+                        <th>Previous Version - BOM({{ previousIsoVer}})</th>
+                    {% else %}
+                        <th>New Version -  ISO({{ isoVersion }})</th>
+                        <th>Previous Version - ISO({{ previousIsoVer}})</th>
+                    {% endif %}
+                </tr>
+                {% for objects in response %}
+                {% for key, keyData in objects.items %}
+                {% if key == "Updated" %}
+                {% for data in keyData %}
+                <tr>
+                    <td>
+                        {{data.artifactId}}
+                    </td>
+                    <td {% if deliveryGroup %}
+                        {% if data.deliveryGroupStatus == "obsoleted" %}
+                        style="color:red"
+                        {% endif %}
+                        {% endif %}
+                    >
+                        {{data.version}}
+                        {% if deliveryGroup %}
+                        <br>Delivery Group:<a href="/{{product}}/queue/{{drop}}/{{data.deliveryGroup}}/#{{data.deliveryGroupStatus}}"><font {% if data.deliveryGroupStatus == "obsoleted" %} color="red" {% endif %}>{{data.deliveryGroup}}</font></a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{data.previousVersion}}
+                    </td>
+             </tr>
+                 {% endfor %}
+                {% endif %}
+                {% endfor %}
+                 {% endfor %}
+             </table>
+           </div>
+       </div>
+     {% endif %}
+     {% if added %}
+      <div id="accordionAdded">
+            <h2>New Content</h2>
+            <div>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                    {% if deliveryGroup %}
+                       <th>Delivery Group</th>
+                    {% endif %}
+                </tr>
+                {% for objects in response %}
+                {% for key, keyData in objects.items %}
+                {% if key == "Added" %}
+                {% for data in keyData %}
+                <tr {% if deliveryGroup %}
+                    {% if data.deliveryGroupStatus == "obsoleted" %}
+                    style="color:red"
+                    {% endif %}
+                    {% endif %}
+                  >
+                  <td>
+                      {{data.artifactId}}
+                  </td>
+                  <td>
+                      {{data.version}}
+                  </td>
+                  {% if deliveryGroup %}
+                  <td>
+                      <a href="/{{product}}/queue/{{drop}}/{{data.deliveryGroup}}/#{{data.deliveryGroupStatus}}"><font{% if data.deliveryGroupStatus == "obsoleted" %} color="red" {% endif %}>{{data.deliveryGroup}}</font></a>
+                  </td>
+                  {% endif %}
+             </tr>
+                 {% endfor %}
+                {% endif %}
+                {% endfor %}
+                 {% endfor %}
+             </table>
+           </div>
+          </div>
+     {% endif %}
+     {% if obsoleted %}
+      <div id="accordionObsoleted">
+            <h2>Removed Content</h2>
+            <div>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                </tr>
+                {% for objects in response %}
+                {% for key, keyData in objects.items %}
+                {% if key == "Obsoleted" %}
+                {% for data in keyData %}
+                <tr>
+                    <td>
+                        {{data.artifactId}}
+                    </td>
+                    <td>
+                        {{data.version}}
+                    </td>
+             </tr>
+                 {% endfor %}
+                {% endif %}
+                {% endfor %}
+                 {% endfor %}
+             </table>
+           </div>
+          </div>
+          {% endif %}
+ </div>
+    {% endblock %}
+{% endif %}

@@ -1,0 +1,99 @@
+{% block content %}
+{% load nexusUrl %}
+{% load setVar %}
+
+<script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("table").tablesorter();
+    });
+</script>
+<table id="drop-revisions" class="general-table">
+    {% if mediaArtifacts %}
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Number</th>
+            <th>Version</th>
+            <th>Type</th>
+            <th>RState</th>
+            <th>Category</th>
+            <th>Built For</th>
+            <th>Date Delivered</th>
+            <th>Delivered to</th>
+            <th>Build Date</th>
+            <th>Download</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {# Loop through each Media delivered for this drop and display the associated information #}
+        {% for media in mediaArtifacts %}
+            {% set found = 0 %}
+
+            <tr>
+            {# Media Name Column #}
+             <td align=center><a href="/{{ media.mediaArtifactVersion.drop.release.product.name }}/{{ media.mediaArtifactVersion.drop.name }}/media/">{{media.mediaArtifactVersion.mediaArtifact.name}}</a></td>
+
+            {# Media Number Column #}
+            <td align=center>{{ media.mediaArtifactVersion.mediaArtifact.number }}</td>
+
+            {# Media Version Column #}
+            <td align=center><a href="/{{ media.mediaArtifactVersion.drop.release.product.name }}/{{ media.mediaArtifactVersion.drop.name }}/mediaContent/{{media.mediaArtifactVersion.mediaArtifact.name }}/{{ media.mediaArtifactVersion.version }}">{{media.mediaArtifactVersion.version }}</a></td>
+
+            {# Media Type Column #}
+            <td align=center>{{ media.mediaArtifactVersion.mediaArtifact.mediaType }}</td>
+
+            {# Media RState Column #}
+            <td align=center>{{ media.mediaArtifactVersion.getRState }}</td>
+
+            {# Media Category Column #}
+            <td align=center>{{ media.mediaArtifactVersion.mediaArtifact.category.name }}</td>
+            {# Media Built For Column #}
+            <td align=center>{{ media.mediaArtifactVersion.drop.name }}</td>
+
+            {# Date Delivered #}
+            <td align=center>{{ media.dateCreated }}</td>
+            {# Drop that Media was delivered to #}
+            <td align=center>{{ media.drop.name }}</td>
+
+            {# Date the Media was Built #}
+            <td align="center">{{media.mediaArtifactVersion.build_date}}</td>
+
+            {# Download Media  #}
+            <td>
+                <a href="{{media.mediaArtifactVersion.getHubIsoUrl}}/{{ media.mediaArtifactVersion.mediaArtifact.name}}/{{ media.mediaArtifactVersion.version }}/{{media.mediaArtifactVersion.mediaArtifact.name}}-{{ media.mediaArtifactVersion.version}}.{{ media.mediaArtifactVersion.mediaArtifact.mediaType }}">E2C</a>
+                {% if media.mediaArtifactVersion.drop.release.product.name in athloneProxyProducts %}
+                    {% if media.mediaArtifactVersion.drop.release.product.name == "TOR" or media.mediaArtifactVersion.drop.release.product.name == "ENM" %}
+                    | <a href="{{enmLocalNexus}}/{{media.mediaArtifactVersion.getGroupIdForUrl}}/{{media.mediaArtifactVersion.mediaArtifact.name}}/{{ media.mediaArtifactVersion.version}}/{{media.mediaArtifactVersion.mediaArtifact.name}}-{{media.mediaArtifactVersion.version}}.{{ media.mediaArtifactVersion.mediaArtifact.mediaType }}">Athlone Proxy</a>
+                    {% else %}
+                    | <a href="{{media.mediaArtifactVersion.getLocalIsoUrl}}/{{media.mediaArtifactVersion.mediaArtifact.name}}/{{ media.mediaArtifactVersion.version}}/{{media.mediaArtifactVersion.mediaArtifact.name}}-{{media.mediaArtifactVersion.version}}.{{ media.mediaArtifactVersion.mediaArtifact.mediaType }}">Athlone Proxy</a>
+                    {% endif %}
+                {% endif %}
+            </td>
+            {# CDB Test Results #}
+            {% for item in latestContents %}
+            {% if item.mediaArtifactVersion.mediaArtifact.name == media.mediaArtifactVersion.mediaArtifact.name %}
+                {% if item.mediaArtifactVersion.version == media.mediaArtifactVersion.version %}
+                     {% set found = 1 %}
+                         <td align=center><p align="center"><a href="/{{ productSet }}/content/{{ drop.name }}"><img src="/static/images/{{ item.status }}.png" alt="{{ item.status }}" class="status-summary-img"></a><span style="display:none">{{item.status}}</span></p></td>
+                {% endif %}
+
+             {% endif %}
+             {% endfor %}
+             {% if found == 0 %}
+                 <td align=center><p align="center"><img src="/static/images/not_started.png" alt="not_started" class="status-summary-img"><span style="display:none">not_started</span></p></td>
+             {% endif %}
+
+             <td>
+                 <a href="/{{ productSet }}/{{ drop.name }}/obsoleteMediaVersion/?id={{ media.id }}&mediaArtifact={{ media.mediaArtifactVersion.mediaArtifact.name }}&version={{ media.mediaArtifactVersion.version }}" title="Obsolete">Obsolete</a>
+             </td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td><p>No deliveries found for {{ drop.name }}</p></td></tr>
+    {% endif %}
+</tbody>
+</table>
+{% endblock %}

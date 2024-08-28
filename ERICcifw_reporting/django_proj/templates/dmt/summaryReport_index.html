@@ -1,0 +1,28 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Summary Report Index{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Summary Reports for Deployments Updated <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Updated+Deployments+Reports" title="Deployment Summary Reports Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    {% if summaryReports %}
+    <table class="general-table">
+        <tr>
+            <th>Report ID</th>
+            <th>Date</th>
+            <th>Deployment Description Version</th>
+        </tr>
+       {% spaceless %}
+       {% for report in summaryReports %}
+         <tr>
+             <td><a href="/dmt/deploymentsUpdatedReport/{{report.id}}/">{{report.id}}</a></td>
+              <td>{{report.createdDate}}</td>
+              <td>{{report.dd_version__version}}</td>
+          </tr>
+       {% endfor %}
+       {% endspaceless %}
+      </table>
+    {% else %}
+        <span>No Reports Found</span>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+<div class="isoDiffResult">
+    <h2 class="sub-title">{% if bom %}BOM{% else %}ISO{% endif %} Diff Result Between {% if bom %}BOM{% else %}ISO{% endif %} {{ isoVersion }} in Drop {{ drop }} and {% if bom %}BOM{% else %}ISO{% endif %} {{ previousIsoVer}} in Drop {{ previousDrop }}</h2>
+    {% if product.name == "ENM" %}
+       <br>
+       <a href="/{{ product }}/drop/{{ drop }}/ISOdeliverygroups"><b> Delivery Group Differences</b></a>
+       <br>
+       <br>
+    {% endif %}
+
+    <div><a href="javascript:void(0)" class="expandResults">Expand All</a> | <a href="javascript:void(0)" class="collapseResults">Collapse All</a></div><br>
+        {% if updated %}
+        <div id="accordionUpdated">
+            <h2>Updated Content</h2>
+            <div>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    {% if bom %}
+                        <th>New Version -  BOM({{ isoVersion }})</th>
+                        <th>Previous Version - BOM({{ previousIsoVer}})</th>
+                    {% else %}
+                        <th>New Version -  ISO({{ isoVersion }})</th>
+                        <th>Previous Version - ISO({{ previousIsoVer}})</th>
+                    {% endif %}
+                </tr>
+                {% for objects in response %}
+                {% for key, keyData in objects.items %}
+                {% if key == "Updated" %}
+                {% for data in keyData %}
+                <tr {% if data.downgrade == "true" %} style="color:red !important" {% endif %}>
+                    <td>
+                        {{data.artifactId}}
+                    </td>
+                    <td {% if deliveryGroup %}
+                        {% if data.deliveryGroupStatus == "obsoleted" %}
+                        style="color:red"
+                        {% endif %}
+                        {% endif %}
+                    >
+                        {{data.version}} {% if data.downgrade == "true" %}- Version Downgraded{% endif %}
+                        {% if deliveryGroup %}
+                        <br>Delivery Group:<a href="/{{product}}/queue/{{data.drop}}/{{data.deliveryGroup}}/#{{data.deliveryGroupStatus}}"><font {% if data.deliveryGroupStatus == "obsoleted" %} color="red" {% endif %}>{{data.deliveryGroup}}</font></a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{data.previousVersion}}
+                    </td>
+             </tr>
+                 {% endfor %}
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+             </table>
+           </div>
+       </div>
+     {% endif %}
+     {% if added %}
+      <div id="accordionAdded">
+            <h2>New Content</h2>
+            <div>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                    {% if deliveryGroup %}
+                       <th>Delivery Group</th>
+                    {% endif %}
+                </tr>
+                {% for objects in response %}
+                {% for key, keyData in objects.items %}
+                {% if key == "Added" %}
+                {% for data in keyData %}
+                <tr {% if deliveryGroup %}
+                    {% if data.deliveryGroupStatus == "obsoleted" %}
+                    style="color:red"
+                    {% endif %}
+                    {% endif %}
+                  >
+                  <td>
+                      {{data.artifactId}}
+                  </td>
+                  <td>
+                      {{data.version}}
+                  </td>
+                  {% if deliveryGroup %}
+                  <td>
+                      <a href="/{{product}}/queue/{{data.drop}}/{{data.deliveryGroup}}/#{{data.deliveryGroupStatus}}"><font{% if data.deliveryGroupStatus == "obsoleted" %} color="red" {% endif %}>{{data.deliveryGroup}}</font></a>
+                  </td>
+                  {% endif %}
+             </tr>
+                 {% endfor %}
+                {% endif %}
+                {% endfor %}
+                 {% endfor %}
+             </table>
+           </div>
+          </div>
+     {% endif %}
+     {% if obsoleted %}
+      <div id="accordionObsoleted">
+            <h2>Removed Content</h2>
+            <div>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                </tr>
+                {% for objects in response %}
+                {% for key, keyData in objects.items %}
+                {% if key == "Obsoleted" %}
+                {% for data in keyData %}
+                <tr>
+                    <td>
+                        {{data.artifactId}}
+                    </td>
+                    <td>
+                        {{data.version}}
+                    </td>
+             </tr>
+                 {% endfor %}
+                {% endif %}
+                {% endfor %}
+                 {% endfor %}
+             </table>
+           </div>
+          </div>
+     {% endif %}
+       <br>
+       <input type="hidden" name="previousIsoVer" value="{{ previousIsoVer }}">
+       <input type="hidden" name="previousDrop" value="{{ previousDrop }}">
+ </div>

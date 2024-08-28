@@ -1,0 +1,17 @@
+<INCLUDE NODE: ps >
+  <litp:component-def id="ps">
+    <name>ps</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <install-source><EARWAR_FILE></install-source>
+      <name><EARWAR_NAME></name>
+      <service>jee_torUI</service>
+      <version><PACKAGE_VERSION></version>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICps_CXP9030203</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>
+

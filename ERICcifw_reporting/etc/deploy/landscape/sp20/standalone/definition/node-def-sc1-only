@@ -1,0 +1,12 @@
+<INCLUDE NODE: SC-1 > 
+      <litp:node-def id="<NODE_ID>">
+        <nodetype><NODE_TYPE></nodetype>
+        <primarynode>true</primarynode>
+        <litp:component-ref id="vcsr">
+          <component>vcsr</component>
+        </litp:component-ref>
+        <litp:solution-ref id="<NODE_SOLUTION_ID>">
+          <solution-name>primary_node</solution-name>
+        </litp:solution-ref>
+      </litp:node-def>
+

@@ -1,0 +1,21 @@
+{% extends "dmt/base.html" %}
+
+{% block title %}DMT Application Templates{% endblock %}
+
+{% block content %}
+<h3>Application Templates</h3>
+<table border=1>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+    </tr>
+    {% for item in templates %}
+    <tr>
+        <td><a href="/dmt/{{ item.name }}/">{{ item.name }}</a></td>
+        <td>{{ item.desc }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock %}

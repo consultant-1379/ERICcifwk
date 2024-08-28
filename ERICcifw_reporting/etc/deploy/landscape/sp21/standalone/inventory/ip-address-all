@@ -1,0 +1,17 @@
+<INCLUDE NODE: NFS SC PL >
+        <litp:ip-address id="<NODE_IP_UNSCORE>">
+          <address><NODE_IP></address>
+          <bootproto>static</bootproto>
+          <broadcast><NODE_BROADCAST></broadcast>
+          <cidr><NODE_CIADDR></cidr>
+          <gateway><NODE_GATEWAY></gateway>
+          <interface_id>0</interface_id>
+          <ipv6_autocon>False</ipv6_autocon>
+          <net_name>mgmt</net_name>
+          <netmask><NODE_NETMASK></netmask>
+          <network><NODE_NETWORK></network>
+          <require></require>
+          <stack>4</stack>
+          <subnet><NODE_SUBNET></subnet>
+        </litp:ip-address>
+

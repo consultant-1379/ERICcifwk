@@ -1,0 +1,554 @@
+{% load staticfiles %}
+<html lang="en">
+    {% block headscript %}
+    <head>
+        <meta charset="utf-8">
+        <meta httpequiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1">
+        <script src="/static/sidemenu/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/jquery/js/jquery-migrate-3.0.0.min.js"></script>
+        <script type="text/javascript" src="/static/sidemenu/js/jquery.multilevelpushmenu.js"></script>
+        <script type="text/javascript" src="/static/jquery/js/jquery.tablesorter.js"></script>
+        <script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/static/jquery/tickertape.js"></script>
+        <link rel=StyleSheet href="/static/jquery/datetimepicker/jquery.datetimepicker.css" type="text/css" />
+        <link rel=StyleSheet href="/static//jquery/dropdown/multiple-select.css" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap-theme.min.css">
+        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+        <link rel=StyleSheet href="/static/general.css" type="text/css" />
+        <link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+        <script type="text/javascript" src="/static/jquery/datetimepicker/jquery.datetimepicker.js"></script>
+        <script type="text/javascript" src="/static/jquery/dropdown/jquery.multiple.select.js"></script>
+        <link rel=stylesheet href="/static/sidemenu/css/dataTables.bootstrap.css" type="text/css" />
+        <link rel=stylesheet href="/static/sidemenu/css/jquery.multilevelpushmenu.css" type="text/css" />
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.min.css" type="text/css" />
+        <script>
+            $(document).ready(function(){
+                sideMenu();
+                tickerTapeControl();
+                $(window).on('click', function() {
+                    $('#menu').multilevelpushmenu('collapse');
+                })
+                function sideMenu(){
+                    $( '#menu' ).multilevelpushmenu({
+                        menu: arrMenu,
+                        containersToPush: [$( '#pushobj' )],
+                        collapsed: true,
+                        preventItemClick: false,
+                        backItemIcon: 'fa fa-angle-left',
+                        groupIcon: 'fa fa-angle-right',
+                    });
+                }
+                function tickerTapeControl() {
+                    $('div.tickerTape marquee').marquee('pointer').mouseover(function () {
+                           $(this).trigger('stop');
+                           }).mouseout(function () {
+                            $(this).trigger('start');
+                            }).mousemove(function (event) {
+                                 if ($(this).data('drag') == true) {
+                                     this.scrollLeft = $(this).data('scrollX') + ($(this).data('x') - event.clientX);
+                             }
+                            }).mousedown(function (event) {
+                               $(this).data('drag', true).data('x', event.clientX).data('scrollX', this.scrollLeft);
+                                      }).mouseup(function () {
+                                $(this).data('drag', false);
+                             }).css('cursor','pointer');
+                }
+                $("#accordion").accordion({
+                    collapsible:true,
+                    active:false,
+                    heightStyle: "content"
+                });
+
+                var icons = $( "#accordion" ).accordion( "option", "icons" );
+                $('.open').click(function () {
+                    $('.ui-accordion-header').removeClass('ui-corner-all').addClass('ui-accordion-header-active ui-state-active ui-corner-top').attr({
+                        'aria-selected': 'true',
+                        'aria-expanded': 'true',
+                        'tabindex': '0'
+                    });
+                    $('.ui-accordion-header-icon').removeClass(icons.header).addClass(icons.headerSelected);
+                    $('.ui-accordion-content').addClass('ui-accordion-content-active').attr({
+                        'aria-expanded': 'true',
+                        'aria-hidden': 'false'
+                    }).show();
+                    $(this).attr("disabled","disabled");
+                    $('.close').removeAttr("disabled");
+                });
+                $('.close').click(function () {
+                    $('.ui-accordion-header').removeClass('ui-accordion-header-active ui-state-active ui-corner-top').addClass('ui-corner-all').attr({
+                        'aria-selected': 'false',
+                        'tabindex': '-1'
+                    });
+                    $('.ui-accordion-header-icon').removeClass(icons.headerSelected).addClass(icons.header);
+                    $('.ui-accordion-content').removeClass('ui-accordion-content-active').attr({
+                        'aria-expanded': 'false',
+                        'aria-hidden': 'true'
+                    }).hide();
+                    $(this).attr("disabled","disabled");
+                    $('.open').removeAttr("disabled");
+                });
+                $('.ui-accordion-header').click(function () {
+                    $('.open').removeAttr("disabled");
+                    $('.close').removeAttr("disabled");
+                });
+
+            });
+            var arrMenu = [
+               {
+                    title: 'CI Portal Menu',
+                    icon: 'fa fa-reorder',
+                    items: [
+                    {
+                        icon: 'fa fa-home',
+                        link: '/'
+                    },
+                    {
+                        name: 'Product Sets',
+                        icon: 'fa fa-dashboard',
+                        link: '/ps'
+                    },
+                    {% if productSet|stringformat:"s" != "None" %}
+                       {
+                        name: '{{ productSet }} Product Set Releases',
+                        icon: 'fa fa-hand-o-right',
+                        link: '/{{ productSet }}/prodSetReleases/'
+                       },
+                    {% endif %}
+
+                    {
+                        name: 'Products',
+                        icon: 'fa fa-euro',
+                        link: '/releaseProducts'
+                    },
+                    {% if product|stringformat:"s" != "None" and productSet|stringformat:"s" == "None" %}
+                       {
+                        name: '{{ product.name }} Releases',
+                        icon: 'fa fa-hand-o-right',
+                        link: '#',
+                        items: [{
+                            title: '{{ product.name }} Releases',
+                            icon: 'fa fa-hand-o-right',
+                            items: [{
+                                name: 'Releases',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/releases'
+                            },
+                            {% if product.name == "ENM" %}
+                            {
+                                name: 'Latest Delivery Queue',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/queue/'
+                            },
+                            {% endif %}
+                            {
+                                name: 'Packages & Testware',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/packages'
+                            }, {
+                                name: 'Mapped Testware',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/testware'
+                            }, {
+                                name: 'Unmapped Testware',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/unmappedtestware'
+                            }, {
+                                name: 'Testware Mapping',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/testware/mapping'
+                            }, {
+                                name: 'PRIM',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/primOptions/'
+                            }, {
+                                name: 'Artifact Association Management',
+                                icon: 'fa fa-hand-o-left',
+                                link: '/{{ product.name }}/viewComponentEntryPoint/'
+                            }
+                            ]
+                        }]
+                    },
+                    {% endif %}
+                    {
+                        name: 'Artifact List',
+                        icon: 'fa fa-list',
+                        link: '/cireports/allArtifacts/'
+                    },
+                    {
+                        name: 'Deployments',
+                        icon: 'fa fa-laptop',
+                        link: '#',
+                        items: [{
+                                title: 'Deployments',
+                                icon: 'fa fa-laptop',
+                                items: [{
+                                    name: 'Manage Management Servers',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/mgtsvrs/',
+                                }, {
+                                    name: 'Manage Deployments',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/clusters/',
+                                }, {
+                                    name: 'Manage NAS',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/nassvrs/',
+                                }, {
+                                    name: 'Manage SAN',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/storage/',
+                                }, {
+                                    name: 'Manage Enclosure(s)',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/enclosure/',
+                                }, {
+                                    name: 'Manage SED',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/ViewUploadSED/',
+                                }, {
+                                    name: 'Change Deployment Group',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/changeClusterGroup/',
+                                }, {
+                                    name: 'Search Inventory',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/searchInventory/',
+                                }, {
+                                    name: 'Buildlog',
+                                    icon: 'fa fa-laptop',
+                                    link: 'visualisation/baseline/',
+                                }, {
+                                    name: 'Cloud Native ENM Buildlog',
+                                    icon: 'fa fa-laptop',
+                                    link: 'cloudnative/buildlog/',
+                                }, {
+                                    name: 'Deployment Install Group Inventory',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/searchInstallGroup/',
+                                }, {
+                                    name: 'Upload Pre-Populated SED',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/populate/deployment/',
+                                }, {
+                                    name: 'SSH Key',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/sshkey/',
+                                }, {
+                                    name: 'Pre-Commit Staging Area',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/uploadSnapshot/',
+                                }, {
+                                    name: 'Default Autodeployment Versions',
+                                    icon: 'fa fa-laptop',
+                                    link: '/dmt/displayDeploymentData/',
+                                }, {
+                                    name: 'Deployments Summary Reports',
+                                    icon: 'fa fa-laptop',
+                                    link: 'dmt/deploymentsSummaryReports/',
+                                }, {
+                                    name: 'Deployment Artifacts Installed Audit',
+                                    icon: 'fa fa-laptop',
+                                    link: 'dmt/deploymentArtifactsInstalled/',
+                                }]
+                            }
+
+                        ]
+                    }, /* {
+                        name: 'Visualisation',
+                        icon: 'fa fa-eye',
+                        link: '#',
+                        items: [{
+                            title: 'Visualisation',
+                            icon: 'fa fa-eye',
+                            items: [{
+                                name: 'Chart(s)',
+                                icon: 'fa fa-eye',
+                                link: '/vis/showWidgets'
+                            }, {
+                                name: 'Chart Configuration(s)',
+                                icon: 'fa fa-eye',
+                                link: '/vis/showWidgetDefinitions/'
+                            }, {
+                                name: 'Sequence Configuration',
+                                icon: 'fa fa-eye',
+                                link: '/vis/showChartMappings/'
+                            }, {
+                                name: 'Server Utilization',
+                                icon: 'fa fa-eye',
+                                link: '/visualisation/serverutilization'
+                            }]
+                        }]
+                        }, */ {
+                        name: 'Framework',
+                        icon: 'fa fa-rotate-right',
+                        link: '#',
+                        items: [{
+                            title: 'Framework',
+                            icon: 'fa fa-rotate-right',
+                            items: [{
+                                name: 'Admin',
+                                icon: 'fa fa-rotate-left',
+                                link: '/admin'
+                            }, {
+                                name: 'TV Teams',
+                                icon: 'fa fa-rotate-left',
+                                link: '/fwk/links/'
+                            }, {
+                                name: 'Change Log',
+                                icon: 'fa fa-rotate-left',
+                                link: '/fwk/changeLog'
+                            }, {
+                                name: 'Ticker Tape History',
+                                icon: 'fa fa-rotate-left',
+                                link: '/TickerTapeHistory'
+                            }, {
+                                name: 'Pre Register Artifact',
+                                icon: 'fa fa-rotate-left',
+                                link: '/preRegisterArtifact'
+                            }]
+                        }]
+                    }, {
+                        name: 'Metrics',
+                        icon: 'fa fa-bar-chart-o',
+                        link: '#',
+                        items: [{
+                            title: 'Metrics',
+                            icon: 'fa fa-bar-chart-o',
+                            items: [{
+                                name: 'ENM Metrics',
+                                icon: 'fa fa-bar-chart-o',
+                                link: 'https://mtportal.seli.wh.rnd.internal.ericsson.com/metrics/#ci-metrics'
+                            }, {
+                                name: 'Cloud Metrics',
+                                icon: 'fa fa-bar-chart-o',
+                                link: '/metrics/CloudMetrics/'
+                            }, {
+                                name: 'KGB Metrics',
+                                icon: 'fa fa-bar-chart-o',
+                                link: '/metrics/KgbMetrics/'
+                            }]
+                        }]
+                    }, {
+                        name: 'Fast Commit',
+                        icon: 'fa fa-fighter-jet',
+                        link: '#',
+                        items: [{
+                            title: 'Metrics',
+                            icon: 'fa fa-fighter-jet',
+                            items: [{
+                                name: 'Docker Images',
+                                icon: 'fa fa-fighter-jet',
+                                link: '/dockerimages/'
+                            }, {
+                                name: 'Documentation',
+                                icon: 'fa fa-fighter-jet',
+                                link: 'https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus/content/sites/tor/docker/snapshot/index.html'
+                            }]
+                        }]
+                    }, {
+                        name: 'Diff Tools',
+                        icon: 'fa fa-tasks',
+                        link: '#',
+                        items: [{
+                            title: 'Diff Tools',
+                            icon: 'fa fa-tasks',
+                            items: [{
+                                name: 'ISO Diff Tool',
+                                icon: 'fa fa-tasks',
+                                link: '/compareISOs/'
+                            },{
+                                name: 'CENM Diff Tool',
+                                icon: 'fa fa-tasks',
+                                link: '/compareCENMDiff/'
+                            },
+                            {
+                                name: 'BOM Diff Tool',
+                                icon: 'fa fa-tasks',
+                                link: '/compareBOMs/'
+                            }, {
+                                name: 'Product Set Diff Tool',
+                                icon: 'fa fa-tasks',
+                                link: '/compareProductSets/'
+                            }]
+                        }]
+                    }, {
+                        name: 'Cloud',
+                        icon: 'fa fa-cloud',
+                        link: '#',
+                        items: [{
+                            title: 'Cloud',
+                            icon: 'fa fa-cloud',
+                            items: [{
+                                name: 'Install Manager',
+                                icon: 'fa fa-cloud',
+                                link: 'https://atvcloud4.athtem.eei.ericsson.se/users/login'
+                            }, {
+                                name: 'TEOD',
+                                icon: 'fa fa-cloud',
+                                link: 'https://atvpbookspp.athtem.eei.ericsson.se/'
+                            }{% load tags %}{% getSPPNewMenuLinks %}]
+                        }]
+                    }, /* {
+                        name: 'FOSS',
+                        icon: '',
+                        link: '#',
+                        items: [{
+                            title: 'FOSS',
+                            icon: '',
+                            items: [{
+                                name: 'Auditing',
+                                icon: '',
+                                link: '/foss/auditing/'
+                            }]
+                        }]
+                    },*/ {
+                        name: 'Excellence',
+                        icon: 'fa fa-pencil',
+                        link: '#',
+                        items: [{
+                            title: 'Excellence',
+                            items: [{
+                                name: 'Questions',
+                                icon: 'fa fa-pencil-square',
+                                link: '/excellence/showQuestions/'
+                            }, {
+                                name: 'Organisations',
+                                icon: 'fa fa-pencil-square',
+                                link: '/excellence/showOrganisations/'
+                           }, {
+                                name: 'New Assessment',
+                                icon: 'fa fa-pencil-square',
+                                link: '/excellence/takeQuestionnaire/'
+                            }, {
+                                name: 'Assessment History',
+                                icon: 'fa fa-pencil-square',
+                                link: '/excellence/searchQuestionnaires/'
+                            }]
+                        }]
+                    },
+                     {% ifnotequal product|stringformat:"s" "None" %}
+                     {
+                        name: '{{ product.name }} Jenkins',
+                        icon : 'fa fa-gears',
+                        link: '#',
+                        items: [{
+                                 title:'{{ product.name }} Jenkins',
+                                 items: [
+                                 {% if femObj %}
+                                   {% for object in femObj %}
+                                      {% if object.product.name == product.name %}
+                                          {
+                                              name: '{{ object.name }}',
+                                              icon : 'fa fa-gears',
+                                              link: '{{ object.fem_link }}'
+                                          },
+                                       {% endif %}
+                                   {% endfor %}
+                                 {% else %}
+                                      {
+                                          name: 'No Information',
+                                          icon : 'fa fa-gears'
+                                      },
+                                 {% endif %}
+                               ]
+                        }]
+                     },
+                     {% endifnotequal %}
+                     {
+                        name: 'External Tools',
+                        icon: 'fa fa-external-link',
+                        link: '#',
+                        items: [{
+                            title: 'External Tools',
+                            icon: 'fa fa-external-link',
+                            items: [{
+                                name: 'Maintrack Radiator',
+                                icon: 'fa fa-external-link',
+                                link: 'https://mtportal.seli.wh.rnd.internal.ericsson.com/metrics/#maintrack-radiator'
+                            }, {
+                                name: 'Test Management',
+                                icon: 'fa fa-external-link',
+                                link: 'http://taftm.lmera.ericsson.se/'
+                            }, {
+                                name: 'Gerrit',
+                                icon: 'fa fa-external-link',
+                                link: 'https://gerrit-gamma.gic.ericsson.se'
+                            }, {
+                                name: 'Local Nexus',
+                                icon: 'fa fa-external-link',
+                                link: 'https://arm901-eiffel004.athtem.eei.ericsson.se:8443/nexus/'
+                            }, {
+                                name: 'E2C Nexus',
+                                icon: 'fa fa-external-link',
+                                link: 'https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus/'
+                            }]
+                        }]
+                    }, {
+                        name: 'Glossary',
+                        icon: 'fa fa-question',
+                        link: '/glossary'
+                    }]
+                }
+            ];
+        </script>
+        <base href="/">
+        <title>PDU NAM CI Portal</title>
+    </head>
+    {% endblock headscript %}
+    {% block body %}
+    <body ng-app="{% block ng_app %}{% endblock ng_app %}">
+        {% block header_includes %}
+        <div class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 4px">
+            <div class="container-fluid">
+            {% block navbar %}
+            <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <span class="navbar-brand" href="#" target="_self">
+                <a href="#" target="_self">
+            <span><img class="brand-logo" src="/static/images/econ01.svg"></span>PDU NAM Continuous Integration Portal
+            </a></span>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+              <li><a href="/CI/packages/ERICcifwkportal_CXP9030099" target="_self" title="CI Portal Version" id="versionInfo">{% getCifwkVersion %}</a></li>
+              <li>
+              <a class="help" title="Help" target="_blank" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Continuous+Integration%28CI%29+Portal"
+                  ><img src="/static/images/help_black_16px.svg"> Help</a>
+              </li>
+              {% block user %}
+                {% if user.is_authenticated %}
+                <li> <span class="navbar-btn"><a href="/logout" target="_self" class="btn btn-default" title="Logout of the CI Portal"><img src="/static/images/user_black_16px.svg"/> &nbsp;{{ user.username }} &nbsp;&nbsp;<img src="/static/images/logout_black.svg"></a></span>
+                </li>
+                {% else %}
+                <li><p class="navbar-btn"><a href="/login" target="_self" class="btn btn-default" title="Login: sigum & LAN password"><span class="glyphicon glyphicon-log-in"></span></a></p></li>
+                {% endif %}
+              {% endblock user %}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+    </div>
+    {% endblock navbar %}
+</div>
+{% endblock header_includes %}
+<div>
+    <div id="menu">
+    {% load tickertape %}
+    {% autoescape off %}
+    {% getTickerTapeMessage %}
+    {% endautoescape %}
+    {% block content %}
+</div>
+    {% endblock content %}
+</div>
+ </body>
+{% endblock body %}
+</html>
+

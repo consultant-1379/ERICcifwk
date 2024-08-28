@@ -1,0 +1,56 @@
+{% block content %}
+<script src="/static/commonFunctions.js"></script>
+<table class="general-table" id="testware-revisions">
+    {% if artifacts %}
+        <thead>
+            <tr>
+                <th>Testware Name</th>
+                <th>Version</th>
+                <th>Date Created</th>
+                <th>Status</th>
+                <th>Action</th>
+                <th>KGB Ready</th>
+                <th>CDB Ready</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in artifacts %}
+            <tr>
+                <td align=center>{{ item.testware_artifact.name }}</td>
+                <td align=center>{{ item.version }}</td>
+                <td align=center>{{ item.date_created }}</td>
+                {% if not item.obsolete %}
+                    <td align=center>Active</td>
+                    <td align=center><a href="javascript:void(0)" onClick="checkAction('Do you really want to Obsolete {{ item.testware_artifact.name }} {{ item.version }}?', '/{{ product }}/testware/obsolete/{{ item.id }}')" title="Obsolete {{ item.testware_artifact.name }} ">obsolete</a></td>
+                {% else %}
+                    <td align=center>Obsolete</td>
+                    <td align=center><a href="javascript:void(0)" onClick="checkAction('Do you really want to Reactivate {{ item.testware_artifact.name }} {{ item.version }}?', '/{{ product }}/testware/reactivate/{{ item.id }}')" title="Reactivate {{ item.testware_artifact.name }} ">reactivate</a></td>
+                {% endif %}
+                {% if item.kgb_status == 1 and item.obsolete == 0 %}
+                    <td align=center><p align="center"><img src="/static/images/tickbox.png" alt="{{item.testware_revision.kgb_status}}" width="40" height="40"></p></td>
+                {% else %}
+                    <td align=center><p align="center"><img src="/static/images/empty_box.png" alt="{{item.testware_revision.kgb_status}}" width="40" height="40"></p></td>
+                {% endif %}
+                {% if item.cdb_status == 1 and item.obsolete == 0 %}
+                    <td align=center><p align="center"><img src="/static/images/tickbox.png" alt="{{item.testware_revision.cdb_status}}" width="40" height="40"></p></td>
+                {% else %}
+                    <td align=center><p align="center"><img src="/static/images/empty_box.png" alt="{{item.testware_revision.cdb_status}}" width="40" height="40"></p></td>
+                {% endif %}
+                {% if item == latestTestware and item.obsolete == 0%}
+                    {% if product.name != "ENM" %}
+                        <td align=center><input type="submit" value="Change CDB" title="Change CDB" onclick="checkAction('Are you sure you wish to change the CDB status of {{ item.testware_artifact.name }}?','/{{ product }}/testware/changeStatus/{{ item.id }}')"/></td>
+                    {% else %}
+                    <td align=center><input type="submit" value="Change CDB" title="Change CDB" onclick="checkAction('This page is now deprecated for the {{ product.name }} product, please now deliver your testware using the Delivery Queue.','/ENM/queue/{{ latestProductDrop }}/')"/></td>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+    </tbody>
+    {% else %}
+    <tbody>
+        <tr><td><p>No Testware found</p></td></tr>
+    </tbody>
+    {% endif %}
+</table>
+{% endblock %}
+

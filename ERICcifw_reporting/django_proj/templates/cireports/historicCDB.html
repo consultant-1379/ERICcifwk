@@ -1,0 +1,43 @@
+{% extends "cireports/base.html" %}
+{% block title %}Customer Deployable Baseline History{% endblock %}
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">Customer Deployable Baseline Information for {{drop.name}} <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/" title="Historic CDB Info" target="_blank"><img src="/static/images/question.png"/></a></div>
+    </div>
+    <div class="generic-text">
+    <br>
+    {% if cdbs %}
+        <table id="package-table" class="tablesort">
+            <thead>
+                <tr>
+                    <th>CDB Type</th>
+                    <th>Started</th>
+                    <th>Last Updated</th>
+                    <th>Result</th>
+                    <th>Included Packages</th>
+                </tr>
+            </thead>
+                {% for cdb in cdbs %}
+                <tr>
+                    <td align=center>{{cdb.type.typeStripUnderscores|capfirst}}</td>
+                    <td align=center>{{ cdb.started }}</td>
+                    <td align=center>{{ cdb.lastUpdated }}</td>
+                    {% if cdb.report == None %}
+                        <td align=center><p align="center"><img src="/static/images/{{cdb.status}}.png" alt="{{cdb.status}}" width="50" height="50"></p></td>
+                    {% else %}
+                        <td align=center><p align="center"><a href="{{cdb.report}}"><img src="/static/images/{{cdb.status}}.png" alt="{{cdb.status}}" width="50" height="50"></a></p></td>
+                    {% endif %}
+                    <td align=center><p align="center"><a href="/{{product.name}}/drops/{{drop.name}}/historic/{{cdb.type.name}}/{{cdb.parent.id}}">Content</a></p></td>
+                </tr>
+                {% endfor %}
+        </table>
+    {% else %}
+        <table>
+            <tr>
+                <td><p><center>No Historic information found for {{ drop.name }} ({{type.typeStripUnderscores}})</center></p></td>
+            </tr>
+        </table>
+    {% endif %}
+
+    </div>
+{% endblock %}

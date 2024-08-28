@@ -1,0 +1,100 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}{{ package }} Test Results {% endblock %}
+
+{% block content %}
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">Product Set: {{ identityString }} {{ sutType }} SUT Test Details</h2>
+        {% if definedDeploymentUtilities  or sedVersion or deployVersion or mtUtilsVersion %}
+            <h3>Deployment Utilities</h3>
+            <br>
+            <table class='general-table'>
+                {% if definedDeploymentUtilities %}
+                  {% for definedDeploymentUtility in definedDeploymentUtilities %}
+                      <tr>
+                           {% if definedDeploymentUtility.utility_version.utility_label %}
+                               <th>{{ definedDeploymentUtility.utility_version.utility_label }}</th>
+                           {% else %}
+                               <th>{{ definedDeploymentUtility.utility_version.utility_name.utility }}</th>
+                           {% endif %}
+                                <td>{{ definedDeploymentUtility.utility_version.utility_version }}</td>
+                           </tr>
+                   {% endfor %}
+                 {% else %}
+                       <tr>
+                           <td>SED Version</td>
+                           {% if sedVersion == None %}
+                              <td>Unspecified</td>
+                           {% else %}
+                              <td>{{ sedVersion }}</td>
+                           {% endif %}
+                       </tr>
+                        <tr>
+                           <td>Deploy Script Version</td>
+                           {% if deployVersion == None %}
+                                <td>Unspecified</td>
+                           {% else %}
+                                 <td>{{ deployVersion}}</td>
+                           {% endif %}
+                        </tr>
+                        <tr>
+                           <td>MT Utils Package Version</td>
+                           {% if mtUtilsVersion == "" or mtUtilsVersion == None %}
+                              <td>Unspecified</td>
+                           {% else %}
+                               <td>{{ mtUtilsVersion }}</td>
+                           {% endif %}
+                         </tr>
+                {% endif %}
+            </table>
+            <br>
+        {% endif %}
+    <h3>Testware Details</h3>
+    {% if reportDirectory %}
+            <br>
+            <div id="viewtestreport">
+                <a href="{{ reportDirectory }}" target="_blank"><img src="/static/images/relatedItem.png" alt="Test Report" />&nbsp;&nbsp;View Full Report</a>
+                <br>
+                {% if testwarePOMDirectory %}
+                    <a href="/static/testReports/{{ testwarePOMDirectory }}"><img src="/static/images/relatedItem.png" alt="Testware POM" />&nbsp;&nbsp;View TestWare POM</a>
+                {% endif %}
+                <br>
+                {% if hostProperties %}
+                    <a href="/static/testReports/{{ hostProperties }}"><img src="/static/images/relatedItem.png" alt="Host Properties"/>&nbsp;&nbsp;Download Host Properties Files</a>
+                {% endif %}
+                {% if veLog != "None" %}
+                    <a href="{{ veLog }}"><img src="/static/images/relatedItem.png" alt="veLog"/>&nbsp;&nbsp;Visualisation Engine Link</a>
+                {% endif %}
+            </div>
+     {% endif %}
+     {% if not reportDirectory and not report %}
+            <table>
+                 <tr>
+                     <td><p><center>No Test Report Available</center></p></td>
+                 </tr>
+            </table>
+     {% endif %}
+     <h3 id="text-container">Testware Artifacts</h3>
+     {% if testware %}
+           <br>
+            <table class='general-table'>
+                <tr>
+                    <th>Name</th>
+                    <th>Version</th>
+                </tr>
+                {% for item in testware %}
+                    <tr>
+                        <td align=center>{{ item.testware_artifact__name }}</td>
+                        <td align=center>{{ item.testware_revision__version }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+     {% else %}
+                <table>
+                    <tr>
+                        <td><p><center>No Testware Available</center></p></td>
+                    </tr>
+                </table>
+     {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Testware to package mapping{% endblock %}
+
+{% block content %}
+<div class="general-container">
+        {% if packageObj %}
+            <h2 class="generalPageNewLook-title">{{ artifact }} Package to Testware Mapping <a class="img" href="/{{ product.name }}/testware/mapping" title="Register A Testware Mapping"><img src="/static/images/create.png"/></a> <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Testware+Management" title="Testware Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        {% else %}
+            <h2 class="generalPageNewLook-title">{{ artifact }} Testware to Package Mapping <a class="img" href="/{{ product.name }}/testware/mapping" title="Register A Testware Mapping"><img src="/static/images/create.png"/></a> <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Testware+Management" title="Testware Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        {% endif %}
+    <div class="generic-sub-title">
+        <div class="generic-text">
+            <br>
+            <script src="/static/commonFunctions.js"></script>
+            {% if error %}
+                <span id="testware-error"> {{ error }}<br></span>
+                <br>
+            {% endif %}
+            {% if message %}
+                <span id="testware-sucess"> {{ message }}<br></span>
+                <br>
+            {% endif %}
+
+            {% if mapping %}
+                <table class="general-table" id="testware-mapping-table">
+                    <thead>
+                        <tr>
+                            <th>Testware</th>
+                            <th>Package</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    {% for item in mapping %}
+                    <tr>
+                        {% if packageObj %}
+                           <td align=center><a href="/{{ product }}/testware/mapping/{{ item.testware_artifact.name }}/">{{ item.testware_artifact.name }}</a></td>
+                           <td align=center>{{ item.package.name }}</td>
+                        {% else %}
+                           <td align=center>{{ item.testware_artifact.name }}</td>
+                           <td align=center><a href="/{{ product }}/testware/mapping/{{ item.package.name }}/">{{ item.package.name }}</a></td>
+                        {% endif %}
+                           <td align=center><a class="img" href="javascript:void(0)"
+                                            onClick="checkAction('Do you really want to Delete {{ item.testware_artifact.name }} to {{ item.package.name }} mapping?', '/{{ product }}/testware/{{ artifact }}/deletemapping/{{ item.id }}')" title="Delete mapping "><img src="/static/images/delete.png"/></a></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <table id="testware-mapping-table">
+                    <tr>No Testware/Package Mappings Associated with {{ artifact }}</tr>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

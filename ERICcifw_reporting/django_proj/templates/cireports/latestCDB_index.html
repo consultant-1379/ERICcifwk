@@ -1,0 +1,109 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Drop {{ drop.name }} Latest CDB{% endblock %}
+    {% block content %}
+        <script type="text/javascript">
+            (function($) {
+             $(document).ready(function() {
+                 function doCDBInfoRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/drop/{{ drop.name }}/latestCDB/{{ iso }}/cdbxml/",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table.drop-cdbs').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('table.drop-cdbs').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+                 }
+                function doRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/drop/{{ drop.name }}/latestCDB/'None'/xml/",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('.cdb-latest').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('.cdb-latest').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+                }
+               function doRequestTestware() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/drop/{{ drop.name }}/latestCDB/'testware'/xml/",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('.cdb-latest-testware').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('.cdb-latest-testware').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+               }
+                   doRequest();
+                   doRequestTestware();
+                   doCDBInfoRequest();
+                 });
+             })(jQuery);
+        </script>
+     <div class="general-container">
+            <h2 class="generalPageNewLook-title">{{ product.name }} Drop: {{ drop.name }} Latest Current Status</h2>
+            <div class="layout-bar"><a href="/{{ product.name }}/drops/{{ drop.name }}/">Drop:{{ drop.name }}</a></div>
+            <br>
+            <div class="sub-title"><b>Current Status</b></div>
+            <br>
+            <table class="drop-cdbs">
+                <tr><td> Loading Data ... </td></tr>
+            </table>
+        <br>
+        <div class="tablinksborder">
+            <ul class="tab">
+                <li><a id="packages-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('packages')">Packages</a></li>
+                <li><a id="testware-tab" href="javascript:void(0);" class="tablinks" onclick="openItem('testware')">Testware</a></li>
+            </ul>
+        </div>
+         <div id="packages" class="tabcontent">
+            <table class="cdb-latest">
+                <tr><td> Loading Data ... </td></tr>
+            </table>
+        </div>
+        <div id="testware" class="tabcontent">
+            <table class="cdb-latest-testware">
+                <tr><td> Loading Data ... </td></tr>
+            </table>
+        </div>
+    </div>
+<script type="text/javascript">
+   openItem("packages");
+   function openItem(name) {
+       var i, tabcontent, tablinks;
+       tabcontent = document.getElementsByClassName("tabcontent");
+       for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+       }
+       tablinks = document.getElementsByClassName("tablinks");
+       for (i = 0; i < tablinks.length; i++) {
+           tablinks[i].className = tablinks[i].className.replace(" active", "");
+       }
+       document.getElementById(name).style.display = "block";
+       document.getElementById(name + "-tab").className += " active";
+   }
+</script>
+    {% endblock %}
+{% endif %}

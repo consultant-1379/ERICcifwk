@@ -1,0 +1,45 @@
+{% extends "base_newlookandfeel.html" %}
+   {% block title %}Delivery Information {% endblock %}
+   {% block content %}
+   <div class="general-container">
+        <h2 class="generalPageNewLook-title">{{ productSet }} Media Artifact Delivery Page </h2>
+        <div class="delivery-info">
+            <br>
+             <table class='general-table'>
+               <tr>
+                   <th>Product:</th> <td><a href="/{{media.drop.release.product.name}}/releases/"><b>{{media.drop.release.product.name}}</b></a></td>
+               </tr>
+               <tr>
+                   <th>Media Artifact:</th> <td><a href="/{{ media.drop.release.product.name }}/{{ media.drop.name }}/media/"><b>{{media.mediaArtifact.name}}</b></a></td>
+               </tr>
+               <tr>
+                   <th>Version:</th> <td> <a href="/{{ media.drop.release.product.name }}/{{ media.drop.name }}/mediaContent/{{ media.version }}"><b>{{ media.version }}</b></a></td>
+               </tr>
+           </table>
+        </div>
+        {% if drops %}
+           <br>
+           <p><font color="red"><b>If Your Drop does not appear as an option to Deliver to, then the Media Freeze Date for that drop has expired or the drop has been temporarily closed.
+           <br>Please contact your support team for further information</b></font></p>
+        {% else %}
+           <br>
+           <p><font color="red"><b>No drops are available to deliver to. Media Freeze Dates for all drops have expired.
+           <br>Please contact your support team for further information</b></font></p>
+        {% endif %}
+        <br>
+        <div class="delivery-info">
+        <b>Enter the delivery information below:</b>
+        <form enctype="multipart/form-data" name="media_delivery_form" method="post" action="/mediaDeliveryToDrop/{{productSet}}/">{% csrf_token %}
+            <table class='general-table'>
+                {{ form }}
+                <input type="hidden" name="signum" value='{{ signum }}'>
+                <input type="hidden" name="productSet" value='{{ productSet }}'>
+                <input type="hidden" name="mediaArtifact" value='{{media.mediaArtifact.name}}'>
+                <input type="hidden" name="version" value='{{media.version}}'>
+                <input type="hidden" name="product" value='{{media.drop.release.product.name}}'>
+                <tr><td bgcolor=#FFFFFF></td><td bgcolor=#FFFFFF><input type="submit" name="mediaDeliver" onclick="this.value='Submitting ..';this.disabled='disabled'; this.form.submit();"/></td></tr>
+            </table>
+        </form>
+     </div>
+   </div>
+  {% endblock %}

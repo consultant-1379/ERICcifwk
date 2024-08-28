@@ -1,0 +1,36 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">AVS: Epic {{ epic }}
+        </div>
+    </div>
+    <div class="generic-text">
+        <br>
+        <table id="avsEpics-table">
+            <tr align="left">
+                <th>User Story</th>
+                <th>Title</th>
+                <th>Test Cases</th>
+            </tr>
+            {% for eachUserStory in userStoryList %}
+            <tr valign="top">
+                <td> {{eachUserStory.usId }}</td>
+                <td>{{ eachUserStory.title }}</td>
+                <td>
+                    <table>
+                    {% for eachTestCase in testCaseList %}
+                    <tr><td><b>TC ID:</b></td><td>{{ eachTestCase.tcId }}</td></tr>
+                    <tr><td><b>Title:</b></td><td>{{ eachTestCase.title }}</td></tr>
+                    <tr><td><b>Description:</b></td><td>{{ eachTestCase.desc }}</td></tr>
+
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

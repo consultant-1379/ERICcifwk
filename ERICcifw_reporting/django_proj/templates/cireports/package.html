@@ -1,0 +1,107 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %} {{ product.name }} Package Information{% endblock %}
+    {% block content %}
+        <link rel=StyleSheet href="/static/general.css" type="text/css" />
+        {% if not is_testware %}
+            <script type="text/javascript">
+                (function($) {
+                         $(document).ready(function() {
+                         function doBuildInfoRequest() {
+                            $.ajax({
+                                type: 'GET',
+                                url: "/{{ product }}/packages/{{ name }}/buildxml/",
+                                dataType: 'html',
+                                cache: false,
+                                success: function(html, textStatus) {
+                                    $('table.package-buildinfo').replaceWith(html);
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    if (xhr.status != 0)
+                                    {
+                                    $('table.package-buildinfo').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                                    }
+                                },
+                                });
+                         }
+                        doBuildInfoRequest();
+                   });
+                 })(jQuery);
+           </script>
+    {% endif %}
+    <script type="text/javascript">
+        (function($) {
+         $(document).ready(function() {
+             function doRequest() {
+                $.ajax({
+                    type: 'GET',
+                    url: "/{{ product }}/packages/{{ name }}/xml/?page={{ pageNo }}",
+                    dataType: 'html',
+                    cache: false,
+                    success: function(html, textStatus) {
+                    $('table#package-revisions').replaceWith(html);
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr.status != 0)
+                        {
+                        $('table#package-revisions').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                        }
+                    },
+                   });
+             }
+             doRequest();
+           });
+         })(jQuery);
+     </script>
+    <div class="artifact-container">
+        <h2 class="generalPageNewLook-title"> {% if product.name != "None" %} {{ product.name }} {% endif %} {{ name }} Information <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Package+Versions" title="Drop Info" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <div class="layout-bar">
+
+                    {% if allRevsPag.has_previous %}
+                        <a href="/{{ product }}/packages/{{ name }}/?page={{ allRevsPag.previous_page_number }}">Previous Page</a> |
+                    {% endif %}
+                    {% if allRevsPag.has_previous or allRevsPag.has_next %}
+                        <span class="current">
+                            Page {{ allRevsPag.number }} of {{ allRevsPag.paginator.num_pages }}
+                        </span>
+                    {% endif %}
+                    {% if allRevsPag.has_next %}
+                        | <a href="/{{ product }}/packages/{{ name }}/?page={{ allRevsPag.next_page_number }}">Next Page</a>
+                    {% endif %}
+                    {% if allRevsPag.has_previous or allRevsPag.has_next %}
+                        | <a id="allPkgRevs_link" href="/{{ product }}/packages/{{ name }}/?page=all">View All ({{ count }})</a>
+                    {% endif %}
+         </div>
+         <br>
+        {% if not is_testware %}
+            <div class="sub-title"><b>Current Design Build Activity</b></div>
+                <table class="package-buildinfo">
+                    <tr><td color="#000" border="none"> Loading Build Data ... </td></tr>
+                </table>
+            <br>
+        {% endif %}
+        <div class="sub-title"><b>Current Integration Activity</b></div>
+        <br>
+         <table id="package-revisions">
+             <tr><td color="#000"> Loading Integration Data ... </td></tr>
+         </table>
+        <div class="layout-bar">
+
+                    {% if allRevsPag.has_previous %}
+                        <a href="/{{ product }}/packages/{{ name }}/?page={{ allRevsPag.previous_page_number }}">Previous Page</a> |
+                    {% endif %}
+                    {% if allRevsPag.has_previous or allRevsPag.has_next %}
+                        <span class="current">
+                            Page {{ allRevsPag.number }} of {{ allRevsPag.paginator.num_pages }}
+                        </span>
+                    {% endif %}
+                    {% if allRevsPag.has_next %}
+                        | <a href="/{{ product }}/packages/{{ name }}/?page={{ allRevsPag.next_page_number }}">Next Page</a>
+                    {% endif %}
+                    {% if allRevsPag.has_previous or allRevsPag.has_next %}
+                        | <a id="allPkgRevs_link" href="/{{ product }}/packages/{{ name }}/?page=all">View All ({{ count }})</a>
+                    {% endif %}
+         </div>
+        </div>
+    {% endblock %}
+{% endif %}

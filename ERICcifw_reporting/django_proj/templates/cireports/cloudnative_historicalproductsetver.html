@@ -1,0 +1,55 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">ENM Product Set Version <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+Sets" title="Product Set Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <table class="general-table" style="width: 100%;">
+            <thead>
+            <tr>
+                <th>ENM Version</th>
+                <th>Integrated, vENM & VIO Working Baseline</th>
+                {% if inactiveMedia %}
+                <th>Contains Media Artifact(s)</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tr>
+                <td><a href="/{{ productSet }}/content/{{ dropName }}/{{ enmPSVersion.version }}">{{ enmPSVersion.version }}</a></td>
+                {% if enmPSVersion.current_status|length >= 1 %}
+                    {% set overallWeigthedStatus = enmPSVersion.getOverallWeigthedStatus %}
+                    <td align="center" class="compile"><p align="center"><a href="/{{ productSet }}/content/{{ dropName }}/{{ enmPSVersion.version }}"><img src="/static/images/{{ overallWeigthedStatus }}.png" alt="{{ overallWeigthedStatus }}" width="40" height="40"></a><span style="display:none">{{ overallWeigthedStatus }}</span></p></td>
+                {% else %}
+                    <td align="center" class="compile"><p align="center"><a href="/{{ productSet }}/content/{{ dropName }}/{{ enmPSVersion.version }}"><img src="/static/images/{{ enmPSVersion.status.state }}.png" alt="{{ enmPSVersion.status.state }}" width="40" height="40"></a><span style="display:none">{{enmPSVersion.status.state}}</span></p></td>
+                {% endif %}
+                {% if inactiveMedia %}
+                <td align="center">
+                    {% if enmPSVersion.id in inactiveMedia %}
+                    <b> No longer available </b>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+    </table>
+    <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">CENM Product Set Versions</h2>
+    <table class="general-table" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>cENM Version</th>
+                <th>cENM Working Baseline</th>
+            </tr>
+        </thead>
+        {% if activeCNPSVersions %}
+            {% for cn_product_set_obj in activeCNPSVersions %}
+                <tr>
+                    <td align="center">
+                        <a href="/cloudnative/getCloudNativeProductSetContent/{{ dropName }}/{{ cn_product_set_obj.product_set_version }}">{{ cn_product_set_obj.product_set_version }}</a>
+                    </td>
+                    <td align="center">
+                        <p align="center"><img src="/static/images/{{ cn_product_set_obj.overall_status }}.png" alt="{{ cn_product_set_obj.overall_status }}" width="40" height="40"><span style="display:none">{{ cn_product_set_obj.overall_status }}</span></p>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+</div>
+{% endblock %}

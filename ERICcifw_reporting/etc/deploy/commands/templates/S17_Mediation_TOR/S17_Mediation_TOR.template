@@ -1,0 +1,18 @@
+###########################################################################
+#
+#      This Template is used by the TOR CIFWK to run command on a LITP MS
+#      This Template is used for the multiblade deployment
+#      If Line begins with # the line is a comment
+#      Arguments/parameters are declared in django function dict and
+#      should be contained within braces {}
+#
+###########################################################################
+#
+#
+litp /definition/cmw_installer/camp4 create core.LitpResourceDef type=cmw.Campaign bundle_name="ERICpmmedcore_CXP9030102-2.1.4-1" bundle_type="rpm" install_name="ERIC-MedCore-Campaign"
+litp /definition/cmw_installer/camp5 create core.LitpResourceDef type=cmw.Campaign bundle_name="ERICpmservice_CXP9030101-1.3.9-1" bundle_type="rpm" install_name="ERIC-PMService-Campaign"
+litp /definition/cmw_installer/camp6 create core.LitpResourceDef type=cmw.Campaign bundle_name="ERICpmmedcom_CXP9030103-1.3.5-1" bundle_type="rpm" install_name="ERIC-MedService-Campaign"
+litp /definition/ materialise
+litp /inventory/ configure
+litp /cfgmgr apply scope=/inventory
+service puppet restart

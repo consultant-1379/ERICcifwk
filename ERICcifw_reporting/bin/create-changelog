@@ -1,0 +1,181 @@
+#!/bin/bash -a
+#
+# script for CI Framework to create Changelog between two dates
+#
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+#
+# usage:
+# Print out the usage for this script
+#
+usage() {
+    $_CAT <<EOF
+    This Script examines all the relevant repos and returns a change log based on the dates provided
+
+    USAGE: $0 -u USERNAME -s START-DATE -e END-DATE -v CIFWK-STARTVersion -l CIFWK-ENDVersion -d NO
+           Provide the following
+            -u: Git username to clone the various repos to create the changelog
+            -s: Start date to begin the search
+            -e: End date to complete the search
+
+            OPTIONAL parameters specific to the CIFWK repo, comparing differences between two versions
+            -v: Base version
+            -l: Latest version to compare difference against the base version
+
+            ONLY INCLUDE -d option if you do not want to see dates in the changelog output
+                By default dates will be included in the log
+            -d: Exclude dates in the change log
+
+        Examples:
+        ./create-changelog -u emarfah -s "DEC 15 2014" -e "JAN 3 2015" -v 2.0.120 -l 2.0.125 -d no
+        ./create-changelog -u emarfah -s "APR 12 2014" -e "APR 23 2014"
+
+EOF
+    exit 1
+}
+
+#
+# header:
+# Populate the header for the changelog file
+#
+header() {
+    log "** Creating file: ${CHANGELOG_FILE}"
+    $_ECHO " *** Change Log between ${START_DATE} and ${END_DATE} ***" >> ${CHANGELOG_FILE}
+    $_ECHO " " >> ${CHANGELOG_FILE}
+}
+
+#
+# lookForChanges:
+# - clone the list of repos
+# - search for changes and add them into a change log
+#
+lookForChanges() {
+    COUNT=0
+    while [ "R${REPOLIST[COUNT]}" != "R" ]
+    do
+        REPONAME=${REPOLIST[COUNT]##*/}
+        log "** Cloning ${REPONAME} "
+        $_GIT clone ssh://${USER}@gerrit-gamma-read.seli.gic.ericsson.se:29418/OSS/${REPOLIST[COUNT]} /var/tmp/${REPONAME} > /dev/null 2>&1
+        cd /var/tmp/${REPONAME}
+        CD_RESULT=$?
+        if [ ${CD_RESULT} -eq 0 ] ; then
+            log "** Writing changes into changelog from ${REPONAME} "
+            $_ECHO " *** Changes in ${REPONAME} ***" >> ${CHANGELOG_FILE}
+            $_GIT log --since="${START_DATE}" --until="${END_DATE}" --pretty=format:"${FORMAT}" --date=short | $_GREP -v maven-release-plugin | $_GREP -v 'Update parent pom' | $_GREP -v 'Merge branch' >> ${CHANGELOG_FILE}
+            $_ECHO " " >> ${CHANGELOG_FILE}
+            $_ECHO " " >> ${CHANGELOG_FILE}
+        fi
+        COUNT=$(( $COUNT + 1 ))
+    done
+    REPONAME="ERICcifwk"
+    # Look for changes in the current repo - ERICcifwk
+    if [ -d ${CIFWK_REPO} ]; then
+        cd ${CIFWK_REPO}
+        log "** Writing changes into changelog from ${REPONAME} "
+        if [[ ! -z ${START_VER} ]] && [[ ! -z ${END_VER} ]] ; then
+            START_VER=ERICcifwk-${START_VER}
+            END_VER=ERICcifwk-${END_VER}
+            $_ECHO " *** Changes in ${REPONAME} Between Versions ${START_VER} and ${END_VER} ***" >> ${CHANGELOG_FILE}
+            $_GIT log --pretty=format:"${FORMAT}" --date=short ${START_VER}..${END_VER} | $_GREP -v maven-release-plugin | $_GREP -v 'Updated sql file' | $_GREP -v 'Update parent pom' | $_GREP -v 'Merge branch' >> ${CHANGELOG_FILE}
+        else
+            $_ECHO " *** Changes in ${REPONAME} ***" >> ${CHANGELOG_FILE}
+            $_GIT log --since="${START_DATE}" --until="${END_DATE}" --pretty=format:"${FORMAT}" --date=short | $_GREP -v maven-release-plugin | $_GREP -v 'Updated sql file' | $_GREP -v 'Update parent pom' | $_GREP -v 'Merge branch' >> ${CHANGELOG_FILE} ## tagA..tagB
+        fi
+    fi
+    $_ECHO " " >> ${CHANGELOG_FILE}
+}
+
+#
+# cleanUp:
+# Remove the temporary directory containing the cloned GIT repositories
+#
+cleanUp() {
+    log "** Clean up of repos"
+    COUNT=0
+    while [ "R${REPOLIST[COUNT]}" != "R" ]
+    do
+        REPONAME=${REPOLIST[COUNT]##*/}
+        $_RM -rf ${BUILDDIR} /var/tmp/${REPONAME}
+        COUNT=$(( $COUNT + 1 ))
+    done
+    log "** Changeset information written to: ${CHANGELOG_FILE}"
+    $_ECHO ${CHANGELOG_FILE}
+}
+
+#
+# gitUpdate:
+# Update the current repo with the latest code before running any change logs
+#
+gitUpdate() {
+    if [ -d ${CIFWK_REPO} ]; then
+        cd ${CIFWK_REPO}
+        log "** Updating repo with latest changes"
+        $_GIT fetch && $_GIT rebase origin/master  > /dev/null 2>&1
+        GITUPDATE_RESULT=$?
+        if [ ${GITUPDATE_RESULT} -ne 0 ] ; then
+            log "** ERROR: Git update failed. Please check and try again"
+            exit ${GITUPDATE_RESULT}
+        else
+            log "** Git update complete"
+        fi
+    fi
+}
+
+unset USER START_DATE END_DATE START_VER END_VER DATE FORMAT
+while getopts  "u:s:e:v:l:d:" flag
+do
+    case "$flag" in
+        u) USER="${OPTARG}";;
+        s) START_DATE="${OPTARG}";;
+        e) END_DATE="${OPTARG}";;
+        v) START_VER="${OPTARG}";;
+        l) END_VER="${OPTARG}";;
+        d) DATE="${OPTARG}";;
+        *) usage
+    esac
+done
+
+if [[ -z ${USER} ]] || [[ -z ${START_DATE} ]] || [[ -z ${END_DATE} ]]; then
+    usage
+fi
+
+if [ -z ${DATE} ]; then
+    FORMAT="%ad%x09%s"
+    log "** Date included in the change log"
+else
+    FORMAT="%s"
+    log "** No date included in the change log"
+fi
+
+#
+# Our list of repos
+#
+CIFWK_REPO=/proj/lciadm100/cifwk/changelog/ERICcifwk/
+REPOLIST=(
+    "com.ericsson.cifwk.cloud/lmicloud-plugin"
+    "com.ericsson.ci.cloud/cloudportal"
+    "com.ericsson.maven.plugins/cifwk-maven-plugin"
+    "com.ericsson.maven.plugins/cifwkimagebuilder-maven-plugin"
+    "com.ericsson.maven.plugins/cifwkmedia-maven-plugin"
+    "com.ericsson.maven.plugins/inventory-maven-plugin"
+    "com.ericsson.ci.cloud/yama"
+    "com.ericsson.ci.cloud/ossrc_cdb_setup"
+    "com.ericsson.ci.cloud/cdb_ossrc_install"
+    "com.ericsson.ci.cloud/enm_auto_inst"
+    "com.ericsson.cifwk.taf/ERICTAFcifwk-testware"
+    "com.ericsson.maven.plugins/rstate-maven-plugin"
+    "com.ericsson.tor/DeploymentScripts"
+   )
+
+DATESTR="$($_DATE "+%Y%m%d_%H%M")"
+CHANGELOG_FILE=/tmp/changelog.${DATESTR}
+
+gitUpdate
+header
+lookForChanges
+cleanUp

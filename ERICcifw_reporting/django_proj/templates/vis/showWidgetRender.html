@@ -1,0 +1,51 @@
+{% extends "vis/base.html" %}
+
+{% block title %}CIFWK Visualisation Widget Render(s){% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div id="generic-title">
+    <div id="text-container">Chart Sequence(s)
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Sequence" title="Chart Sequence Help" target="_blank"><img src="/static/images/question.png"/></a>
+    </div>
+</div>
+<div class="generic-text">
+    <br>
+    <table class="chartSequence-table">
+        {% if widgetRenders %}
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Chart Configuration</th>
+                <th>Chart Sequence</th>
+                <th>Options</th>
+            </tr>
+            {% for render in widgetRenders %}
+                <tr>
+                    <td>{{ render.name }}</td>
+                    <td>{{ render.description }}</td>
+                    <td>{{ render.widgetDefinition }}</td>
+                    <td>{{ render.existing_Chart_Sequence }}</td>
+                    <td>
+                        <a class="img" href="/vis/WidgetRenders/{{ render.id }}/edit/" title="Edit Chart Sequence {{ render.name }}"><img src="/static/images/edit.png"/></a>
+                         <a class="img" href="#"
+                            onClick="checkAction('Do you really want to Delete {{ render.name}}?', '/vis/deletetWidgetRender/{{ render.id }}/')" title="Delete Chart Sequence {{ render.name }}"><img src="/static/images/delete.png"/></a>
+                        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Chart+Sequence" title="Chart Sequence Help" target="_blank"><img src="/static/images/question.png"/></a>
+
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+    <p/><b>For Infomation about CI Visualisation and Charts Please <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Visualisation/" target="_blank">Visit This Confluence Page</a></p>
+        {% else %}
+            </table>
+            <p/><b>For Infomation about CI Visualisation and Widgets Please <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Visualisation/" target="_blank">Visit This Confluence Page</a></p>
+        {% endif %}
+</div>
+{% endblock %}

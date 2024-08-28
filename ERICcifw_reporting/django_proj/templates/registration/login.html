@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <link rel=StyleSheet href="/static/login.css" type="text/css" />
+      <title>Login</title>
+   </head>
+   <body>
+      <div id="container">
+         <div class="login">
+            <div class="login-inner">
+               <div class="login-ericsson-logo"></div>
+               <br>
+               <div class="login-title">PDU NAM Continuous Integration Portal</div>
+               <br>
+               <br>
+               <div class="login-inputWrap">
+                  <form method="post" action="">
+                     {% csrf_token %}
+                     <table>
+                        <tr>
+                           <td>{{ form.username.label_tag }}</td>
+                           <td>{{ form.username }}</td>
+                           <td>&nbsp;</td>
+                           <td>{{ form.password.label_tag }}</td>
+                           <td>{{ form.password }}</td>
+                           <td> &nbsp;</td>
+                           <td> <input name="ciportal_login" type="submit" value="" id="login-submit" />
+                           <td>
+                        </tr>
+                     </table>
+                  </form>
+                  <br>
+                  {% if form.errors %}
+                  <p id="login-failure">Your username and password didn't match. Please try again.
+                  <p>
+                     {% endif %}
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

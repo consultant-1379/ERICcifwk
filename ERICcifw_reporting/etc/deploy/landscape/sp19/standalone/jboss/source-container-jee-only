@@ -1,0 +1,4 @@
+<INCLUDE NODE: jee > 
+        <litp:component-ref id="jboss_source">
+          <component>jboss_source</component>
+        </litp:component-ref>

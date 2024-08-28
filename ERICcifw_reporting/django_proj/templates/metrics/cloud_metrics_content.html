@@ -1,0 +1,45 @@
+{% block content %}
+
+        {% if total %}
+         <!--Headers-->
+        <table id="metrics-summary" class="general-table">
+            <thead>
+                 <tr>
+                     <th>Total Events</th>
+                     <th>Total Passed</th>
+                     <th>Total Failed</th>
+                     <th>% Passed</th>
+                     <th>Passed With Retries</th>
+                     <th>Average Execution Time(Passed Events Only)</th>
+                </tr>
+            </thead>
+            <tr>
+                <!--Total Number of Events-->
+                <td id="total" align=center>{{ total }}</td>
+                <!--Number of Passed Events-->
+                <td id="passed" align=center>{{ passed }}</td>
+                <!--Number of Failed Events-->
+                <td id="failed" align=center>{{ failed }}</td>
+                <!--% of Events Passed-->
+                <td id="percent_passed" align=center>{{ percent_passed }}</td>
+                <!--Number of Events passed with retries-->
+                <td id="passed_with_retries" align=center>{{ passed_with_retries }}</td>
+                <td id="average_time" align=center>{{ average_exec_time }}</td>
+            </tr>
+        </table>
+        <br>
+        <form enctype="multipart/form-data" name="dmt_mgmtServerReg" action="/downloadMetricsFile/?"  method="post" >{% csrf_token %}
+            <input type="hidden" id="" name = "metrics_data" value="{{ content }}" >
+            <input type="hidden" id="" name = "degMapping" value="{{ deg_mapping }}" >
+            <input type="hidden" id="" name = "start" value="{{ start }}" >
+            <input type="hidden" id="" name = "end" value="{{ end }}" >
+            <input type="submit" id="download_csv" name = "" value="Download Full Result" style="display:block;" >
+        </form>
+        {% else %}
+        <br>
+        <br>
+        <!--Error message if no information is found-->
+        <div align=center>No information found for this Query.</div>
+        {% endif %}
+
+{% endblock %}

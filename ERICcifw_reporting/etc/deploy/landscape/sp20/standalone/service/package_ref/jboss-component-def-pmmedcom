@@ -1,0 +1,17 @@
+<INCLUDE NODE: pmmedcom >
+  <litp:component-def id="pmmedcom">
+    <name>pmmedcom</name>
+    <version>1.0.0</version>
+    <litp:deployable-entity-def id="de">
+      <app-type>ear</app-type>
+      <install-source>/opt/ericsson/com.ericsson.oss.mediation.MediationService/mediation-service.ear</install-source>
+      <name>pmmedcom</name>
+      <service>jboss_tor</service>
+      <version><PACKAGE_VERSION></version>
+    </litp:deployable-entity-def>
+    <litp:package-def id="pkg">
+      <ensure>installed</ensure>
+      <name>ERICpmmedcom_CXP9030103</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+  </litp:component-def>

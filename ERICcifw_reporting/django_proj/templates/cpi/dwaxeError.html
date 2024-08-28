@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">  Dwaxe  Error  
+             <a class="img" href="{{ confluenceUrl }}" title="CPI Library Build Automation" target="_blank"><img src="/static/images/question.png"/></a>
+        </div>
+    </div>
+    <div class="full-details">
+    <br>
+        <font style="font-family: Verdana, Arial, Helvetica, sans-serif;">
+        <table border="2">
+            <tr>
+                <font color="red">Dwaxe Error: {{ Error }} 
+                {% if "Wrong Credentials" in Error %}
+                    <a href="/{{ product }}/logindwaxe/{{ version }}/{{cpiDrop}}/{{redirect}}"> Click Here</a> to try again
+                {% endif %}
+            </font>
+            </tr>
+        </table>
+        </font>
+    </div>
+{% endblock %}
+

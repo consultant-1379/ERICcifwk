@@ -1,0 +1,53 @@
+#### Command : Expected Output : Sucess Comment : Error Comment : Time given before expect timeout
+#### Make a Variable so we can use it through the commands 
+installdir=$( echo "autodeploy_`date '+%Y%m%d-%H:%M:%S'`" ) : \# : Setting Variable for install Directory : Unable to set variable for install Directory : 10
+#### Make the directory to store the install zip in
+mkdir -p /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir} : \# : Created Directory for zip file : Unable to Create Directory for zip file : 10
+#### Copy the install file from the upload directory to the new extracting location
+cp /opt/ericsson/nms/litp/bin/cifw_autodeploy/*.zip /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/install.zip : \# : Copying zipped file to install Directory : Unable to Copy File to install Dir : 10
+#### Copy the unzip file from the upload directory to the new extracting location
+cp /opt/ericsson/nms/litp/bin/cifw_autodeploy/unzip.py /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/unzip.py : \# : Copying unzip file to install Directory : Unable to Copy unzip File to install Dir : 10
+#### Cd to the new Directory
+cd /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/ : \# : Change directory to install Directory : Unable to change directory to install Directory : 10
+#### Change permission on zip file
+chmod 777 /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/unzip.py : \# : Changing permissio on unzip file : Unable to uchange permissions on zip File : 10
+#### Unzip the file
+/opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/unzip.py : \# : Unpacking install zip File : Unable to unzip File : 60
+#### Need to update the owner ship of the packages directory
+chown -R root:root /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/packages/* : \# : Changing ownership on the packages directory : Unable to change ownership on packages directory : 10
+#### Changing Permissions zip file content
+chmod -R 777 /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/* : \# : Changing permission for content of file : Unable to change permission for content of file : 10
+#### Run the Clean all Command to ensure the LMS is a fresh installation
+/opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/clean_all.sh : \# : Running Clean All on LMS : Unable to Run Clean All on LMS : 60
+#### loading the Tor SDP to /opt/ericsson/nms/litp/etc/cmw/packages
+\cp -f /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/packages/tor_patches/* /opt/ericsson/nms/litp/etc/cmw/packages : \# : Copying tor_patches : Unable to Copy tor Patches : 60
+#### WorkAround need to rename the http sdp
+\mv /opt/ericsson/nms/litp/etc/cmw/packages/ERIC-httpd-UI-Camp-1.0.1.sdp /opt/ericsson/nms/litp/etc/cmw/packages/ERIC-httpd-UI-Camp.sdp : \# : Renaming http sdp : Unable to rename http campaiogn : 10
+#### Copy Packages to /opt/ericsson/nms/litp/etc/cmw/packages
+\cp -f /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/packages/*.rpm /opt/ericsson/nms/litp/etc/cmw/packages : \# : Copying Tor Packages : Unable to Copy Tor Packages : 60
+#### Copy Litp Patches
+\cp -f /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/packages/litp_patches/* /var/www/html/litp : \# : Copying litp_patches if they exist : Unable to Copy Litp Patches : 60
+#### Remove the ERIVtorinst package from /opt/ericsson/nms/litp/etc/cmw/packages
+\rm /opt/ericsson/nms/litp/etc/cmw/packages/ERICtorinst*.rpm : \# : Removing Unwanted files from /opt/ericsson/nms/litp/etc/cmw/packages : Unable to remove Unwanted files from /opt/ericsson/nms/litp/etc/cmw/packages : 10
+#### Install the Tor Install rpm
+rpm -i /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/packages/ERICtorinst*.rpm : \# : Installing Tor install RPM : Unable to Tor Install RPM : 60
+#### Untar the litp tor Patches tar file
+cd /var/www/html/litp/; gunzip -f /var/www/html/litp/LITPServicePack-Latest.tar.gz; tar xvf /var/www/html/litp/LITPServicePack-Latest.tar : \# : Unpacking the Litp Tor Patches Tar File : Unable to Unpackage the Litp Patches Tar File : 60
+#### Run the Litp Patches script
+/var/www/html/litp/install_patches.sh : ]\# : Running the Litp install Patches command : Unable to install the litp Patches : 120
+#### Create REPO
+createrepo /var/www/html/litp : \# : Re-Creating the /var/www/html/litp repo : Unable to recreate the /var/www/html/litp repo : 30
+#### Load the definition XML
+litp / load /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/definition-overall-template.xml : \# : Loading the definition XML : Unable to Load the Definition XML : 10
+#### Load the inventory XML
+litp / load /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/inventory-overall-template.xml : \# : Loading the inventory XML : Unable to Load the inventory XML : 10
+#### Printout the definition and inventory to the log file for trouble shooting later
+litp / show -rl : \# : Storing inventory and definition info to the Log file : Unable to Store inventory and definition info to the Log file : 10
+#### Run the install commands to re-install the LMS according to the definition/inventorya XML's
+/opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/single_blade.sh : \# : Running install Script : Unable to Run install Script : 120
+#### Sleep for 3 minutes for puppet to configure cobbler
+####sleep 200 : \# : Sleeping for 3 minutes for puppet to configure cobbler : Unable to sleep for 3 minutes : 300
+#### The next three commands are all for the one command when you boot the mgt to are asked to press the any key twice to start the boot
+#### Boot the mgt Server
+#### Please note the pause function should be deleted from the bootmgr.sh script if not already
+\cp -f /opt/ericsson/nms/litp/bin/cifw_autodeploy/${installdir}/bootmgr.sh /opt/ericsson/nms/litp/bin/cifw_autodeploy/bootmgr.sh : ]\# : Copy Boot script to /opt/ericsson/nms/litp/bin/cifw_autodeploy : Unable to Copy Boot script to /opt/ericsson/nms/litp/bin/cifw_autodeploy on  LMS Server : 10

@@ -1,0 +1,33 @@
+{% block content %}
+<script src="/static/commonFunctions.js"></script>
+<script type="text/javascript">
+    $(document).ready(function()
+    {
+        $(".tablesort").tablesorter({widgets: ['zebra']});
+    });
+</script>
+
+<table id="testware-artifacts" class="general-table">
+    {% if testwareArtifacts %}
+        <thead>
+        <tr>
+            <th>Testware Name</th>
+            <th>Latest Version</th>
+            <th>Date Created</th>
+            <th>Mapped Packages</th>
+        </tr>
+        </thead>
+        {% for artifact in testwareArtifacts %}
+            <tr>
+                <td id="testware" align="center"><a id="testware_{{ artifact.testware_artifact.name }}" href="/{{ product }}/testware/showall/{{ artifact.testware_artifact.name }}">{{ artifact.testware_artifact.name }}</a></td>
+                <td align="center">{{ artifact.version }}</td>
+                <td align="center">{{ artifact.date_created }}</td>
+                <td align=center><a href="/{{ product }}/testware/mapping/{{ artifact.testware_artifact.name }}">Show Mappings</a></td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td><p>No testware found for {{ product }}</p></td></tr>
+    {% endif %}
+</table>
+{% endblock %}
+

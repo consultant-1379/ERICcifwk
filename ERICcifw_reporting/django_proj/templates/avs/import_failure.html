@@ -1,0 +1,25 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">Submit has failed
+        </div>
+    </div>
+    <div class="generic-text">
+        <br>
+        <H3>There were {{errors}}  errors <font color=red>(Noted in red)</font></H3>
+        <br>
+        {% for each in response %}
+
+        {% if ' False' in each   %}
+        <H3><font color=red> {{ each }} </font></h3><br />
+        {% else %}
+            {{ each }} <br />
+
+        {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+

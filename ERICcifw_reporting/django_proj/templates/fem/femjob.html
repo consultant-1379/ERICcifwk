@@ -1,0 +1,16 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Create Jenkins Jobs{% endblock %}
+{% block content %}
+<div class="general-container" >
+    <h2 class="generalPageNewLook-title">Create Jenkins Jobs <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/CIOSS/Automatic+creation+of+jenkins+jobs" title="create jobs Info" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <br>
+    <form enctype="multipart/form-data" name="primform" method="post" action="/createfemjob/">{% csrf_token %}
+    <table>
+        <tr><td>{{ form }}</td></tr>
+        <tr><td><input type="submit"  value="Submit" style="width:100px;" onclick="$('#loading').show();"/></td></tr>
+    </table>
+    </form>
+<div id="loading" style="display:none;"><img src="/static/images/processing.gif" alt="" /></div>
+</div>
+{% endblock %}

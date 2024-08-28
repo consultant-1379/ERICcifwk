@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# setupvapp    Setup vApp at boot time
+#
+# chkconfig: 2345 54 30
+# description: This init script does vApp setup at boot time, eg nexus settings.xml file population
+# processname: setupvapp
+
+. /etc/rc.d/init.d/functions
+
+CIFWK_URL=https://ci-portal.seli.wh.rnd.internal.ericsson.com
+
+RETVAL=0
+LOCAL_SCRIPT=/setupvapp.sh
+REMOTE_SCRIPT=$CIFWK_URL/static/setupvapp/scripts/setupvapp.sh
+
+start() {
+    echo $"Starting setupvapp: "
+    rm -rf $LOCAL_SCRIPT
+    wget --no-check-certificate $REMOTE_SCRIPT -O $LOCAL_SCRIPT
+    if [[ $? -eq 0 ]]
+    then
+        chmod +x $LOCAL_SCRIPT
+        $LOCAL_SCRIPT $CIFWK_URL
+        RETVAL=$?
+    else
+        RETVAL=1
+    fi
+    [ $RETVAL -eq 0 ] && success || failure
+    echo
+    return $RETVAL
+}
+
+stop() {
+        return 0
+}
+
+status() {
+        return 0
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
+exit $RETVAL

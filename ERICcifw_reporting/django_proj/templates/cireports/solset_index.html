@@ -1,0 +1,25 @@
+{% extends "cireports/base.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Solution Sets{% endblock %}
+    {% block content %}
+        <div id="generic-title">
+            <div id="text-container">{{ product.name }} Solution Sets</div>
+        </div>
+        <div class="full-details">
+            <br>
+            <div class="generic-text">
+                <table id="solset-table" >
+                    <tr>
+                        <th>Solution Sets</th>
+                    </tr>
+                    {% for item in solsets %}
+                        <tr> 
+                            <td><a href="/{{ product.name }}/solutionsets/{{ item.name }}">{{ item.name }}</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endblock %}
+{% endif %}
+

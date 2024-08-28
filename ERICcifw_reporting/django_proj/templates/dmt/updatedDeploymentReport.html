@@ -1,0 +1,38 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Summary Report{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">{{clusterName}} Reports<a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Updated+Deployments+Reports" title="Deployment Reports Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <div class="layout-bar"><a href="/dmt/clusters/{{ clusterId }}/">Return To Deployment</a></div>
+    {% if deploymentReport %}
+    <div id="accordion">
+       {% spaceless %}
+       {% for deployment in deploymentReport %}
+       <h2 {% if deployment.status %}
+           class="update_deployment_{{deployment.status}}"
+           {% endif %}
+           >Updated at {{deployment.createdDate }} - DD: {{deployment.deployment_description__name}} - Version: {{deployment.deployment_description__version__version}} </h2>
+             <div>
+                <table class="general-table">
+                    <tr>
+                        <th>Result</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            {% autoescape off %}
+                            {{ deployment.log }}
+                            {% endautoescape %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            {% endfor %}
+            {% endspaceless %}
+      </div> 
+    {% else %}
+        <span>No Deployments Report Found</span>
+    {% endif %}
+</div>
+{% endblock %}

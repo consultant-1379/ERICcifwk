@@ -1,0 +1,108 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+
+{% block title %}VLAN Cluster Multicast Form{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+<script language="JavaScript">
+    function checkAction(link) {
+            window.location = link;
+    }
+</script>
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">VLAN Cluster Multicast Form  <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/VLAN+Multicast" title="Deployment VLAN Mulitcast Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    {% if message %}
+       <span class="form-error"> {{message}} </span>
+       <br>
+       <br>
+    {% endif %}
+    <table class="deployment-table">
+         <form enctype="multipart/form-data" name="vlanClusterMulticastform" method="post" action="/dmt/{{ clusterId }}/vlanClusterMulticast/{{ action }}/?multicast_type={{ multicast_type }}">{% csrf_token %}
+            <tr>
+            <th width="30%">Type: </th>
+            <td>  <select name="multicast_type" id="multicast_type">
+                  {% for typeItem in typesOptions %}
+                   <option value="{{ typeItem.name }}">{{ typeItem.name }} - {{ typeItem.description }}</option>
+                  {% endfor %}
+           </select>
+            </td>
+           </tr>
+           <tr>
+           <th width="30%">Multicast Snooping: </th>
+           <td>
+           <select name="multicast_snooping" id="multicast_snooping">
+                 <option value="0">0</option>
+                 <option value="1">1</option>
+           </select>
+            </td>
+           </tr>
+           <tr>
+           <th width="30%">Multicast Querier: </th>
+           <td> <select name="multicast_querier" id="multicast_querier">
+                 <option value="0">0</option>
+                 <option value="1">1</option>
+           </select>
+            </td>
+           </tr>
+           <tr>
+           <th width="30%">Multicast Router: </th>
+           <td> <select name="multicast_router" id="multicast_router">
+                 <option value="0">0</option>
+                 <option value="1">1</option>
+                 <option value="2">2</option>
+           </select>
+            </td>
+           </tr>
+           <tr>
+           <th width="30%">Hash Max: </th>
+           <td><select name="hash_max" id="hash_max">
+                  {% for item in hashMaxOptions %}
+                   <option value="{{ item }}">{{ item }}</option>
+                  {% endfor %}
+           </select>
+            </td>
+           </tr>
+           <tr>
+               <td></td> <td><input id="saveButton" type="submit" value="Save & Exit" title="Save & Exit"/>
+                <input type="button" value="Cancel" onClick="checkAction('/dmt/clusters/{{clusterId}}/details/')" title="Cancel"/></td>
+           </tr>
+           </form>
+       </table>
+   </div>
+   <div class="modal"></div>
+{% if action == "edit" %}
+<script>
+    $(function() {
+       $('#multicast_type').val('{{ multicast_type }}');
+       $('#multicast_type').attr("disabled", true);
+       $('#multicast_snooping').val('{{ vlanClusterMulticastObj.multicast_snooping }}');
+       $('#multicast_querier').val('{{ vlanClusterMulticastObj.multicast_querier }}');
+       $('#multicast_router').val('{{ vlanClusterMulticastObj.multicast_router }}');
+       $('#hash_max').val('{{vlanClusterMulticastObj.hash_max }}');
+    });
+</script>
+{% endif %}
+<script>
+    $(function() {
+        $("#saveButton").click(function () {
+             $("body").addClass('loading');
+        });
+        $("#multicast_snooping").change(function () {
+          var multicast_snooping = this.value;
+          var multicast_querier = document.getElementById('multicast_querier');
+          var multicast_router = document.getElementById('multicast_router');
+          var hash_max = document.getElementById('hash_max');
+          if (multicast_snooping == "0"){
+              multicast_querier.value = "0";
+              multicast_router.value = "1";
+              hash_max.value = "512";
+          } else {
+             multicast_querier.value = "1";
+             multicast_router.value = "2";
+             hash_max.value = "2048";
+         }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "cireports/base.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Documents {{ version }} {% endblock %}
+    {% block content %}
+        <div id="generic-title">
+            <div id="text-container"> Import CPI Baseline for {{ product.name }} Drop {{ version }} 
+                 <a class="img" href="{{ confluenceUrl }}" title="CPI Library Build Automation" target="_blank"><img src="/static/images/question.png"/></a>
+            </div>
+        </div>
+        <div class="full-details">
+            <br>
+            {{doclist}}
+            <table border="2">
+                <tr>
+                    <h3> <font color="red"> Import Error {{doclist}} </font></h3>
+                </tr>
+                <tr>
+                    <td>	
+                        <p> The following documents are not stored in Gask and its not saved to database. </p>
+                            {% for document in doclist %}
+                            {{ document|safe}}
+                    </td> 
+                </tr>
+               <tr>
+                    <td>
+                        <p> Something went wrong while parsing the excel file. Please <a href = "/{{product.name}}/batchimport/{{version}}/">retry </a> and if the error persists contact administrator. </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    {% endblock %}
+{% endif %}
+

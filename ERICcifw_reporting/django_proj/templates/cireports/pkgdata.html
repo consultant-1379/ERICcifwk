@@ -1,0 +1,50 @@
+{% extends "base_newlookandfeel.html" %}
+{% load extractDeliverer %}
+{% if product %}
+{% block title %} Delivery Data for {{ package }}{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">
+        {% if drop == "None" %}
+        <div id="text-container"> {{ package }} - {{ count }} deliveries into {{ release }} <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Statistics" target="_blank"><img src="/static/images/question.png"/></a></div>
+        {% else %}
+        <div id="text-container"> {{ package }} - {{ count }} deliveries into {{ drop }} <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Statistics" target="_blank"><img src="/static/images/question.png"/></a></div>
+        {% endif %}
+        </h2>
+        <table class="general-table">
+            <thead>
+                <tr>
+                    <th>Package Name</th>
+                    <th>Version</th>
+                    <th>Date Delivered</th>
+                    {% if drop == "None" %}
+                    <th>Drop Delivered To</th>
+                    {% endif %}
+                    <th>Delivered By</th>
+                </tr>
+            </thead>
+            {% for item in packages %}
+                <tr>
+                    {% if item.obsolete %}
+                        <td><font color="red">{{ item.package_revision.package.name }}</font></td>
+                        <td><font color="red">{{ item.package_revision.version }} (obsoleted)</font></td>
+                        <td><font color="red">{{ item.date_created }}</font></td>
+                        {% if drop == "None" %}
+                        <td align=center><font color="red"><a href="/{{ product }}/deliver_info/{{ release }}/{{ item.drop.name }}">{{ item.drop.name }}</a></font></td>
+                        {% endif %}
+                        <td><font color="red">{{ item.delivery_info|extractDeliverer }}</font></td>
+                    {% else %}
+                        <td>{{ item.package_revision.package.name }}</td>
+                        <td>{{ item.package_revision.version }}</td>
+                        <td>{{ item.date_created }}</td>
+                        {% if drop == "None" %}
+                        <td align=center><a href="/{{ product }}/deliver_info/{{ release }}/{{ item.drop.name }}">{{ item.drop.name }}</a></td>
+                        {% endif %}
+                        <td>{{ item.delivery_info|extractDeliverer }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+        {% endblock %}
+    </div>
+{% endif %}

@@ -1,0 +1,26 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Prim Updated {% endblock %}
+
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title" >Prim Update Status</h2>
+{% if report %}
+<h3 class="sub-title">Report</h3>
+{% autoescape off %}
+<table class="general-table">
+    <th>Number</th><th>New RState</th><th>Result</th>
+    {% for item in report %}
+    <tr>
+       {{ item }}
+   </tr>
+ {% endfor %}
+</table>
+<p>{{error}}</p>
+{% endautoescape %}
+{% else %}
+    <p> The Product Information has been successfully updated in Prim</p>
+{% endif %}
+</div>
+{% endblock %}
+

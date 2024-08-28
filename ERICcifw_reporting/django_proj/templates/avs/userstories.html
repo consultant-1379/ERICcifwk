@@ -1,0 +1,32 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">
+            {% if epic %}
+                EPIC {{ epic.name }}: Stories
+            {% else %}
+                AVS Stories
+            {% endif %}
+        </div>
+    </div>
+    <div class="generic-text">
+        <br>
+        <table id="avsEpics-table">
+            {% for storyname, story in stories.items %}
+                <tr>
+                    <td width="15%">
+                        <!-- story version: {{ story.version }} -->
+                        <a href="/avs/stories/{{ story.name }}">{{ story.name }}</a>
+                    </td>
+                    <td>
+                        {{ story.title }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+ {% endblock %}
+

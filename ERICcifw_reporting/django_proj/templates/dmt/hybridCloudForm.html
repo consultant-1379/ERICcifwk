@@ -1,0 +1,101 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+
+{% block title %}Hybrid Cloud Form{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+<script language="JavaScript">
+    function checkAction(link) {
+            window.location = link;
+    }
+</script>
+{% if action == "edit" or ipType != 'None' %}
+<script>
+    $(function() {
+       var $radios = $('input:radio[name=ipType]');
+       if($radios.is(':checked') === false) {
+           $radios.filter('[value={{ipType}}]').prop('checked', true);
+       }
+       if ($('input[name=ipType]:radio:checked').val() == "ipv4"){
+              $("#ipv4FormView").show();
+              $("#ipv6FormView").hide();
+          } else {
+              $("#ipv6FormView").show();
+              $("#ipv4FormView").hide();
+         }
+    });
+</script>
+{% else %}
+<script>
+$(function() {
+     var $radios = $('input:radio[name=ipType]');
+     if($radios.is(':checked') === false) {
+        $radios.filter('[value=ipv4]').prop('checked', true);
+    }
+    $("#ipv4FormView").show();
+    $("#ipv6FormView").hide();
+});
+</script>
+{% endif %}
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Hybrid Cloud Form  <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Add+Hybrid+Cloud+Information" title="Hybrid Cloud Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    {% if error %}
+        <span class="form-error"> {{error}} </span>
+       <br>
+       <br>
+       {% endif %}
+    {% if action == "add" and not error %}
+       <span class="form-error"> Select IP Version </span>
+       <br>
+       <br>
+    {% endif %}
+
+        <table class="deployment-table">
+        <tr>
+            <td colspan="2"> <input type="radio" class="ipType" name="ipType" value="ipv4">IPv4 | <input type="radio" class="ipType" name="ipType" value="ipv6">IPv6</td>
+         </tr>
+       </table>
+        <table id="ipv4FormView" class="deployment-table">
+            <form enctype="multipart/form-data" name="ipv4Form" method="post"  action="/dmt/{{clusterId}}/hybridCloud/{{action}}/">{% csrf_token %}
+                {{ ipv4_form.as_table}}
+           <input type="hidden" name="ipType" value="ipv4" />
+           <input type="hidden" name="form-type" value="ipv4-form" />
+           <tr><td></td><td><input class="saveButton" type="submit" value="Save & Exit" />
+               <input type="button" value="Cancel" onClick="checkAction('/dmt/clusters/{{clusterId}}/details/')" title="Cancel"/>
+           </td>
+         </tr>
+       </form>
+     </table>
+      <table id="ipv6FormView" class="deployment-table">
+        <form enctype="multipart/form-data"  name="ipv6Form" method="post" action="/dmt/{{clusterId}}/hybridCloud/{{action}}/">{% csrf_token %}
+            {{ ipv6_form.as_table }}
+           <input type="hidden" name="ipType" value="ipv6" />
+           <input type="hidden" name="form-type" value="ipv6-form" />
+           <tr><td></td><td><input class="saveButton" type="submit" value="Save & Exit" />
+              <input type="button" value="Cancel" onClick="checkAction('/dmt/clusters/{{clusterId}}/details/')" title="Cancel"/>
+         </td>
+         </tr>
+       </form>
+     </table>
+   </div>
+<div class="modal"></div>
+<script>
+    $(function() {
+        $(".saveButton").click(function () {
+             $("body").addClass('loading');
+        });
+        $(".ipType").change(function () {
+            if ($('input[name=ipType]:radio:checked').val() == "ipv4"){
+                $("#ipv4FormView").show();
+                $("#ipv6FormView").hide();
+            } else {
+                $("#ipv6FormView").show();
+                $("#ipv4FormView").hide();
+            }
+        });
+    });
+</script>
+
+
+{% endblock %}

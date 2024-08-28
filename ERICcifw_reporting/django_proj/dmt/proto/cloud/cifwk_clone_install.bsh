@@ -1,0 +1,304 @@
+#!/bin/bash
+#set -xv
+
+# Global variables
+cmd=`basename $0`
+lock_f=/export/cifwk/${choice}.lck
+warn=no
+warn_f=/tmp/warn.$$
+
+ECHO=/bin/echo
+PRINTF=/usr/bin/printf
+CAT=/bin/cat
+RM=/bin/rm
+DATE=/bin/date
+SED=/bin/sed
+AWK=/bin/awk
+
+trap '${ECHO} "Cleaning up"; rm_lock; exit 1' INT TERM
+
+error () {
+        $PRINTF "%s\t%s\n" "Error: $*" "$(${DATE} '+%H:%M:%S')" 1>&2
+        rm_lock
+        exit 1
+}
+
+warning () {
+        $ECHO "Warning: $*" >> ${warn_f}
+        warn=yes
+}
+
+status () {
+    if [ "$warn" = "yes" ]; then
+        PRINTF "%s\t%s\n" "[Warning]" "$(${DATE} '+%H:%M:%S')"
+        warn=no
+        $CAT ${warn_f} 2>&1
+        $RM -f ${warn_f}
+    else
+         $PRINTF "%s\t%s\n" "[Ok]" "$(${DATE} '+%H:%M:%S')"
+    fi
+}
+
+check_lock () {
+        if [ -e $lock_f ]; then
+                $CAT $lock_f
+                exit 1
+        fi
+}
+
+write_lock () {
+        ${ECHO} "Creation ongoing by $USER on $(hostname) started $(${DATE} '+%Y%m%d-%H:%M')" > $lock_f
+}
+
+rm_lock () {
+        [ -e $lock_f ] && rm $lock_f
+}
+
+usage ()
+{
+        ${ECHO} "Usage: $cmd -u <USER> -p <PASSWORD> -o <ORGANISATION> -n <vAPP/vAPP Template Name/ID> -c <Re-Deploy/Catalog> -v <NEW vAPP Name" 1>&2
+        ${PRINTF} " -u <USER>                        User you log into the VCloud Director with\n"
+        ${PRINTF} " -p <PASSWORD>                    Password you log into the VCloud Director with\n"
+        ${PRINTF} " -o <ORGANISATION>                The Organisation your vAPP's are within\n"
+        ${PRINTF} " -n <vAPP/vAPP Template Name/ID>  Name or the ID of the vAPP you wish to Re-deploy/Catalog\n"
+        ${PRINTF} " -c <redeploy/catalog>            What do you wish to do Re-deploy or Catalog\n"
+        ${PRINTF} " -d <Destination Catalog>         Within the Organisation which Catalog to add the vAPP template\n"
+        exit 1
+}
+### Pre-Checks
+pre_checks (){
+    ${PRINTF} "%-30s" "Checking Mounted Files"
+    if [ ! -d /export/scripts/CLOUD ]; then
+        status
+        ${PRINTF} "%-30s" "Mounting Cloud Scripts"
+        mkdir /export/scripts/ 2>&1 > /dev/null
+        mount atmgtvm3.athtem.eei.ericsson.se:/export/scripts /export/scripts
+        [ -d /export/scripts/CLOUD ] || error "Unable to Mount Cloud scripts"
+    fi
+    status
+}
+
+####################################################################
+## Function - redeploy
+##
+## Used for the redeployment of a vAPP with the vAPP templates to be deployed as a new instance
+##
+## Outputs - New Vapp id which should be stored in the database which could be used when adding it to the catalog
+##
+## Outputs - Nothing
+##
+####################################################################
+redeploy () {
+    ${PRINTF} "%-30s" "Getting vAPP Template ID Data"
+    #vapptemplateid=urn:vcloud:vapptemplate:4ab9b613-98b8-4fc5-9a7c-f5751ef89cf9
+    vapptemplateid=$( ${vCloudFunction} -f list_vapp_templates_in_org --orgname $organisation | grep "${name}" | sed 's/;/ /g' | awk '{print $2}' )
+    #destorgvdcname=Misc_vDC
+    destorgvdcname=$( ${vCloudFunction} -f get_orgvdc_of_vapp_template --vapptemplateid ${vapptemplateid} ) # MISC_vDC
+    status
+
+    ### Deploying From Catalog (This function outputs the id of the newly created vapp)
+    ${PRINTF} "%-30s" "Deploying From Catalog"
+    ivappid=$( ${vCloudFunction} -f deploy_from_catalog --destorgvdcname ${destorgvdcname} --vapptemplateid ${vapptemplateid} --newvappname "${newvappname}" --linkedclone true )
+    [ $? -eq "0" ] || error "Issue with Deployment to the Catalog"
+    status
+    ivappid=$( ${ECHO} $ivappid | $SED 's/.* //' )
+
+    ### Update the Org Network On The Gateway (Only really necessary if deploying from a catalog thats in a different organization, but no harm in putting it in as a step in any case, it won't do any harm)
+    ${PRINTF} "%-30s" "Update the Org Network"
+    ${vCloudFunction} -f update_org_network_gateway --vappid $ivappid
+    [ $? -eq "0" ] || error "Issue with the update to the Org Network"
+    status
+
+    #Reset the mac on the gateway
+    ${PRINTF} "%-30s" "Reset the mac on the gateway"
+    ${vCloudFunction} -f reset_mac_gateway --vappid $ivappid
+    [ $? -eq "0" ] || error "Issue with the Reset of the gateway Mac"
+    status
+
+    #Power on the gateway (This function waits until the gateway boots, and gets an IP. It returns the IP address then as output)
+    ${PRINTF} "%-30s" "Power on the gateway"
+    gatewayip=$( ${vCloudFunction} -f poweron_gateway --vappid $ivappid ) 
+    [ $? -eq "0" ] || error "Issue with the Power on of the gateway"
+    status
+    gatewayip=$( ${ECHO} $gatewayip | $SED 's/.* //' )
+
+    #Start the vapp
+    ${PRINTF} "%-30s" "Start the VM's"
+    ${vCloudFunction} -f start_vapp --vappid $ivappid
+    [ $? -eq "0" ] || error "Issue with the Starting of the vAPP\'s"
+    status
+
+    vapppower=$( ${vCloudFunction} -f list_vapps_in_org --orgname $organisation | grep $ivappid | sed 's/;/ /g' | ${AWK} '{print $3}' )
+    ${PRINTF} "\nvAPP Redeployment COMPLETED\n\n"
+    ${PRINTF} "NEW VAPP Details\n"
+    ${PRINTF} "vAPP Name           = $newvappname\n"
+    ${PRINTF} "VAPP ID             = $ivappid\n"
+    ${PRINTF} "NEW GATEWAY IP      = $gatewayip\n"
+    ${PRINTF} "VAPP POWER STATUS   = $vapppower\n\n"
+    ${PRINTF} "VM's within the vAPP Details:\n"
+    ${PRINTF} "%-14s %-3s %-10s %-3s %-10s %-7s %-18s %-3s %-10s %-3s %-14s %-3s %10s\n" "VM NAME" ":" "NIC NUMBER" ":" "IS CONNECTED" ":" "NETWORK NAME" ":" "IP ALLOCATION TYPE" ":" "IP ADDRESS" ":" "MAC ADDRESS"
+    ${PRINTF} "------------------------------------------------------------------------------------------------------------------------------------------\n"
+    #ivappid=urn:vcloud:vapp:3f9fab43-901c-46a3-98a0-9205c465be5d
+    vmlist=$( ${vCloudFunction} -f list_vms_in_vapp --vappid $ivappid | sed 's/ /__/' )
+    for i in $vmlist; do
+        #entry=$( echo $i | sed 's/;/ /g' | $AWK '{ print $1"__"$3 }' )
+        vmname=$( echo $i | sed 's/;/ /g' | $AWK '{ print $1 }' )
+        vmid=$( echo $i | sed 's/;/ /g' | $AWK '{ print $3 }' )
+        #stop=1
+        #start=1
+        #set -xv
+        #while [[ "$stop" != "0" || "$start" != "5" ]]; do
+           vminfo=$( ${vCloudFunction} -f list_nics_on_vm --vmid $vmid | sed 's/;;/;-;/g' )
+           ipaddress=$( echo $vminfo | sed 's/;/ /g' | awk '{print $5}' )
+        #   if [[ "$ipaddress" != "-" ]]; then
+        #       stop=0
+        #   else
+        #       start=`expr $start + 1`
+        #   fi
+        #done
+        #set +xv
+        for j in $vminfo; do
+            ###NIC# <colon> ISCONNECTED <colon> NETWORK_NAME <colon> IP_ALLOCATION_TYPE <Colon> IP_ADDRESS <colon> MAC_ADDRESS
+            nicno=$( echo $j | sed 's/;/ /g' | $AWK '{ print $1 }' )
+            ISCONNECTED=$( echo $j | sed 's/;/ /g' | $AWK '{ print $2 }' )
+            NETWORK_NAME=$( echo $j | sed 's/;/ /g' | $AWK '{ print $3 }' )
+            IP_ALLOCATION_TYPE=$( echo $j | sed 's/;/ /g' | $AWK '{ print $4 }' )
+            IP_ADDRESS=$( echo $j | sed 's/;/ /g' | $AWK '{ print $5 }' )
+            MAC_ADDRESS=$( echo $j | sed 's/;/ /g' | $AWK '{ print $6 }' )
+            ${PRINTF} "%-14s %-3s %-10s %-3s %-12s %-3s %22s %-3s %-18s %-3s %-14s %-3s %10s\n" "$vmname" ":" "$nicno" ":" "$ISCONNECTED" ":" "$NETWORK_NAME" ":" "$IP_ALLOCATION_TYPE" ":" "$IP_ADDRESS"  ":" "$MAC_ADDRESS"
+        done
+    done
+    ${PRINTF} "\n\n"
+}
+
+####################################################################
+## Function - catalog
+##
+## Used for the for the adding of a new vAPP into the vAPP templates
+##
+## Inputs - Variables from input file which would be created from a database
+##
+## Outputs - New Vapp template id which should be stored in the database for use on redeployment
+##
+####################################################################
+catalog () {
+    ${PRINTF} "%-30s" "Getting vAPP ID Data"
+    vappdetail=$( ${vCloudFunction} -f list_vapps_in_org --orgname ${organisation} | grep "${name}" | sed 's/;/ /g' | awk '{print $2,$3}' )
+    [ $? -eq "0" ] || error "Issue Getting vAPP ID Data"
+    vappname=$( echo $vappdetail | awk '{print $1}' )
+    vapppower=$( echo $vappdetail | awk '{print $2}' )
+
+    #$destcatalogname=$( ${vCloudFunction}  -f get_catalog_of_vapp_template --vapptemplateid $vappname )
+    #[ $? -eq "0" ] || error "Issue Getting vAPP ID Data"
+    status
+
+    if [[ "${vapppower}" != "POWERED_OFF" ]]; then
+        ${PRINTF} "%-30s" "Stopping the vAPP"
+        ${vCloudFunction} -f stop_vapp --vappid $vappname
+    else
+        ${PRINTF} "%-30s" "vAPP Already Stopped"
+    fi
+    [ $? -eq "0" ] || error "Issue Stopping the vAPP's"
+    status
+    ${PRINTF} "%-30s" "Add vAPP to the Catalog"
+    ivapptempid=$( ${vCloudFunction} -f add_vapp_to_catalog --vappid $vappname --newvapptemplatename "$newvappname" --destcatalogname $destcatalogname )
+    [ $? -eq "0" ] || error "Issue Adding the vAPP to the Cloud"
+    status
+    ivapptempid=$( ${ECHO} $ivapptempid | $SED 's/.* //' )
+    
+    #Start the vapp
+    if [[ "${vapppower}" != "POWERED_OFF" ]]; then
+        ${PRINTF} "%-30s" "Restarting the vAPP"
+        ${vCloudFunction} -f start_vapp --vappid $vappname
+    else
+        ${PRINTF} "%-30s" "vAPP Stopped before operation"
+    fi
+    [ $? -eq "0" ] || error "Issue with the Starting of the vAPP's"
+    status
+
+    ${PRINTF} "\nvAPP Added to Catalog\n\n"
+    ${PRINTF} "NEW VAPP Template Details\n"
+    ${PRINTF} "New vAPP Template Name  = $newvappname\n"
+    ${PRINTF} "New vAPP Template ID    = $ivapptempid\n\n"
+    ${PRINTF} "VM's within the vAPP Template Details:\n"
+    ${PRINTF} "%-14s %-3s %-10s %-3s %-10s %-7s %-18s %-3s %-10s %-3s %-14s %-3s %10s\n" "VM NAME" ":" "NIC NUMBER" ":" "IS CONNECTED" ":" "NETWORK NAME" ":" "IP ALLOCATION TYPE" ":" "IP ADDRESS" ":" "MAC ADDRESS"
+    ${PRINTF} "------------------------------------------------------------------------------------------------------------------------------------------\n"
+    #ivappid=urn:vcloud:vapp:3f9fab43-901c-46a3-98a0-9205c465be5d
+    vmlist=$( ${vCloudFunction} -f list_vms_in_vapp --vappid $vappname | grep -v "gateway" | sed 's/ /__/' )
+    for i in $vmlist; do
+        vmname=$( echo $i | sed 's/;/ /g' | $AWK '{ print $1 }' )
+        vmid=$( echo $i | sed 's/;/ /g' | $AWK '{ print $3 }' )
+        stop=1
+        while [[ "$stop" != "0" ]]; do
+           vminfo=$( ${vCloudFunction} -f list_nics_on_vm --vmid $vmid | sed 's/;;/;-;/g' )
+           ipaddress=$( echo $vminfo | sed 's/;/ /g' | awk '{print $5}' )
+           if [[ "$ipaddress" != "-" ]]; then
+               stop=0
+           fi
+        done
+        for j in $vminfo; do
+            ###NIC# <colon> ISCONNECTED <colon> NETWORK_NAME <colon> IP_ALLOCATION_TYPE <Colon> IP_ADDRESS <colon> MAC_ADDRESS
+            nicno=$( echo $j | sed 's/;/ /g' | $AWK '{ print $1 }' )
+            ISCONNECTED=$( echo $j | sed 's/;/ /g' | $AWK '{ print $2 }' )
+            NETWORK_NAME=$( echo $j | sed 's/;/ /g' | $AWK '{ print $3 }' )
+            IP_ALLOCATION_TYPE=$( echo $j | sed 's/;/ /g' | $AWK '{ print $4 }' )
+            IP_ADDRESS=$( echo $j | sed 's/;/ /g' | $AWK '{ print $5 }' )
+            MAC_ADDRESS=$( echo $j | sed 's/;/ /g' | $AWK '{ print $6 }' )
+            ${PRINTF} "%-14s %-3s %-10s %-3s %-12s %-3s %22s %-3s %-18s %-3s %-14s %-3s %10s\n" "$vmname" ":" "$nicno" ":" "$ISCONNECTED" ":" "$NETWORK_NAME" ":" "$IP_ALLOCATION_TYPE" ":" "$IP_ADDRESS"  ":" "$MAC_ADDRESS"
+        done
+    done
+    ${PRINTF} "\n\n"
+}
+
+#############################
+########### MAIN ############
+#############################
+# Set all Variables with the creation file
+while getopts u:p:o:c:n:v:d:h opt; do
+        case $opt in
+                u)      username=$OPTARG
+                        ;;
+                p)      password=$OPTARG
+                        ;;
+                o)      organisation=$OPTARG
+                        ;;
+                c)      choice=$OPTARG
+                        ;;
+                n)      name=$OPTARG
+                        ;;
+                v)      newvappname=$OPTARG
+                        ;;
+                d)      destcatalogname=$OPTARG
+                        ;;
+                h|\?)   usage
+                        ;;
+        esac
+done
+shift `expr $OPTIND - 1`
+[ "$username" != "" ] || usage
+[ "$password" != "" ] || usage
+[ "$organisation" != "" ] || usage
+[ "$choice" != "" ] || usage
+[ "$name" != "" ] || usage
+[ "$newvappname" != "" ] || usage
+
+if [[ "$choice" == "catalog" ]]; then
+    [ "$destcatalogname" != "" ] || usage
+fi
+if [[ "$choice" != "catalog" && "$choice" != "redeploy" ]]; then
+    usage
+fi
+
+lock_f=/export/cifwk/${choice}.lck
+#. /export/cifwk/create_vapp
+vCloudFunction="/export/scripts/CLOUD/bin/vCloudFunctions.sh --username ${username} --password ${password} --organization ${organisation}"
+${PRINTF} "Starting the $choice of $name to $newvappname by $username\n"
+${PRINTF} "%-30s" "Process commenced at:"
+${PRINTF} "%s\t%s\n\n" "$(date '+%d/%m/%Y %H:%M:%S')"
+
+pre_checks
+if [[ $choice == "redeploy" ]]; then
+    redeploy
+elif [[ $choice == "catalog" ]]; then
+    catalog 
+fi

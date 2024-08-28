@@ -1,0 +1,10 @@
+<INCLUDE NODE: PL >     
+      <litp:node-def id="<NODE_ID>">
+        <nodetype><NODE_TYPE></nodetype>
+        <primarynode>true</primarynode>
+        <Append Here File: jboss-vcs-component-ref-node>
+        <litp:solution-ref id="<NODE_SOLUTION_ID>">
+          <solution-name><NODE_SOLUTION_DEF_NAME></solution-name>
+        </litp:solution-ref>
+      </litp:node-def>
+

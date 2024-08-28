@@ -1,0 +1,6 @@
+#### Command : Expected Output : Success Comment : Error Comment : Time given before expect timeout
+/usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no SC-1 'cmw-partial-backup-create backup.before.campaign_generator_execute.`/bin/date +%Y%m%d_%H%M%S` 2>&1 1>/dev/null' : \# : Creating CMW Backup : Unable to Creating CMW Backup : 600
+litp /inventory/deployment1/cluster1/cmw_cluster_config/etf_generator generate_etfs : \# : Generating etfs : Unable to Generate etfs : 300 
+litp /inventory/deployment1/cluster1/cmw_cluster_config/etf_generator verify : \# : Verifing etfs Generation : Unable to Verifing etfs Generation : 300
+litp /inventory/deployment1/cluster1/cmw_cluster_config/campaign_generator generate : \# : Generating campaigns : Unable to Generate campaigns : 300
+litp /inventory/deployment1/cluster1/cmw_cluster_config/campaign_generator execute : \# : Executing the campaigns : Unable to Execute campaigns : 3600

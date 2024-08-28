@@ -1,0 +1,3 @@
+#!/bin/bash
+NEWEST=$(ls -t /var/cifwk/logs/ssl_access* | head -n1)
+cp $NEWEST /proj/axisadm/metrics/logstash/data/portal.log

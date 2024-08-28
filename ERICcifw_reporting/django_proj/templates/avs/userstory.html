@@ -1,0 +1,27 @@
+{% extends "avs/base.html" %}
+
+{% block title %}CI Framework - Agile VS {% endblock %}
+
+{% block content %}
+<h2>AVS: Story {{ story.usId }}</h2>
+<h3>{{ story.title }}</h3>
+<table>
+    <tr>
+        <th>ID</th><th>Title</th><th>Description</th>
+    </tr>
+    {% for tc in tcs %}
+    <tr valign="top">
+    <td width=10%>
+        {{ tc.tcId }}
+    </td>
+    <td>
+        {{ tc.title }}
+    </td>
+    <td>
+        {{ tc.desc }}
+    </td>
+   </tr>
+   {% endfor %}
+</table>
+
+{% endblock %}

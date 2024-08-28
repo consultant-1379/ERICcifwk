@@ -1,0 +1,89 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}{{ package }} Test Results {% endblock %}
+
+{% block content %}
+<div class="general-container">
+        <h2 class="generalPageNewLook-title">{{ package }} Test Results: {{ phase }} Phase</h2>
+        <br>
+        {% if testware %}
+            <table class="general-table">
+                <thead>
+                <tr>
+                    <th>Package</th>
+                    <th>Version</th>
+                    <th>Testware</th>
+                    <th>Testware Version</th>
+                    <th>KGB Ready</th>
+                    <th>CDB Ready</th>
+                </tr>
+                </thead>
+                {% for item in testware %}
+                    <tr>
+                        <td align=center>{{ item.package.name }}</td>
+                        <td align=center>{{ item.package_revision.version }}</td>
+                        <td align=center>{{ item.testware_artifact.name }}</td>
+                        <td align=center>{{ item.testware_revision.version }}</td>
+                        {% if item.testware_revision.kgb_status == 1 %}
+                            <td align=center><p align="center"><img src="/static/images/tickbox.png" alt="{{item.testware_revision.kgb_status}}" width="40" height="40"></p></td>
+                        {% else %}
+                            <td align=center><p align="center"><img src="/static/images/empty_box.png" alt="{{item.testware_revision.kgb_status}}" width="40" height="40"></p></td>
+                        {% endif %}
+                        {% if item.testware_revision.cdb_status == 1 %}
+                            <td align=center><p align="center"><img src="/static/images/tickbox.png" alt="{{item.testware_revision.cdb_status}}" width="40" height="40"></p></td>
+                        {% else %}
+                            <td align=center><p align="center"><img src="/static/images/empty_box.png" alt="{{item.testware_revision.cdb_status}}" width="40" height="40"></p></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div id="no-testware">
+                <table>
+                    <tr>
+                        <td><p><center>No Testware Available</center></p></td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+        <br><br>
+    <h2 class="sub-title">Test Report</h2>
+    <br><br>
+    <div class="generic-text">
+        {% if reportDirectory %}
+            <div id="viewtestreport">
+                <a href="{{ reportDirectory }}" target="_blank"><img src="/static/images/relatedItem.png" alt="Test Report" />&nbsp;&nbsp;View Full Report</a>
+                <br>
+                {% if testwarePOMDirectory %}
+                    <a href="/static/testReports/{{ testwarePOMDirectory }}"><img src="/static/images/relatedItem.png" alt="Testware POM" />&nbsp;&nbsp;View TestWare POM</a>
+                {% endif %}
+                {% if hostProperties %}
+                    <br><a href="/static/testReports/{{ hostProperties }}"><img src="/static/images/relatedItem.png" alt="Host Properties"/>&nbsp;&nbsp;Download Host Properties Files</a>
+                {% endif %}
+                {% if veLog != "None" and veLog != None %}
+                    <br><a href="{{ veLog }}"><img src="/static/images/relatedItem.png" alt="Visualisation Engine Link"/>&nbsp;&nbsp;Visualisation Engine Link</a>
+                {% endif %}
+
+
+            </div>
+        {% endif %}
+
+        {% if report %}
+            <div id="testreport">
+                {% autoescape off %}
+                {{ report }}
+                {% endautoescape %}
+            </div>
+        {% endif %}
+        {% if not reportDirectory and not report %}
+            <div id ="no-test-report">
+                <table>
+                    <tr>
+                        <td><p><center>No Test Report Available</center></p></td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

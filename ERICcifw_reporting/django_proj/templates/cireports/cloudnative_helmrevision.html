@@ -1,0 +1,63 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} Helm Revision for ISO Version {{ enm_iso_version }} {% endblock %}
+{% block content %}
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    });
+</script>
+
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">{{ integration_name }} - {{ integration_version }}</h2>
+    <button class="glyphicon glyphicon-info-sign" type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Helm Revision Page"></button>
+    <br><br>
+    <table class="general-table" style="width:30%; box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+        <tr>
+            <td width="50%"><b>Integration Chart Name</b></td>
+            <td>{{ integration_name }}</td>
+        </tr>
+        <tr>
+            <td width="50%"><b>Integration Chart Version</b></td>
+            <td>{{ integration_version }}</td>
+        </tr>
+    </table>
+    <br>
+    <div id="accordion">
+        {% if integration_version %}
+        {% for helm in listOfHelmIntegrationMaps %}
+        <h2>{{ helm.helm_chart_revision.helm_chart.helm_chart_name }} - {{ helm.helm_chart_revision.version}}</h2>
+        <div>
+            <div>
+                <h3>Helm Chart Repo: <a target="_blank" href="https://arm.epk.ericsson.se/artifactory/proj-enm-helm/{{ helm.helm_chart_revision.helm_chart.helm_chart_name }}/">{{ helm.helm_chart_revision.version }}</a></h3>
+            </div>
+            <table class="general-table" style="box-shadow: 0px 2px 18px 0px rgba(0,0,0,0.5);">
+            <br>
+            <thead>
+                <tr>
+                    <th>Image Name</th>
+                    <th>Image Version</th>
+                    <th>Gerrit SHA</th>
+                    <th>Size</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            {% for map_obj in listOfHelmImageMaps %}
+            {% if helm.helm_chart_revision == map_obj.helm_chart_revision %}
+            <tr>
+                <td><a href="cloudnative/getCloudNativeImageContent/{{ map_obj.image_revision.image.image_name }}/{{ map_obj.image_revision.version }}/">{{ map_obj.image_revision.image.image_name }}</a></td>
+                <td>{{ map_obj.image_revision.version }}</td>
+                <td><a target="_blank" href="https://gerrit-gamma.gic.ericsson.se/gitweb?p={{ map_obj.image_revision.image.repo_name }}.git;a=commitdiff;h={{ map_obj.image_revision.gerrit_repo_sha }}">{{ map_obj.image_revision.gerrit_repo_sha }}</a></td>
+                <td>{{ map_obj.image_revision.size }}</td>
+                <td>{{ map_obj.image_revision.created }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            </table>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+#!/bin/bash
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+IPSEC_CONF=/usr/local/etc/ipsec.conf
+
+usage_msg () {
+    echo "$0 -g atvtsXXX -f start/stop/status
+    -g Gateway name eg atvts123
+    -f start, stop, status
+    "
+}
+
+chk_args () {
+    if [[ -z "${GATEWAY}" ]]
+    then
+        echo "Must enter a gateway -g"
+        usage_msg
+        exit 1
+    fi
+    if [[ -z "${FUNCTION}" ]]
+    then
+        echo "Must enter a function -f"
+        usage_msg
+        exit 1
+    #else
+    #    if [[ "$FUNCTION" == "start" ]] || [[ "$FUNCTION" == "stop" ]] || [[ "$FUNCTION" == "status" ]]
+    #    then
+    #        echo "Running $FUNCTION function"
+    #    fi
+    fi
+
+}
+
+chk_gateway_alive () {
+    IP=`$_GETENT hosts $GATEWAY | grep $GATEWAY | $_AWK '{print $1}'`
+    STATUS=$($_SSH -o BatchMode=yes -o ConnectTimeout=5 ${IP} echo ok 2>&1)
+    if [[ $STATUS == ok ]] ; then
+        echo "$GATEWAY is up"
+    elif [[ $STATUS == *"ion denied"* ]] ; then
+        echo "$GATEWAY is up"
+    elif [[ $STATUS == *"Host key verification failed"* ]] ; then
+        echo "$IP is up"
+    else
+        echo "$GATEWAY cannot be accessed please check and retry"
+        exit 1
+    fi
+}
+
+stop_ipsec() {
+    $_IPSEC stop
+}
+
+edit_ipsec() {
+    if [[ -r ${IPSEC_CONF} ]]
+    then
+        mv ${IPSEC_CONF} /tmp/ipsec.org.$$
+    fi
+    $_CAT <<EOF > ${IPSEC_CONF}
+config setup
+conn pass
+    left=%defaultroute
+    right=$IP
+    rightsubnetwithin=192.168.0.1/16
+    authby=secret
+    dpdaction=hold
+    auto=start
+EOF
+}
+
+start_ipsec() {
+    $_IPSEC start
+}
+
+status_ipsec() {
+    echo "Current IPSEC status"
+    echo "#################"
+    $_IPSEC status
+    echo "#################"
+}
+
+delete_ipsec() {
+    if [[ -r ${IPSEC_CONF} ]]
+    then
+        mv ${IPSEC_CONF} /tmp/ipsec.org.$$
+    fi
+}
+
+setup_dns () {
+    if [[ ! -r /etc/resolv.conf.outside ]]
+    then
+        cp /etc/resolv.conf /etc/resolv.conf.outside
+    fi
+
+    if [[ ! -r /etc/resolv.conf.inside ]]
+    then
+        echo -e "nameserver 159.107.173.3
+        nameserver 192.168.0.1
+        domain vts.com
+        search vts.com
+        search athtem.eei.ericsson.se" > /etc/resolv.conf.inside
+    fi
+}
+
+outside_dns() {
+    cp /etc/resolv.conf.outside /etc/resolv.conf
+}
+
+inside_dns() {
+    cp /etc/resolv.conf.inside /etc/resolv.conf
+}
+
+status_dns() {
+    echo "Current DNS setup"
+    echo "#################"
+    cat /etc/resolv.conf
+    echo "#################"
+}
+
+while getopts "g:f:" arg ; do
+    case $arg in
+        g) GATEWAY="$OPTARG"
+        ;;
+        f) FUNCTION="$OPTARG"
+        ;;
+        \?) usage_msg
+        exit 1
+        ;;
+    esac
+done
+
+chk_args
+
+if [[ "$FUNCTION" == "start" ]]
+then
+    setup_dns
+    stop_ipsec
+    outside_dns
+    chk_gateway_alive
+    edit_ipsec
+    start_ipsec
+    inside_dns
+    WAIT=20
+    UP="no"
+    while [[ $COUNT -le $WAIT ]]
+    do
+        echo -e ".\c"
+        sleep 1
+        $_IPSEC status | grep "ESTABLISHED" > /dev/null 2>&1
+        if [ $? -eq 0 ] ; then
+            UP="yes"
+            break
+        fi
+        COUNT=`expr $COUNT + 1`
+    done
+    if [ "$UP" = "no" ] ; then
+        echo "ERROR: could not start ipsec"
+        exit 1
+    fi
+    status_ipsec
+    status_dns
+fi
+
+if [[ "$FUNCTION" == "stop" ]]
+then
+    setup_dns
+    stop_ipsec
+    delete_ipsec
+    outside_dns
+    status_ipsec
+    status_dns
+fi
+
+if [[ "$FUNCTION" == "status" ]]
+then
+    status_ipsec
+    status_dns
+fi
+

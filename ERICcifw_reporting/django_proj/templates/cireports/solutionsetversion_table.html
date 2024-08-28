@@ -1,0 +1,16 @@
+{% block content %}
+<table class='package-revisions'>
+    <tr>
+        <th>Package Name</th>
+        <th>Product Number</th>
+        <th>Description</th>
+    </tr>
+    {% for item in packages %}
+    <tr> 
+        <td>{{ item.package.name }}</a></td>
+        <td>{{ item.package.product_number}}</td>
+        <td>{{ item.package.description }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% block content %}
+<script src="/static/commonFunctions.js"></script>
+<table class="general-table" id="unmapped-testware-artifacts" >
+    {% if unMappedTestware %}
+        <thead>
+            <tr>
+                <th>Testware Name</th>
+                <th>Latest Version</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        {% for artifact in unMappedTestware %}
+            <tr>
+                <td align="center"><a href="/{{ product }}/testware/showall/{{ artifact.testware_artifact.name }}">{{ artifact.testware_artifact.name }}</a></td>
+                <td align="center">{{ artifact.version }}</td>
+                <td align="center">{{ artifact.date_created }}</td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td><p>No unmapped testware found</p></td></tr>
+    {% endif %}
+</table>
+{% endblock %}
+

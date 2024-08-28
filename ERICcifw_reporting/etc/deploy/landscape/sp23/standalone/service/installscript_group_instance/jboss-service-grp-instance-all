@@ -1,0 +1,9 @@
+<INCLUDE NODE: ALL >
+# we use {ip.address} macro to bind public-listner and management-listener to th vip
+# jgroups-bind-addr does not accept the {ip.address} macro, we need to update it to proper address manually (per si)
+# Allocate an IP address to Service Group <SERVICE_GROUP_ID> Service instance <INSTANCE_NAME>
+litp /inventory/deployment1/network/ip_<SERVICE_GROUP_ID>_<INSTANCE_NAME> enable
+litp /inventory/deployment1/cluster1/<SERVICE_GROUP_ID>/<INSTANCE_NAME>/jee/instance/ip allocate
+litp /inventory/deployment1/cluster1/<SERVICE_GROUP_ID>/<INSTANCE_NAME>/jee/instance/ update jgroups-bind-addr=<INSTANCE_BIND_ADD>
+litp /inventory/deployment1/cluster1/<SERVICE_GROUP_ID>/<INSTANCE_NAME>/jee/instance/jee_unsecure/ update value=<INSTANCE_BIND_ADD>
+

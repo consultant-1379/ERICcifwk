@@ -1,0 +1,5 @@
+<INCLUDE NODE: NFS SC PL >
+            <litp:vm-guest-assignment id="vm_site1_cluster1_<NODE_SYSTEM_NAME>">
+              <guest>/inventory/site1/systems/vm_pool/vm_site1_cluster1_<NODE_SYSTEM_NAME></guest>
+              <require></require>
+            </litp:vm-guest-assignment>

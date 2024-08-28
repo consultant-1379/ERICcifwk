@@ -1,0 +1,99 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+
+{% block title %}Deployment Install Group{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+    {% if installGroupList %}
+        {% for item in installGroupList %}
+            $(function() {
+                $( "#accordion_{{ item.installGroup }}" ).accordion({
+                    active:false,
+                    collapsible: true,
+                    heightStyle: "content"
+                });
+            });
+        {% endfor %}
+    {% endif %}
+    {% if results %}
+        {% for result in results %}
+            $(function() {
+                $( "#accordionCluster_{{result.cluster.name}}" ).accordion({
+                    active:false,
+                    collapsible: true,
+                    heightStyle: "content"
+                });
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Deployment Dashboard</h2>
+{% if not installGroupObj %}
+    <p><font color="red"><b>
+        Unfortunately there are no deployments assigned to a install group currently identified on the system.<br>
+    </b></font></p>
+{% elif displayDashBoard == "yes" %}
+    {% if installGroupObj %}
+        {% for item in installGroupObj %}
+                    <table width="100%">
+                        <tr>
+                            <th class="title" colspan=2>
+                                <div class="table-title">Status of Deployments Attached to install Group {{ item.installGroup }}</div>
+                                <div class="table-actions">
+                                    <a class="img" href='/dmt/searchInstallGroup/'>
+                                        <img src="/static/images/back.png" title="Back to Overall Install Group Information"/>
+                                    </a>
+                                </div>
+                            </th>
+                        </tr>
+                    </table>
+                    {% for result in results %}
+                        {% if item.installGroup == result.group.installGroup %}
+                            {% for deployStatusItem in deployStatus %}
+                            {% if result.cluster.id == deployStatusItem.cluster_id %}
+                                {% if forloop.counter|divisibleby:2 %}
+                                  <div style="float:right; width:50%; height:200px; display:table; clear:right;">
+                                {% else %}
+                                   <div style="float:left; width:50%; height:200px; display:table; clear:left;">
+                                {% endif %}
+                                    <table class="general-table"  style=" margin:0 auto; overflow:auto; white-space: normal; word-wrap: break-word;">
+                                                <tr>
+                                                    <th class="title" colspan=2>
+                                                        <div class="table-title"><a href="/dmt/clusters/{{result.cluster.id}}/">{{result.cluster.name}}</a></div>
+                                                         <div class="table-actions">
+                                                            <a class="img" href='/dmt/editDeploymentStatus/{{result.cluster.id}}/{{deployStatusItem.id}}/searchInstallGroup/'>
+                                                                <img src="/static/images/edit.png" title="Edit Deployment Status for Deployment {{result.cluster.name}}" />
+                                                            </a>
+                                                            <a class="img" href="javascript:void(0)" onCLick="checkAction('Do you really want to Delete this Deployment from the install Group {{item.installGroup}}?','/dmt/installGroup/deployment/delete/{{ result.cluster.id }}/{{ item.id }}/');">
+                                                                <img src="/static/images/delete.png"/>
+                                                            </a>
+                                                         </div>
+                                                    </th>
+                                                </tr>
+                                                <tr><td width="20%">Status:</td><td>{{ deployStatusItem.status }}</td></tr>
+                                                <tr><td width="20%">OS:</td><td>{{ deployStatusItem.osDetails }}</td></tr>
+                                                <tr><td width="20%">Patches:</td><td>{{ deployStatusItem.patches }}</td></tr>
+                                                <tr><td width="20%">LITP:</td><td>{{ deployStatusItem.litpVersion }}</td></tr>
+                                                <tr><td width="20%">ENM Artifact (ISO):</td><td>{{ deployStatusItem.mediaArtifact }}</td></tr>
+                                                <tr><td width="20%">KGB Packages:</td><td>{{ deployStatusItem.packages }}</td></tr>
+                                                <tr><td width="20%">Description:</td><td>{{ deployStatusItem.description }}</td></tr>
+                                            </table>
+                                       </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% endfor %}
+        {% endfor %}
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

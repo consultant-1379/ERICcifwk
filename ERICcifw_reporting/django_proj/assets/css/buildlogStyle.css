@@ -1,0 +1,315 @@
+table.blTable {
+    font-size: 11px;
+    text-align: left;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    table-layout: fixed;
+    width: 100%
+}
+
+.checkBox {
+    padding-top: 5px;
+    display: inline-block;
+}
+
+.previousComment {
+    white-space: pre-line;
+    text-align:left;
+    word-wrap: break-word;
+}
+
+th.blTH {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    font-size: 11px;
+}
+
+td.BLTD {
+    border: 1px solid #EEEDED;
+    text-align: center;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+tr.BLTR:nth-child(even) {
+    background: #dddddd;
+}
+
+tr.BLTR:nth-child(odd) {
+    background: #FFF;
+}
+
+.container {
+    font-family: arial;
+    font-size: 11px;
+    overflow: auto;
+}
+
+select {
+    border-width: 0;
+}
+
+.selectgrey {
+    border-width: 0;
+    background: #dddddd;
+}
+
+.commentTextArea {
+    width:100%;
+    height:100px;
+    margin-bottom: 10px;
+}
+
+.comment {
+    max-width: 280px;
+    min-width: 280px;
+    text-align: left;
+    word-break:break-all;
+}
+
+select:focus {
+    outline-width: 0;
+}
+
+::-webkit-input-placeholder {
+    color:#fff;
+}
+::-moz-placeholder {
+    color:#fff;
+} /* firefox 19+ */
+:-ms-input-placeholder {
+    color:#fff;
+} /* ie */
+input:-moz-placeholder {
+    color:#fff;
+}
+
+.buildlogHandle {
+    width: 24px;
+    height: 24px;
+    position:absolute;
+}
+
+.form-control {
+    height: 26px;
+    width: 200px;
+    line-height:normal;
+    font-size: 11px;
+    color: black;
+    border: 1px solid #bdbdbd;
+    margin-left: 2px;
+    float: right;
+    display: inline-block;
+}
+
+.form-control::-ms-clear {
+  display: none;
+}
+
+.form-control2 {
+    width: 50px;
+}
+
+.form-control:focus .form-control2:focus {
+    outline-color: #FFF;
+}
+
+.loadBox {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: 1;
+}
+
+.buildlogContent {
+    width: auto;
+    z-index: 0;
+}
+
+.closedHandle {
+    background-image: url("../images/tableclosed.svg");
+}
+
+.openHandle {
+    background-image: url("../images/tableopen.svg");
+}
+
+.disabledHandle{
+    background-image: url("../images/tabledisabled.svg");
+}
+
+.buildlogTopPanel {
+    width: 780px;
+    display: inline-block;
+    z-index: 0;
+}
+
+.buildlogLabel {
+    font-size: 11px;
+    line-height: 26px;
+    float:left;
+    margin-bottom: 2px;
+    padding-right: 16px;
+}
+
+.buildlogHeading {
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.dragCursor {
+    cursor: move;
+}
+
+.pen:hover {
+    width: 16px;
+    height: 16px;
+    float: right;
+    display: inline-block;
+    cursor: pointer;
+    background-image: url("../images/penover.svg");
+}
+
+.pen {
+    width: 16px;
+    height: 16px;
+    float: right;
+    display: inline-block;
+    background-image: url("../images/pen.svg");
+}
+
+.allureHeader {
+    width: 33%;
+    height: 14px;
+    display: inline-block;
+    text-align: center;
+}
+
+.allureContent {
+    width: 33%;
+    display: inline-block;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.status {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.clusterName {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 150px;
+}
+
+.timestamp {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 180px;
+}
+
+.scrollable {
+    height: 123px;
+    max-height: 123px;
+}
+
+.busyCell {
+    background-color: #ffdc10;
+}
+
+.passedCell {
+    background-color: #01ff13;
+}
+
+a.passedCellLink:link { color:#008000 !important;}
+a.passedCellLink:visited { color: #008000 !important; text-decoration:none; font-weight:normal; }
+a.passedCellLink:hover { color: #33CC33 !important; text-decoration:underline; font-weight:normal; }
+a.passedCellLink:active { color: #008000 !important; text-decoration:none; font-weight:normal; }
+
+.failedCell{
+    background-color: #c62c2c;
+    color: white;
+}
+
+a.failedCellLink:link { color: #fe0000 !important;}
+a.failedCellLink:visited { color: #fe0000 !important; text-decoration:none; font-weight:normal; }
+a.failedCellLink:hover { color: #FF6666 !important; text-decoration:underline; font-weight:normal; }
+a.failedCellLink:active { color: #fe0000 !important; text-decoration:none; font-weight:normal; }
+
+.quarantineCell {
+    background-color: gray !important;
+    color: white !important;
+}
+
+.textRed {
+    color: #fe0000 !important;
+}
+
+.textGreen {
+    color: #008000 !important;
+}
+
+.textBlack {
+    color: #000000 !important;
+}
+
+.textLeft {
+    float:left;
+    padding-top: 5px;
+    padding-left: 2px;
+    text-align: left;
+}
+
+.textRight {
+    float:right;
+    padding-top: 5px;
+    padding-right: 2px;
+    text-align: right;
+}
+
+.export {
+    padding-left: 5px;
+}
+.checkBoxDropdown {
+    position: absolute;
+    top:90;
+    left:500;
+    padding: 5px;
+    width:180px;
+    background-color: white;
+    border-radius: 5px;
+    border: 1px solid #bdbdbd;
+    z-index: 1000;
+}
+
+.ISO {
+    width:60px;
+}
+
+.RFA250 {
+    width:80px;
+}
+
+.jenkinsJob {
+    width:120px;
+}
+
+.delGroup {
+    width:170px;
+    text-align:left;
+}
+
+.upgradePerf {
+    width:85px;
+}
+
+.upgradeAvil {
+    width:80px;
+}

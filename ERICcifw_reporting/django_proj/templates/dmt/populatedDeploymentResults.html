@@ -1,0 +1,173 @@
+{% load setVar %}
+
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+
+<script>
+    $(function() {
+        $( "#virtualImageUploadError" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+<script>
+    $(function() {
+        $( "#virtualImageUploadWarning" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+<script>
+    $(function() {
+        $( "#virtualImageUploadInfo" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+<script>
+    $(function() {
+        $( "#virtualImageUploadSuccess" ).accordion({
+            active:false,
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
+</script>
+
+<div>
+    <div class="layout-bar"><a href="/dmt/populate/deployment/{{ clusterDetails.id }}/">SED Upload Page</a> | <a href="/dmt/clusters/{{ clusterDetails.id }}/">{{ clusterDetails.name }}</a></div>
+    <br>
+    <p>
+        <b>Results for VM Service Info:</b>
+        <br>
+        <img src="/static/images/failed.png" alt="Error" height="20" width="20"> icon illustrates a error to the user this should be investigated before proceeding with an installation. (<b>Item Not Uploaded</b>)<br>
+        <img src="/static/images/warning.png" alt="Warning" height="20" width="20"> icon illustrates a warning to the user that the user can ignore if the user is aware of the issue. (<b>Item Not Uploaded</b>)<br>
+        <img src="/static/images/info.png" alt="Info" height="22" width="22"> icon illustrates info for the user, stating that item(s) that are in the sed but not in the deployment description so no need to register. (<b>Item Not Uploaded</b>)<br>
+        <img src="/static/images/passed.png" alt="Passed" height="20" width="20"> icon illustrates that all was successful for that item. (<b>Item Uploaded</b>)<br>
+    </p>
+</div>
+<h3 class="sub-title"><b>SED Upload Report</b></h3>
+<div class="full-sub-details">
+    <b class="table-title">Virtual Image Section Upload Report</b>
+    {% if result %}
+    <br>
+        <div id="virtualImageUploadError">
+            <h3><img src="/static/images/failed.png" alt="Error" height="20" width="20"/> Errors</h3>
+            <div>
+                <table class="general-table">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    </tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "ERROR" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/failed.png" alt="Error" height="20" width="20"/></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                      <tr>
+                        <td>No Errors Found</td>
+                        <td></td>
+                      </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        <div id="virtualImageUploadWarning">
+            <h3><img src="/static/images/warning.png" alt="Warning" height="20" width="20"/> Warnings</h3>
+            <div>
+                <table class="general-table">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    </tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "WARNING" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/warning.png" alt="Warning" height="20" width="20"/></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                            </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                       <tr>
+                        <td>No Warnings Found</td>
+                        <td></td>
+                      </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        <div id="virtualImageUploadInfo">
+            <h3><img src="/static/images/info.png" alt="Info" height="22" width="22"/> Info</h3>
+            <div>
+                <table class="general-table">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    </tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "INFO" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/info.png" alt="Info" height="22" width="22"/></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                            </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                     <tr>
+                        <td>No Info Found</td>
+                        <td></td>
+                     </tr>
+                        {% endif %}
+                </table>
+            </div>
+        </div>
+        <div id="virtualImageUploadSuccess">
+            <h3><img src="/static/images/passed.png" alt="Passed" height="20" width="20"/> Success</h3>
+            <div>
+                <table class="general-table">
+                    <tr>
+                        <th>Comment</th>
+                        <th>Result</th>
+                    </tr>
+                    {% set found = 0 %}
+                    {% for item in result %}
+                        <tr>
+                            {% if "SUCCESS" in item %}
+                                <td>{{ item }}</td>
+                                <td align="center"><img src="/static/images/passed.png" alt="Passed" height="20" width="20"></td>
+                                {% set found = 1 %}
+                            {% endif %}
+                            </tr>
+                    {% endfor %}
+                    {% if found == 0 %}
+                       <tr>
+                        <td>No Successes Found</td>
+                        <td></td>
+                      </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    {% else %}
+        There seems to be something wrong with the upload of the virtual image section</br>
+        If the problem persists please log a jira on the <a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/CIS">Continuous Integration Services</a> area.<br><br>
+        Return to the <a href="/dmt/populate/deployment/">Upload Pre-Populated SED</a><br>
+    {% endif %}
+</div>

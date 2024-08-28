@@ -1,0 +1,62 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product.name }} Testware {% endblock %}
+    {% block content %}
+        <script src="/static/commonFunctions.js"></script>
+        <script type="text/javascript">
+            (function($) {
+             $(document).ready(function() {
+                function doRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/unmappedtestware/xml/?page={{ pageNo }}",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table#unmapped-testware-artifacts').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('table#unmapped-testware-artifacts').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+                   }
+                   doRequest();
+                 });
+             })(jQuery);
+        </script>
+
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">Unmapped Testware Artifacts <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Testware+Management" title="Testware Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <br><br>
+        <table id="unmapped-testware-artifacts">
+            <tr><td> Loading Data ... </td></tr>
+        </table>
+        <br>
+        <table id="paginator">
+            <tr>
+                {% if allRevsPag.has_previous %}
+                <td><a href="{{ product.name }}/unmappedtestware/?page={{ allRevsPag.previous_page_number }}">Previous</a></td>
+                {% endif %}
+                {% if allRevsPag.has_previous or allRevsPag.has_next %}
+                <span class="current">
+                    <td>Page {{ allRevsPag.number }} of {{ allRevsPag.paginator.num_pages }}</td>
+                </span>
+                {% endif %}
+
+                {% if allRevsPag.has_next %}
+                <td><a href="{{ product.name }}/unmappedtestware/?page={{ allRevsPag.next_page_number }}">Next</a></td>
+                {% endif %}
+                {% if allRevsPag.has_previous or allRevsPag.has_next %}
+                <td><a href="{{ product.name }}/unmappedtestware/?page=all">All({{ count }})</a></td>
+                {% endif %}
+            </tr>
+        </table>
+    </div>
+    {% endblock %}
+{% endif %}
+
+
+

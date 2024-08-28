@@ -1,0 +1,30 @@
+<template>
+
+  <name>__ARTIFACT___image</name>
+  <os>
+    <name>__OSNAME__</name>
+    <version>__OSVERSION__</version>
+    <arch>__OSARCH__</arch>
+    <install type='iso'>
+      <iso>__OSURL__</iso>
+    </install>
+    __ROOTPASS__
+  </os>
+
+  __DISKSIZE__
+
+  <repositories>
+    __NEXUSDROPREPO__
+    __3PPREPO__
+  </repositories>
+
+
+  <packages>
+    __PACKAGES__
+  </packages>
+
+
+  <commands>
+    __COMMANDS__
+  </commands>
+</template>

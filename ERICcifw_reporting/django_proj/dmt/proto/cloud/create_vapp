@@ -1,0 +1,14 @@
+#username=ciuser
+#password=ciuser01
+#organisation=Misc
+#destorgvdcname=Misc_vDC
+#vapptemplateid=urn:vcloud:vapptemplate:4ab9b613-98b8-4fc5-9a7c-f5751ef89cf9
+#newvappname=autodeploy_cifwk_SP9_$$
+newvapptemplatename=autodeploy_template_cifwk_SP9_$$
+vappname=urn:vcloud:vapp:3f9fab43-901c-46a3-98a0-9205c465be5d
+destcatalogname=Misc_Catalog
+
+#REDEPLOY
+#./cifwk_clone_install.bsh -u ciuser -p ciuser01 -o Misc -n LITP_SP9_4_Node -c redeploy -v cifwk_SP9
+#CATALOG
+#./cifwk_clone_install.bsh -u ciuser -p ciuser01 -o Misc -n autodeploy_litp_SP9 -c catalog -v cifwk_SP9 -d Misc_Catalog

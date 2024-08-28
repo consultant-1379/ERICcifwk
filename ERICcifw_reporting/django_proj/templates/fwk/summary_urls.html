@@ -1,0 +1,11 @@
+{% block content %}
+
+{% if summary %}
+<?xml version="1.0" encoding="UTF-8" ?>
+<urls>
+{% for dashboards in summary %}
+<url><target>{{ dashboards.url.url }}</target><time>{{ dashboards.time }}</time></url>
+{% endfor %}
+{% endif %}
+</urls>
+{% endblock %}

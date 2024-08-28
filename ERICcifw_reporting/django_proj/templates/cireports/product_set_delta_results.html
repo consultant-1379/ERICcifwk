@@ -1,0 +1,98 @@
+<div class="isoDiffResult">
+    <h2 class="sub-title">Product Set Diff Result Between Product Set {{ productSetVersion }} in Drop {{ drop }} and {{ previousPSVer}} in Drop {{ previousDrop }}</h2>
+    <div><a href="javascript:void(0)" class="expandResults">Expand All</a> | <a href="javascript:void(0)" class="collapseResults">Collapse All</a></div><br>
+        {% if updated %}
+            <div id="accordionUpdated">
+                <h2>Updated Content</h2>
+                <div>
+                    <table class='general-table'>
+                        <tr>
+                            <th>Name</th>
+                            <th>New Version -  Product Set({{ productSetVersion }})</th>
+                            <th>Previous Version - Product Set({{ previousPSVer }})</th>
+                        </tr>
+                        {% for objects in response %}
+                            {% for key, keyData in objects.items %}
+                                {% if key == "Updated" %}
+                                    {% for data in keyData %}
+                                        <tr>
+                                            <td>
+                                                {{data.artifactId}} <a href="/compareISOs/?drop={{ data.drop }}&product={{ data.product }}&current={{ data.version }}&previous={{ data.previousVersion }}&preDrop={{ data.previousDrop }}" >Diff these versions</a>
+                                            </td>
+                                            <td>
+                                                {{data.version}}
+                                            </td>
+                                            <td>
+                                                {{data.previousVersion}}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        {% if added %}
+            <div id="accordionAdded">
+                <h2>New Content</h2>
+                <div>
+                    <table class='general-table'>
+                        <tr>
+                            <th>Name</th>
+                            <th>Version</th>
+                        </tr>
+                        {% for objects in response %}
+                            {% for key, keyData in objects.items %}
+                                {% if key == "Added" %}
+                                    {% for data in keyData %}
+                                        <tr>
+                                            <td>
+                                                {{data.artifactId}}
+                                            </td>
+                                            <td>
+                                                {{data.version}}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        {% if obsoleted %}
+            <div id="accordionObsoleted">
+                <h2>Removed Content</h2>
+                <div>
+                    <table class='general-table'>
+                        <tr>
+                            <th>Name</th>
+                            <th>Version</th>
+                        </tr>
+                        {% for objects in response %}
+                            {% for key, keyData in objects.items %}
+                                {% if key == "Obsoleted" %}
+                                    {% for data in keyData %}
+                                        <tr>
+                                            <td>
+                                                {{data.artifactId}}
+                                            </td>
+                                            <td>
+                                                {{data.version}}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        <br>
+        <input type="hidden" name="previousPS" value="{{ previousPSVer }}">
+        <input type="hidden" name="previousDrop" value="{{ previousDrop }}">
+    </div>

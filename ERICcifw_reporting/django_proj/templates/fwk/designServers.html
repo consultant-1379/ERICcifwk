@@ -1,0 +1,33 @@
+{% extends "fwk/fwk_base.html" %}
+
+{% block title %}CIFWK Development Servers{% endblock %}
+{% block content %}
+<h2>CIFWK Design Server(s)</h2>
+{% for server in servers %}
+<div class="details">
+    {{ status }}
+    <h3>{{ server.vm_hostname }}</h3>
+    <table border=1 width="100%">
+        <tr><td class="header" width="35%">FQDN:</th><td>{{ server.vm_hostname }}.{{server.domain_name }}</td></tr>
+        <tr><td class="header" width="35%">IP Address:</th><td>{{ server.ipAddress }}</td></tr>
+        <tr><td class="header" width="35%">Booking Date:</th><td>{{ server.bookingDate }}</td></tr>
+        <tr><td class="header" width="35%">User:</th><td>{{ server.owner }}</td></tr>
+        <tr><td class="header" width="35%">Description:</th><td>{{ server.description }}</td></tr>
+
+    <br>
+        <tr align="center">
+            <td><a href="/fwk/editdevserver/{{server.vm_hostname}}/edit"/>Edit Server</a></td>
+            <td><a href="/fwk/deletedevserver/{{server.vm_hostname}}/delete"/>Delete Server</a></td>
+</table>
+</div>
+{% endfor %}
+<div>
+<table border=1 width="100%">
+    <tr align="center">
+        <td><a href="/fwk/devServers/"/>Register A Server</a></td>
+    </tr>
+    <br>
+</table>
+
+</div>
+{% endblock %}

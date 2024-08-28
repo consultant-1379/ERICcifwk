@@ -1,0 +1,36 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %} SSH Key Information {% endblock %}
+
+{% block content %}
+<div class="deployment_container">
+        <h2 class="generalPageNewLook-title">Enable Deployment access from Jenkins
+        </h2>
+    <div class="sshkeygeneric-text">
+        <p />To allow the CI Framework infrastructure to execute jobs on your deployment nodes you need to add
+        the CI Framework SSH keys to your authorized_keys file.
+        <p />If you already know what this means, here's the keys:
+        <p/><textarea rows="10.5" cols="150">{{ ssh_key }}&#13;&#10;{{ cloudSSHKey }}</textarea>
+        <hr />
+        <h2>Instructions for Adding the SSH Key</h2>
+        <p />run the following commands to add the SSH Key to authorized_keys file for each node.
+        <h3> <b>Section A:</b></h3>
+        <p />Check if .ssh exists in /root using:
+        <p /><code>$ ls -lrta</code>
+        <p />If it already exists, skip to Section B. Otherwise, create the directory with the correct permissions
+        by running the ssh-keygen command to generate a key for that user:
+        <p /><code>$ ssh-keygen -t rsa</code>
+        <p />Create authorized_keys file in /root/.ssh/:
+        <p /><code>$ touch authorized_keys</code>
+        <p />Make sure your authorized_keys file has the correct permissions:
+        <p /><code>$ chmod 600 /root/.ssh/authorized_keys</code>
+        <hr />
+        <h3><b> Section B:</b> </h3>
+        <p /> Copy and paste the SSH Public Keys below into the remote server's .ssh/authorized_keys
+        using a text editor.
+        <p /><b>SSH Public Keys:</b>
+        <p /><textarea rows="10.5" cols="150">{{ ssh_key }}&#13;&#10;{{ cloudSSHKey }}</textarea>
+    </div>
+<div>
+{% endblock %}
+

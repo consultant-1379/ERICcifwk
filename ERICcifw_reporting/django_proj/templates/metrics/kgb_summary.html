@@ -1,0 +1,45 @@
+<br>
+        {% if packageData %}
+             <table id="package-table" class="tablesort general-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>KGB Not Run</th>
+                        <th>*KGB Runs</th>
+                        <th>Passed KGB Jobs</th>
+                        <th>Failed KGB Jobs</th>
+                        <th>Deliveries</th>
+                        <th>Delivered With Passed KGB</th>
+                        <th>Delivered With Failed KGB</th>
+                        <th>Delivered Without KGB</th>
+                    </tr>
+                </thead>
+                {% for pkg in packageData %}
+                    <tr>
+                        <td>{{ pkg.name }}</td>
+                        <td>{{ pkg.Summary.NoKGBRan }}</td>
+                        <td>{{ pkg.Summary.PassedKGB|add:pkg.Summary.FailedKGB }}</td>
+                        <td>{{ pkg.Summary.PassedKGB }}  ({{ pkg.Summary.passedPercent }}%)</td>
+                        <td>{{ pkg.Summary.FailedKGB }}  ({{ pkg.Summary.failedPercent }}%)</td>
+                        <td>{{ pkg.Summary.NumberOfDeliveries }}</td>
+                        <td>{{ pkg.Summary.DeliveredWithPassedKGB }}  ({{ pkg.Summary.delWithPassPercent }}%)</td>
+                        <td>{{ pkg.Summary.DeliveredWithFailedKGB }}  ({{ pkg.Summary.delWithFailPercent }}%)</td>
+                        <td>{{ pkg.Summary.DeliveredWithoutKGB }}  ({{ pkg.Summary.delWithOutPercent }}%)</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        <br>
+        <br>
+        <form enctype="multipart/form-data" name="dmt_mgmtServerReg" action="/downloadKGBMetricsFile/?"  method="post" >{% csrf_token %}
+            <input type="hidden" id="" name = "package_data" value="{{ raw_data }}" >
+            {% if start %}
+                <input type="hidden" id="" name = "start" value="{{ start }}" >
+                <input type="hidden" id="" name = "end" value="{{ end }}" >
+            {% else %}
+                <input type="hidden" id="" name = "drops" value="{{ drops }}" >
+            {% endif %}
+            <input type="submit" id="download_csv" name = "" value="Download Full Result" style="display:block;" >
+        </form>
+        {% else %}
+            <p><h2>Sorry there is no KGB data available for this package in this time period</h2></p>
+        {% endif %}

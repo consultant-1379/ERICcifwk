@@ -1,0 +1,14 @@
+<INCLUDE NODE: ALL > 
+      <litp:service-group-def id="<SERVICE_GROUP_ID>">
+        <availability_model>nway</availability_model>
+        <node_list><NODE_LIST></node_list>
+        <version>1.0.0</version>
+        <litp:service-instance-def id="si">
+          <active-count><ACTIVE-COUNT></active-count>
+          <version>1.0.0</version>
+          <litp:component-ref id="jee">
+            <component><JBOSS_CLUSTER></component>
+          </litp:component-ref>
+          <Append Here File: jboss-component-ref-group-<SERVICE_GROUP_ID_LWR>>
+        </litp:service-instance-def>
+      </litp:service-group-def>

@@ -1,0 +1,54 @@
+<INCLUDE NODE: jee_torOAM > 
+  <litp:component-def id="<JBOSS_ID>">
+    <name><JBOSS_ID></name>
+    <version>1.0.0</version>
+    <litp:package-def id="rpm">
+      <ensure>installed</ensure>
+      <name>jboss-eap-6.0.0-sfwk-ms-dps</name>
+      <repository>Ammeon_Custom</repository>
+    </litp:package-def>
+    <litp:jee-container-def id="instance">
+      <command-line-options>-Djgroups.uuid_cache.max_age=5000</command-line-options>
+      <data-dir>/home/jboss/{rdni}/jboss_data</data-dir>
+      <default-multicast><MESSAGING_GROUP_ADDRESS></default-multicast>
+      <home-dir>/home/jboss/{rdni}</home-dir>
+      <install-source>/opt/ericsson/nms/jboss/jboss-eap-6.0.tgz</install-source>
+      <instance-name>{rdni}</instance-name>
+      <jgroups-mping-mcast-addr><GROUP_MPING_ADDRESS></jgroups-mping-mcast-addr>
+      <jgroups-mping-mcast-port><GROUP_MPING_PORT></jgroups-mping-mcast-port>
+      <jgroups-udp-mcast-addr><UDP_MCAST_ADDRESS></jgroups-udp-mcast-addr>
+      <jgroups-udp-mcast-port><UDP_MCAST_PORT></jgroups-udp-mcast-port>
+      <log-dir>/var/log/jboss/{rdni}</log-dir>
+      <management-listener>{ip.address}</management-listener>
+      <management-password>shroot</management-password>
+      <management-user>root</management-user>
+      <messaging-group-address><MESSAGING_GROUP_ADDRESS></messaging-group-address>
+      <messaging-group-port><MESSAGING_GROUP_PORT></messaging-group-port>
+      <name>jboss_torOAM</name>
+      <process-group>litp_jboss</process-group>
+      <process-user>litp_jboss</process-user>
+      <public-listener>{ip.address}</public-listener>
+      <public-port-base><PUBLIC_PORT_BASE></public-port-base>
+      <version>1.0.0</version>
+      <litp:firewalls-def id="fw_<JBOSS_ID>">
+        <dport><MESSAGING_GROUP_PORT>,<GROUP_MPING_PORT>,<MANAGEMENT_PORT_NATIVE></dport>
+        <name>006 <JBOSS_ID_NO_UND></name>
+      </litp:firewalls-def>
+      <litp:ip-address-def id="ip">
+        <net_name>mgmt</net_name>
+        <pool>network</pool>
+      </litp:ip-address-def>
+      <litp:jee-property-def id="gcInterval">
+        <property>-Dsun.rmi.dgc.server.gcInterval</property>
+        <value>300</value>
+      </litp:jee-property-def>
+      <litp:jee-property-def id="jee_unsecure">
+        <property>-Djboss.bind.address.unsecure</property>
+        <value>127.0.0.1</value>
+      </litp:jee-property-def>
+      <litp:jee-property-def id="preferIPv4Stack">
+        <property>-Djava.net.preferIPv4Stack</property>
+        <value>true</value>
+      </litp:jee-property-def>
+    </litp:jee-container-def>
+  </litp:component-def>

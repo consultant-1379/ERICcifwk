@@ -1,0 +1,11 @@
+#!/bin/bash -a
+
+# Wrapper for manage.py
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global-e2c.env ] && . ${BASEDIR}/etc/global-e2c.env
+
+$_PYTHON ${BASEDIR}/django_proj/manage.py "$@"

@@ -1,0 +1,18 @@
+#! /bin/bash
+#Compress CIFwk build
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+VER=$1
+DIR=$2
+NAME=$3
+
+[[ -d /tmp/${VER} ]] && $_RM -rf /tmp/${VER}
+$_MKDIR /tmp/${VER}
+$_CP -R ${DIR}/* /tmp/${VER}
+cd /tmp/
+$_ZIP --recurse-paths --symlinks /tmp/${NAME}_${VER}.zip  ${VER} --exclude ${VER}/target/\* ${VER}/test/\*
+$_RM -rf /tmp/${VER}

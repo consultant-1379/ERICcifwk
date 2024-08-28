@@ -1,0 +1,64 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+    {% block title %}{{ product }} Media Artifact Version(s) {% endblock %}
+    {% block content %}
+        <div class="artifact-container">
+            <h2 class="generalPageNewLook-title">{{ product }} {{ pkgName }} {{ version }} Media Artifact Version(s) </h2>
+            <div class="layout-bar"> <a href="/{{ product }}/packages/{{ pkgName }}/">Return To Package</a>
+              {% if isoMappingObj.has_previous %}
+                | <a href="{{pageBaseUrl}}?page={{ isoMappingObj.previous_page_number }}">Previous Page</a>
+                {% endif %}
+                {% if isoMappingObj.has_previous or isoMappingObj.has_next %}
+                    <span class="current">
+                       | Page {{ isoMappingObj.number }} of {{ isoMappingObj.paginator.num_pages }}
+                    </span>
+                {% endif %}
+                {% if isoMappingObj.has_next %}
+                    | <a href="{{ pageBaseUrl }}?page={{ isoMappingObj.next_page_number }}">Next Page</a>
+                {% endif %}
+                {% if isoMappingObj.has_previous or isoMappingObj.has_next %}
+                    | <a href="{{ pageBaseUrl }}?page=all">View All ({{ count }})</a>
+                {% endif %}
+            </div>
+            <br>
+                {% if isoMappingObj %}
+                        <table class="artifact-table" >
+                        <tr>
+                            <th>Name</th>
+                            <th>Version</th>
+                            <th>Drop</th>
+                        </tr>
+                        {% for isoMap in isoMappingObj %}
+                        <tr>
+                            <td><a href="/{{ product }}/{{ isoMap.iso__drop__name }}/media/">{{ isoMap.iso__mediaArtifact__name }}</a></td>
+                            <td><a href="/{{ product }}/{{ isoMap.iso__drop__name }}/mediaContent/{{ isoMap.iso__mediaArtifact__name }}/{{ isoMap.iso__version }}"><b>{{ isoMap.iso__version }}</b></a></td>
+                            <td>{{ isoMap.iso__drop__name }}</td>
+                        </tr>
+                        {% endfor %}
+                      </table>
+                   {% else %}
+
+                        <div id="iso-text">
+                            {{ pkgName }} {{ version }} has not been included in any ISO Build
+                        </div>
+                   {% endif %}
+                <div class="layout-bar">
+                {% if isoMappingObj.has_previous %}
+                <a href="{{pageBaseUrl}}?page={{ isoMappingObj.previous_page_number }}">Previous Page</a> |
+                {% endif %}
+                {% if isoMappingObj.has_previous or isoMappingObj.has_next %}
+                    <span class="current">
+                       Page {{ isoMappingObj.number }} of {{ isoMappingObj.paginator.num_pages }}
+                    </span>
+                {% endif %}
+                {% if isoMappingObj.has_next %}
+                   | <a href="{{ pageBaseUrl }}?page={{ isoMappingObj.next_page_number }}">Next Page</a>
+                {% endif %}
+                {% if isoMappingObj.has_previous or isoMappingObj.has_next %}
+                   | <a href="{{ pageBaseUrl }}?page=all">View All ({{ count }})</a>
+                {% endif %}
+               </div>
+        </div>
+    {% endblock %}
+{% endif %}
+

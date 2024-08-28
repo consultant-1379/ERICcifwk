@@ -1,0 +1,3 @@
+<INCLUDE NODE: NFS SC PL >
+litp /inventory/deployment1/cluster1/<NODE_ID>/<NODE_SOLUTION_ID>/os/system update hostname="<NODE_HOSTNAME>" macaddress="<NODE_MAC>" domain="" systemname="vm_deployment1_cluster1_<NODE_SYSTEM_NAME>"
+

@@ -1,0 +1,83 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}{{ productSet }} Drop {{ drop.name }} {% endblock %}
+{% block content %}
+    <script type="text/javascript">
+        (function($) {
+         $(document).ready(function() {
+            function doRequest() {
+                $.ajax({
+                    type: 'GET',
+                    url: "/{{ productSet }}/dropMedia/{{ drop.name }}/'None'/xml/",
+                    dataType: 'html',
+                    cache: false,
+                    success: function(html, textStatus) {
+                        $('table#drop-revisions').replaceWith(html);
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr.status != 0)
+                        {
+                        $('table#drop-revisions').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                        }
+                    },
+                    });
+               }
+               function getLatestProductSetVersion() {
+                   $.ajax({
+                    type: 'GET',
+                    url: "/api/productSet/{{ productSet }}/drop/{{ drop.name }}/versions/latest/",
+                    dataType: 'html',
+                    cache: false,
+                    success: function(productSetVersion) {
+                       $("#release-note-link").attr("href", "/api/getReleaseNote/{{ productSet }}/" + productSetVersion + "/?format=json");
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        alert("Issue while generating link for MRRN " + (errorThrown ? errorThrown : xhr.status));
+                    },
+                    });
+               }
+               getLatestProductSetVersion();
+               doRequest();
+             });
+         })(jQuery);
+     </script>
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">
+        {{ productSet }} Drop:{{ drop.name }} <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+Set+Drop" title="Drop Info" target="_blank"><img src="/static/images/question.png"/></a>
+        </h2>
+       <div class="layout-bar">
+           <a href="/{{ productSet }}/content/{{ drop.name }}">Latest Version Content</a>
+           | <a href="/{{ productSet }}/historicalContent/{{ drop.name }}">Historical Versions</a>
+           | <a href="/{{ productSet }}/{{ drop.name }}/obsoleteMediaHistory/">Obsolete History</a>
+           | <a href="/compareProductSets/">Compare Product Set Versions</a>
+           |    {% if productSet == 'ENM' %}
+                    <a id="release-note-link" href="#" target="_blank">Generate MRRN</a>
+                {% endif %}
+         </div>
+         <br>
+         {% if deployMappings %}
+            <div id="accordion">
+               <h2>Auto Deployment Mappings</h2>
+               <div>
+                  <table class="general-table">
+                     <tr>
+                       <th>Name</th>
+                       <th>Version</th>
+                       <th>Deploy Type</th>
+                     </tr>
+                     {% for item in deployMappings %}
+                      <tr>
+                        <td>{{ item.mediaArtifact }}</td>
+                        <td>{{ item.version }}</td>
+                        <td>{{ item.deployType }}</td>
+                      </tr>
+                     {% endfor %}
+                  </table>
+               </div>
+            </div>
+            <br>
+         {% endif %}
+        <table id="drop-revisions" class="general-table">
+            <tr><td> Loading Data ... </td></tr>
+        </table>
+    </div>
+{% endblock %}

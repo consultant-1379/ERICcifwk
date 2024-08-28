@@ -1,0 +1,89 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}CIFWK Excellence Model Versioning Data{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Organisation Information
+        <a class="img" href="/excellence/addOrganisation/" title="Add New Organisation"><img src="/static/images/create.png"/></a>
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/CI+Excellence+Model+Organisation+Information" title="Add Organisation Help" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <div class="generic-text">
+        <br>
+        <table id="excellenceOrganistaions-table" class="general-table">
+            {% if organistions %}
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Parent Organisation</th>
+                </tr>
+                <th>
+                    <font color="blue" />Business Units
+                </th>
+                {% for organisation in organistions %}
+                    {% if organisation.type == "BU" %}
+                        <tr>
+                            <td></td>
+                            <td>{{ organisation.name }}</td>
+                            <td>{{ organisation.description }}</td>
+                            <td>{{ organisation.parent }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                <th>
+                    <font color="blue" />Development Units
+                </th>
+                {% for organisation in organistions %}
+                    {% if organisation.type == "DU" %}
+                        <tr>
+                            <td></td>
+                            <td>{{ organisation.name }}</td>
+                            <td>{{ organisation.description }}</td>
+                            <td>{{ organisation.parent }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                <th>
+                    <font color="blue" />Product Development Units
+                </th>
+                {% for organisation in organistions %}
+                    {% if organisation.type == "PDU" %}
+                        <tr>
+                            <td></td>
+                            <td>{{ organisation.name }}</td>
+                            <td>{{ organisation.description }}</td>
+                            <td>{{ organisation.parent }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                <th>
+                    <font color="blue" />Requirements Areas
+                </th>
+                {% for organisation in organistions %}
+                    {% if organisation.type == "RA" %}
+                        <tr>
+                            <td></td>
+                            <td>{{ organisation.name }}</td>
+                            <td>{{ organisation.description }}</td>
+                            <td>{{ organisation.parent }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                <th>
+                    <font color="blue" />Teams
+                </th>
+                {% for organisation in organistions %}
+                    {% if organisation.type == "Team" %}
+                        <tr>
+                            <td></td>
+                            <td>{{ organisation.name }}</td>
+                            <td>{{ organisation.description }}</td>
+                            <td>{{ organisation.parent }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% endblock %}

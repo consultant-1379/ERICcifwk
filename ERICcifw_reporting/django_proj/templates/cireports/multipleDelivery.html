@@ -1,0 +1,64 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Make Multiple Delivery{% endblock %}
+
+{% block content %}
+<link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+<script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src='/static/multipleDelivery.js'></script>
+<div id="hidden_group_div" style="display:none">{{ groupInfo|safe }}</div>
+<div id="hidden_edit_div" style="display:none">{{ edit }}</div>
+<div class="delivery-form-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;" >
+          Deliver To {{ product.name }} Queue
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Queue" title="Delivery Queue Help" target="_blank">
+                <img src="/static/images/question.png"/>
+            </a>
+       </h2>
+        <div id=empty_form>
+            <br>
+            <label for='drop'>Drop:</label>
+            <select id='drop' class="delivery_form_drop"></select>
+            <label for='team'>Group Creators Team:</label>
+            <input id='team' class="delivery_form_creator">
+            <br>
+        </div>
+        <input type="button" value="Add Artifact" style="cursor:pointer;" class="btn-default" id="add_artifact">
+        <br>
+        <div id=empty_jira_form>
+        </div>
+        <input type="button" value="Add JIRA Ticket" class="btn-default" id="add_jira">
+        <div id="empty_cenmdg_form">
+            <br>
+            <input type="button" value="Add Impacted Cloud Native Delivery Group" class="btn-default" id="add_cenmdg">
+            <br>
+        </div>
+        <br>
+        <span class="generic-text"> <label for='set_missingDep'>This Group has Missing Dependencies:</label><input type="checkbox" name="missing" value="missing" id="set_missingDep"></span><br>
+        <br>
+        <div id=kgb-dialog title="Reason for No Passed KGB" class="generic-text">
+            <h4>There is one or more Package Contained in this Delivery Group without a Passed KGB Test, Please select a Reason.</h4>
+            <form action="" id="kgb">
+                <label for='no_kgb_reported'>Reason: </label>
+                <select id='kgb_select_box_option'></select><br>
+                <label for='kgb_comment'>Comment: </label>
+                <textarea id='kgb_extra_info' name="Comment" class='kgb_dialog_form' rows="4" cols="100"></textarea><br>
+                <div style="text-align:center;">
+                    <input id="submit" type="button" value="Submit">
+                    <div style="width:10px;height:auto;display:inline-block;"></div>
+                    <input id="cancel" type="button" value="Cancel">
+                </div>
+            </form>
+        </div>
+        <label for='comment'>Comment:</label><br>
+        <textarea rows="4" cols="50" id="comment"></textarea>
+        <br>
+        {% if edit %}
+            <input type="button" class="btn-default" value="Edit Delivery" id="add_to_queue">
+        {% else %}
+            <input type="button" class="btn-default" value="Add To Delivery Queue" id="add_to_queue">
+        {% endif %}
+    </div>
+    <div class="modal"></div>
+{% endblock %}
+

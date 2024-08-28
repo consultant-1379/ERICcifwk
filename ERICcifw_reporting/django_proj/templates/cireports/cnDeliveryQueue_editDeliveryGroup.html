@@ -1,0 +1,47 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Edit Delivery Groups for {{ deliveryGroupNumber }} {% endblock %}
+
+{% block content %}
+    <link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+    <script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src='/static/cnDeliveryQueue_editDeliveryGroup.js'></script>
+    <div id="hidden_deliveryGroupNumber_div" style="display:none">{{ deliveryGroupNumber }}</div>
+    <div id="hidden_drop_div" style="display:none">{{ drop }}</div>
+    <div class="delivery-form-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;" >
+          Edit Delivery Group {{ deliveryGroupNumber }}
+            <a class="img" href="" title="Delivery Queue Help" target="_blank">
+                <img src="/static/images/question.png"/>
+            </a>
+        </h2>
+        <div id='drop_team_form'>
+            <br>
+            <label for='drop'>Drop:</label>
+            <input id='drop' class="delivery_form_drop" style="width: 20%; background-color: #d1d1e0;" readonly>
+            <label for='team'>Group Creators Team:</label>
+            <input id='team' class="delivery_form_creator">
+            <br>
+        </div>
+        <br>
+        <div id='team_email_form'>
+            <label for='team_email'>Group Creators Team Email:</label>
+            <input id='team_email' class="delivery_form_team_email">
+        </div>
+        <br>
+        <div id="artifact_container">
+            <input type="button" value="Add Artifact" class="btn-default" id="add_artifact">
+        </div>
+        <br>
+        <div id="empty_enmdg_form">
+            <input type="button" value="Add Impacted ENM DG" class="btn-default" id="add_enmdg">
+        </div>
+        <br>
+        <div id='jira_form'>
+            <input type="button" value="Add Jira Ticket" style="cursor:pointer;" class="btn-default" id="add_jira">
+        </div>
+        <br>
+        <input type="button" class="btn-default" value="Edit Delivery Group" id="edit_delivery_group">
+    </div>
+<div class="modal"></div>
+{% endblock %}

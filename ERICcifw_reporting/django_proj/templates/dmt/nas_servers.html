@@ -1,0 +1,141 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% load passwordHide %}
+
+{% block title %}Manage Network Attached Storage{% endblock %}
+{% block content %}
+
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Network Attached Storage Servers
+        <a class="img" style="padding-left:5px;" href="/dmt/addsvr/None/None/nas/" title="Register An NAS Server"><img src="/static/images/create.png"/></a>
+        <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+SFS+Server" title="NAS Server Help" target="_blank"><img src="/static/images/question.png"/></a>
+         <a class="img" style="padding-left:5px;" href="/dmt/log/nasserver/" title="User Activity Log for NAS Servers"><img src="/static/images/log.png"/></a>
+    </h2>
+<div id="server">
+    <p><b>For Information on Deployments <a href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Deployments" target="_blank">Visit This Confluence Page</a></b></p>
+    <table class="general-table">
+        {% if nasServers %}
+            <tr>
+                <th>Name</th>
+                <th style="text-align: center;">Options</th>
+            </tr>
+            {% for item in nasServers %}
+             <tr>
+                    <td
+                    {% ifequal item.id|add:"0" selected|add:"0" %}
+                    class="selected"
+                    {% endifequal %}
+                    >
+                    <a href="/dmt/nassvrs/{{ item.id }}/">{{ item.hostname }} (id: {{ item.id }})</a></td>
+                    <td style="text-align: center;">
+                        <a class="img" href="/dmt/editnassvr/{{ item.id }}/edit" title="Edit {{ item.hostname }} Server"><img src="/static/images/edit.png"/></a>
+                        <a class="img" href="javascript:void(0)"
+                            onClick="checkAction('Do you really want to Delete {{ item.hostname }}?', '/dmt/deletenassvr/{{ item.id}}/delete')" title="Delete {{ item.hostname }} Server"><img src="/static/images/delete.png"/></a>
+                    </td>
+                </tr>
+            {% endfor %}
+       {% else %}
+            <tr>No Network Attached Storage Servers</tr>
+       {% endif %}
+   </table>
+</div>
+<div id="server-details">
+{% if selected %}
+    {% set fndnasvip1 = 0 %}
+    {% set fndnasvip2 = 0 %}
+    {% set fndnasinstallip1 = 0 %}
+    {% set fndnasinstallip2 = 0 %}
+    {% if server %}
+        <h3>NAS Server Details for {{ server.hostname }} (id: {{ server.id }})</h3>
+        <table class="general-table">
+                <tr><th>Machine Name:</th><td>{{ server.name }}</td></tr>
+                <tr><th>Domain Name:</th><td>{{ server.domain_name }}</td></tr>
+                <tr><th>HW Type:</th><td>{{ server.hardware_type }}</td></tr>
+                <tr><th>DNS IP Address A:</th><td>{{ server.dns_serverA }}</td></tr>
+                <tr><th>DNS IP Address B:</th><td>{{ server.dns_serverB }}</td></tr>
+                {% for n in nics %}
+                    {% if n.servers.hostname == servers.hostname %}
+                        <tr><th>Primary NIC:</th><td>{{ n.mac_address }}</td></tr>
+                        {% for ip in ipaddrs %}
+                            {% if ip.nic.mac_address == n.mac_address %}
+                                {% if ip.ipType == "nas" %}
+                                    <tr><th>IP Address:</th><td>{{ ip.address }}</td></tr>
+                                    <tr><th>Bitmask:</th><td>/{{ ip.bitmask }}</td></tr>
+                                    <tr><th>Gateway:</th><td>{{ ip.gateway_address }}</td></tr>
+                                {% endif %}
+                                {% if ip.ipType == "nasvip1" %}
+                                    <tr><th>NAS VIP1:</th><td>{{ ip.address }}</td></tr>
+                                    {% set fndnasvip1 = 1 %}
+                                {% endif %}
+                                {% if ip.ipType == "nasvip2" %}
+                                    <tr><th>NAS VIP2:</th><td>{{ ip.address }}</td></tr>
+                                    {% set fndnasvip2 = 1 %}
+                                {% endif %}
+                                {% if ip.ipType == "nasinstallip1" %}
+                                    <tr><th>NAS Install IP 1:</th><td>{{ ip.address }}</td></tr>
+                                    {% set fndnasinstallip1 = 1 %}
+                                {% endif %}
+                                {% if ip.ipType == "nasinstallip2" %}
+                                    <tr><th>NAS Install IP 2:</th><td>{{ ip.address }}</td></tr>
+                                    {% set fndnasinstallip2 = 1 %}
+                                {% endif %}
+                                {% if ip.ipType == "nasInstalIlolIp1" %}
+                                    <tr><th>NAS Install iLO IP 1:</th><td>{{ ip.address }}</td></tr>
+                                    {% set fndnasInstalIlolIp1 = 1 %}
+                                {% endif %}
+                                {% if ip.ipType == "nasInstalIlolIp2" %}
+                                    <tr><th>NAS Install iLO IP 2:</th><td>{{ ip.address }}</td></tr>
+                                    {% set fndnasInstalIlolIp2 = 1 %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% if fndnasvip1 != 1 %}
+                    <tr><th>NAS VIP1:</th><td>Not Assigned</td></tr>
+                {% endif %}
+                {% if fndnasvip2 != 1 %}
+                    <tr><th>NAS VIP1:</th><td>Not Assigned</td></tr>
+                {% endif %}
+                {% if fndnasinstallip1 != 1 %}
+                    <tr><th>NAS Install IP 1:</th><td>Not Assigned</td></tr>
+                {% endif %}
+                {% if fndnasinstallip2 != 1 %}
+                    <tr><th>NAS Install IP 2:</th><td>Not Assigned</td></tr>
+                {% endif %}
+                {% if fndnasInstalIlolIp1 != 1 %}
+                    <tr><th>NAS Install iLO IP 1:</th><td>Not Assigned</td></tr>
+                {% endif %}
+                {% if fndnasInstalIlolIp2 != 1 %}
+                    <tr><th>NAS Install iLO IP 2:</th><td>Not Assigned</td></tr>
+                {% endif %}
+        </table>
+    {% endif %}
+    <br>
+    <h3>Deployments Associated with this NAS Server</h3>
+    {% if clusters %}
+    <table class="general-table">
+        <tr>
+            <th>Name</th>
+            <th>Deployment ID</th>
+        </tr>
+       {% for c in clusters %}
+        <tr>
+            <td><a href="/dmt/clusters/{{ c.cluster.id }}/">{{ c.cluster.name }}</a></td>
+            <td>{{ c.cluster.id}}</td>
+        </tr>
+       {% endfor %}
+   </table>
+    {% endif %}
+</div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,107 @@
+#! /bin/sh
+#
+# chkconfig: - 55 45
+# description:	The memcached daemon is a network memory cache service.
+# processname: memcached
+# config: /etc/sysconfig/memcached
+# pidfile: /var/run/memcached/memcached.pid
+
+# Standard LSB functions
+#. /lib/lsb/init-functions
+
+# Source function library.
+. /etc/init.d/functions
+
+PORT=11211
+USER=lciadm100
+MAXCONN=1024
+CACHESIZE=512
+OPTIONS=""
+
+# Check that networking is up.
+. /etc/sysconfig/network
+
+if [ "$NETWORKING" = "no" ]
+then
+	exit 0
+fi
+
+_ECHO=/bin/echo
+_MKDIR=/bin/mkdir
+_TOUCH=/bin/touch
+_RM=/bin/rm
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+_PWD=pwd
+BASEDIR=$(cd ${BASEDIR}/../.. ; $_PWD)
+if [ -f ${BASEDIR}/etc/global.env ]; then
+    . ${BASEDIR}/etc/global.env
+fi
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${BASEDIR}/lib/3pp/memcached_dependencies/lib/
+
+MEMCACHED_BINARY=${BASEDIR}/lib/3pp/memcached_service/bin/memcached
+RETVAL=0
+prog="memcached"
+pidfile=${PIDFILE-/tmp/memcached.pid}
+lockfile=${LOCKFILE-/tmp/memcached}
+
+start () {
+	$_ECHO -n $"Starting $prog: "
+	# Ensure that $pidfile directory has proper permissions and exists
+	piddir=`dirname $pidfile`
+	if [ ! -d $piddir ]; then
+		$_MKDIR $piddir
+	fi
+	#if [ "`stat -c %U $piddir`" != "$USER" ]; then
+		#chown $USER $piddir
+	#fi
+
+	daemon --pidfile ${pidfile} ${MEMCACHED_BINARY} -d -p $PORT -u $USER  -m $CACHESIZE -c $MAXCONN -P ${pidfile} $OPTIONS
+	RETVAL=$?
+	$_ECHO
+	[ $RETVAL -eq 0 ] && $_TOUCH ${lockfile}
+}
+stop () {
+	$_ECHO -n $"Stopping $prog: "
+	killproc -p ${pidfile} ${MEMCACHED_BINARY}
+	RETVAL=$?
+	$_ECHO
+	if [ $RETVAL -eq 0 ] ; then
+		$_RM -f ${lockfile} ${pidfile}
+	fi
+}
+
+restart () {
+        stop
+        start
+}
+
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+	status -p ${pidfile} ${MEMCACHED_BINARY}
+	RETVAL=$?
+	;;
+  restart|reload|force-reload)
+	restart
+	;;
+  condrestart|try-restart)
+	[ -f ${lockfile} ] && restart || :
+	;;
+  *)
+	$_ECHO $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart|try-restart}"
+	RETVAL=2
+        ;;
+esac
+
+exit $RETVAL

@@ -1,0 +1,98 @@
+{% block content %}
+    {% if "Procus" in product.name and eniqAdmin == "no" %}
+        <div class="full-details">
+            <table id='documents-table'>
+                Sorry. You are not authorized to view ENIQ Procus Library Details
+            </table>
+        </div>
+    {% else %}
+        {% if identity and docObjList %}
+            <table>
+                <tr>
+                    <td><b>{{user.group}}Last Build:</b> </td>
+                    <td> {{ identity.lastBuild}}  </td>
+                </tr>
+                <tr>
+                    <td><b> Last Modified </b></td>
+                    <td>{{identity.lastModified}}</td>
+                <tr>
+                    <td> <b> Status </b></td>
+                    <td>
+                        {% if identity.status == 'Failed' %}
+                            <font color="red">
+                        {% elif identity.status == 'Passed' %}
+                            <font color = "green">
+                        {% else %}
+                            <font color = "violet">
+                        {% endif %}
+                        {{identity.status }}
+                        </font>
+                    </td>
+                </tr>
+                <tr>
+                    <td> <b> Download </b> </td>
+                        <td> <a href = "/{{ product.name }}/downloadsdi/{{ version }}/{{identity.cpiDrop}}/">SDI</a> | <a href = "/{{ product.name }}/downloadexcel/{{ version }}/{{identity.cpiDrop}}/">Excel</a>
+                        {% if identity.status == "Passed" %}
+                            | <a href = "{{ fetchSdiUrl }} ">Alex Lib</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if identity.status %}
+                    <tr> <td><b> Log </b> </td>
+                        <td > <a href = " {{ logUrl }} " target=_blank>Publishing Log</a></td>
+                    </tr>
+                {% endif %}
+                {% if identity.status == "Passed" %}
+                    <tr> <td> <b> Show Library </b></td>
+                        <td> <a href = " {{ libraryURL }} " target=_blank> Library </a></td>
+                    </tr>
+                    {% if admin == "yes" or eniqAdmin == "yes" %}
+                        <tr><td><b>Upload to</b></td>
+                            <td> <a href = " {{ calStore }}" target=_blank>CAL Store</a> |
+                                  <a href = " {{ cpiStore }}" target=_blank>CPI Store</a>
+                            </td></tr>
+                    {% endif %}
+                {% endif %}
+            </table>
+            <br><br>
+            {% load mptt_tags %}
+                <ul>
+                    <li>
+                        <a href="#" onclick="toggle('MainHeading','MainImg')"><img src="/static/images/Minus.png" id = "MainImg" width=1% height=1%><b> {{ product }} {{version}}</b></a>
+                        <ul id="MainHeading" style="display:''">
+                        {% recursetree nodes %}
+                            <div style="margin-left:2{{ node.get_level }}px">
+                                {% if "_headers" in node.title %}
+                                    <a href="#" onclick="toggle('title{{node.id}}','img{{node.id}}')"><img src="/static/images/Minus.png" id ='img{{node.id}}' width=1% height=1%><b>&nbsp{{ node.title | cut:"_headers" | upper}}</b></a>
+                                {% elif "_Container" in node.title or "_container" in node.title %}
+                                    <a href="#" onclick="toggle('title{{node.id}}','img{{node.id}}')"><img src="/static/images/Minus.png" id ='img{{node.id}}' width=1% height=1%><b>&nbsp{{ node.title | cut:"_Container" | cut:"_container"}}</b></a>
+                                {% else %}
+                                    <a href="#" onclick="toggle('title{{node.id}}','img{{node.id}}')"><img src="/static/images/Minus.png" id ='img{{node.id}}' width=1% height=1%><b>&nbsp{{node.title}}</b></a>
+                                {% endif %}
+                                <ul id='title{{node.id}}' style:"display:none">
+                                {% for document in docObjList %}
+                                    {% if node.id == document.section_id %}
+                                        <div style="margin-left:21px">
+                                            <li><table style="table-layout:fixed;" ><col width="600px" /><col width="250px"/><col width="100px" /><tr><td style="overflow:hidden;"><a href="/{{ product.name }}/editCPIDocument/{{ version }}/{{identity.cpiDrop}}/{{document.id}}"style="color: 33FF33"> {{document.docName}}</a>&nbsp;&nbsp;&nbsp;<u></td><td style="color: FFFF99;"><a href='http://gask2web.ericsson.se/pub/get?DocNo={{document.docNumber|cut:" "}}&lang={{document.language}}&rev={{document.revision}}' target="_blank" style="color:FFFF99">{{document.docNumber}}</a></u></td><td style="text-align:center" >{{document.revision}}</td></tr></table></li>
+                                        </div>
+                                   {% endif %}
+                                {% endfor %}
+                                {% if not node.is_leaf_node %}
+                                    {{ children }}
+                                {% endif %}
+                                </ul>
+                            </div>
+                        {% endrecursetree %}
+                    </li>
+                </ul>
+        {% else %}
+            <div class="full-details">
+                <table id='documents-table'>
+                    Sorry There are no Documents Associated with {{ product }} Drop {{ version }}.
+                </table>
+            </div>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}
+

@@ -1,0 +1,375 @@
+# Lifted from SP24 scripts
+# network ip addresses of the nodes (virtual machines)
+export IP_ADDRESS_POOL_SUBNET='<SC-1_NODE_SUBNET>'
+export IP_ADDRESS_POOL_START='<SC-1_NODE_IP>'
+export IP_ADDRESS_POOL_END='<SC-2_NODE_IP>'
+export IP_ADDRESS_POOL_GW='<SC-1_NODE_GATEWAY>'
+
+# br0 network interface of MS
+# TODO: be cleverer and create the _IP variable from the _ADD
+export IPV6_ADDRESS_POOL_SUBNET='<MS_IPV6_NODE_SUBNET>'
+export IPV6_ADDRESS_POOL_ADDR='<MS_IPV6_NODE_IP>'
+
+export IP_ADDRESS_POOL_BRIDGE_IP='<MS_NODE_IP_UNSCORE>'
+export IP_ADDRESS_POOL_BRIDGE_SUBNET='<MS_NODE_SUBNET>'
+export IP_ADDRESS_POOL_BRIDGE_ADDR='<MS_NODE_IP>'
+export IP_ADDRESS_POOL_BRIDGE_GW='<MS_NODE_GATEWAY>'
+
+# public network interface of MS
+export IP_ADDRESS_POOL_EXT_IP='<MS_EXTERNAL_NODE_IP_UNSCORE>'
+export IP_ADDRESS_POOL_EXT_SUBNET='<MS_EXTERNAL_NODE_SUBNET>'
+export IP_ADDRESS_POOL_EXT_ADDR='<MS_EXTERNAL_NODE_IP>'
+export IP_ADDRESS_POOL_EXT_GW='<MS_EXTERNAL_NODE_GATEWAY>'
+
+# MAC address of the physical machine
+export MS_MAC='<MS_NODE_MAC>'
+
+# MAC range of the virtual machines
+export VM_MAC_START='<MS_START_MAC>'
+export VM_MAC_END='<MS_END_MAC>'
+export TIPC_NETID='<MS_NODE_NETID>'
+
+# network ip addresses of the nodes (virtual machines)
+# SC-1
+ipv6_address_pool_sc1_subnet='<SC-1_IPV6_NODE_SUBNET>'
+ipv6_address_pool_sc1_addr='<SC-1_IPV6_NODE_IP>'
+ip_address_pool_sc1_ip='<SC-1_NODE_IP_UNSCORE>'
+ip_address_pool_sc1_subnet='<SC-1_NODE_SUBNET>'
+ip_address_pool_sc1_addr='<SC-1_NODE_IP>'
+ip_address_pool_sc1_gw='<SC-1_NODE_GATEWAY>'
+ip_address_pool_sc1_mac='<SC-1_NODE_MAC>'
+#Extra Blade Information for SC1
+SC1_BLADE_SERIAL="<SC-1_SERIAL_NUMBER>"
+SC1_PROFILE="<SC-1_PROFILE_TAG>"
+SC1_VLAN_TAG="<SC-1_VLAN_TAG>"
+SC1_ENCLOSURE="<SC-1_ENCLOSURE_HOSTNAME>"
+SC1_ENCLOSURE_IP1="<SC-1_ENCLOSURE_IP1>"
+SC1_ENCLOSURE_IP2="<SC-1_ENCLOSURE_IP2>"
+SC1_ENCLOSURE_USERNAME="<SC-1_ENCLOSURE_USERNAME>"
+SC1_ENCLOSURE_PASSWORD="<SC-1_ENCLOSURE_PASSWORD>"
+SC1_ILOIP="<SC-1_ILOIP>"
+SC1_ILOUSERNAME="<SC-1_ILOUSERNAME>"
+SC1_ILOPASSWORD="<SC-1_ILOPASSWORD>"
+
+# SC-2
+ipv6_address_pool_sc2_subnet='<SC-2_IPV6_NODE_SUBNET>'
+ipv6_address_pool_sc2_addr='<SC-2_IPV6_NODE_IP>'
+ip_address_pool_sc2_ip='<SC-2_NODE_IP_UNSCORE>'
+ip_address_pool_sc2_subnet='<SC-2_NODE_SUBNET>'
+ip_address_pool_sc2_addr='<SC-2_NODE_IP>'
+ip_address_pool_sc2_gw='<SC-2_NODE_GATEWAY>'
+ip_address_pool_sc2_mac='<SC-2_NODE_MAC>'
+
+#Extra Blade Information for SC2
+SC2_BLADE_SERIAL="<SC-2_SERIAL_NUMBER>"
+SC2_PROFILE="<SC-2_PROFILE_TAG>"
+SC2_VLAN_TAG="<SC-2_VLAN_TAG>"
+SC2_ENCLOSURE="<SC-2_ENCLOSURE_HOSTNAME>"
+SC2_ENCLOSURE_IP1="<SC-2_ENCLOSURE_IP1>"
+SC2_ENCLOSURE_IP2="<SC-2_ENCLOSURE_IP2>"
+SC2_ENCLOSURE_USERNAME="<SC-2_ENCLOSURE_USERNAME>"
+SC2_ENCLOSURE_PASSWORD="<SC-2_ENCLOSURE_PASSWORD>"
+SC2_ILOIP="<SC-2_ILOIP>"
+SC2_ILOUSERNAME="<SC-2_ILOUSERNAME>"
+SC2_ILOPASSWORD="<SC-2_ILOPASSWORD>"
+
+# network ip addresses of the nodes (virtual machines)
+# PL-3
+ipv6_address_pool_pl3_subnet='<PL-3_IPV6_NODE_SUBNET>'
+ipv6_address_pool_pl3_addr='<PL-3_IPV6_NODE_IP>'
+ip_address_pool_pl3_ip='<PL-3_NODE_IP_UNSCORE>'
+ip_address_pool_pl3_subnet='<PL-3_NODE_SUBNET>'
+ip_address_pool_pl3_addr='<PL-3_NODE_IP>'
+ip_address_pool_pl3_gw='<PL-3_NODE_GATEWAY>'
+ip_address_pool_pl3_mac='<PL-3_NODE_MAC>'
+#Extra Blade Information for pl-3
+PL3_BLADE_SERIAL="<PL-3_SERIAL_NUMBER>"
+PL3_PROFILE="<PL-3_PROFILE_TAG>"
+PL3_VLAN_TAG="<PL-3_VLAN_TAG>"
+PL3_ENCLOSURE="<PL-3_ENCLOSURE_HOSTNAME>"
+PL3_ENCLOSURE_IP1="<PL-3_ENCLOSURE_IP1>"
+PL3_ENCLOSURE_IP2="<PL-3_ENCLOSURE_IP2>"
+PL3_ENCLOSURE_USERNAME="<PL-3_ENCLOSURE_USERNAME>"
+PL3_ENCLOSURE_PASSWORD="<PL-3_ENCLOSURE_PASSWORD>"
+PL3_ILOIP="<PL-3_ILOIP>"
+PL3_ILOUSERNAME="<PL-3_ILOUSERNAME>"
+PL3_ILOPASSWORD="<PL-3_ILOPASSWORD>"
+
+# network ip addresses of the nodes (virtual machines)
+# PL-4
+ipv6_address_pool_pl4_subnet='<PL-4_IPV6_NODE_SUBNET>'
+ipv6_address_pool_pl4_addr='<PL-4_IPV6_NODE_IP>'
+ip_address_pool_pl4_ip='<PL-4_NODE_IP_UNSCORE>'
+ip_address_pool_pl4_subnet='<PL-4_NODE_SUBNET>'
+ip_address_pool_pl4_addr='<PL-4_NODE_IP>'
+ip_address_pool_pl4_gw='<PL-4_NODE_GATEWAY>'
+ip_address_pool_pl4_mac='<PL-4_NODE_MAC>'
+#Extra Blade Information for pl-4
+PL4_BLADE_SERIAL="<PL-4_SERIAL_NUMBER>"
+PL4_PROFILE="<PL-4_PROFILE_TAG>"
+PL4_VLAN_TAG="<PL-4_VLAN_TAG>"
+PL4_ENCLOSURE="<PL-4_ENCLOSURE_HOSTNAME>"
+PL4_ENCLOSURE_IP1="<PL-4_ENCLOSURE_IP1>"
+PL4_ENCLOSURE_IP2="<PL-4_ENCLOSURE_IP2>"
+PL4_ENCLOSURE_USERNAME="<PL-4_ENCLOSURE_USERNAME>"
+PL4_ENCLOSURE_PASSWORD="<PL-4_ENCLOSURE_PASSWORD>"
+PL4_ILOIP="<PL-4_ILOIP>"
+PL4_ILOUSERNAME="<PL-4_ILOUSERNAME>"
+PL4_ILOPASSWORD="<PL-4_ILOPASSWORD>"
+
+# network ip addresses of the nodes (virtual machines)
+# PL-5
+ipv6_address_pool_pl5_subnet='<PL-5_IPV6_NODE_SUBNET>'
+ipv6_address_pool_pl5_addr='<PL-5_IPV6_NODE_IP>'
+ip_address_pool_pl5_ip='<PL-5_NODE_IP_UNSCORE>'
+ip_address_pool_pl5_subnet='<PL-5_NODE_SUBNET>'
+ip_address_pool_pl5_addr='<PL-5_NODE_IP>'
+ip_address_pool_pl5_gw='<PL-5_NODE_GATEWAY>'
+ip_address_pool_pl5_mac='<PL-5_NODE_MAC>'
+#Extra Blade Information for pl-5
+PL5_BLADE_SERIAL="<PL-5_SERIAL_NUMBER>"
+PL5_PROFILE="<PL-5_PROFILE_TAG>"
+PL5_VLAN_TAG="<PL-5_VLAN_TAG>"
+PL5_ENCLOSURE="<PL-5_ENCLOSURE_HOSTNAME>"
+PL5_ENCLOSURE_IP1="<PL-5_ENCLOSURE_IP1>"
+PL5_ENCLOSURE_IP2="<PL-5_ENCLOSURE_IP2>"
+PL5_ENCLOSURE_USERNAME="<PL-5_ENCLOSURE_USERNAME>"
+PL5_ENCLOSURE_PASSWORD="<PL-5_ENCLOSURE_PASSWORD>"
+PL5_ILOIP="<PL-5_ILOIP>"
+PL5_ILOUSERNAME="<PL-5_ILOUSERNAME>"
+PL5_ILOPASSWORD="<PL-5_ILOPASSWORD>"
+
+# network ip addresses of the nodes (virtual machines)
+# PL-6
+ipv6_address_pool_pl6_subnet='<PL-6_IPV6_NODE_SUBNET>'
+ipv6_address_pool_pl6_addr='<PL-6_IPV6_NODE_IP>'
+ip_address_pool_pl6_ip='<PL-6_NODE_IP_UNSCORE>'
+ip_address_pool_pl6_subnet='<PL-6_NODE_SUBNET>'
+ip_address_pool_pl6_addr='<PL-6_NODE_IP>'
+ip_address_pool_pl6_gw='<PL-6_NODE_GATEWAY>'
+ip_address_pool_pl6_mac='<PL-6_NODE_MAC>'
+#Extra Blade Information for pl-6
+PL6_BLADE_SERIAL="<PL-6_SERIAL_NUMBER>"
+PL6_PROFILE="<PL-6_PROFILE_TAG>"
+PL6_VLAN_TAG="<PL-6_VLAN_TAG>"
+PL6_ENCLOSURE="<PL-6_ENCLOSURE_HOSTNAME>"
+PL6_ENCLOSURE_IP1="<PL-6_ENCLOSURE_IP1>"
+PL6_ENCLOSURE_IP2="<PL-6_ENCLOSURE_IP2>"
+PL6_ENCLOSURE_USERNAME="<PL-6_ENCLOSURE_USERNAME>"
+PL6_ENCLOSURE_PASSWORD="<PL-6_ENCLOSURE_PASSWORD>"
+PL6_ILOIP="<PL-6_ILOIP>"
+PL6_ILOUSERNAME="<PL-6_ILOUSERNAME>"
+PL6_ILOPASSWORD="<PL-6_ILOPASSWORD>"
+
+#Enclosure IP Addresses
+ENCLOSURE_IP1="<SC-1_ENCLOSURE_IP1>"
+ENCLOSURE_IP2="<SC-1_ENCLOSURE_IP2>"
+ENCLOSURE_USERNAME="<SC-1_ENCLOSURE_USERNAME>"
+ENCLOSURE_PASSWORD="<SC-1_ENCLOSURE_PASSWORD>"
+
+#NAS Details 
+NAS_SERVER_IP="<NAS_IP_ADDRESS>"
+NAS_SYS_ID="<NAS_SYS_ID>"
+NAS_POOL="<NAS_STORAGE_POOL>"
+NAS_PATH_CLUSTER="/vx/<STORAGE_CLS>"
+NAS_PATH_STORADM="/vx/<STORAGE_ADMIN>"
+NAS_PATH_STOROBS="/vx/<STORAGE_OBS>"
+NAS_GATEWAY="<NAS_GATEWAY>"
+NAS_SUBNET="<NAS_SUBNET>"
+NAS_MAC="<NAS_MAC>"
+NAS_MASTER_USERNAME="<NAS_MASTER_USERNAME>"
+NAS_MASTER_PASSWORD="<NAS_MASTER_PASSWORD>"
+NAS_SUPPORT_USERNAME="<NAS_SUPPORT_USERNAME>"
+NAS_SUPPORT_PASSWORD="<NAS_SUPPORT_PASSWORD>"
+
+#Storage Details
+STORAGE_SITE_ID="site1${NAS_SYS_ID}"
+STORAGE_HOSTNAME="<STORAGE_HOSTNAME>"
+STORAGE_IP1="<STORAGE_IPADRESS_1>"
+STORAGE_IP2="<STORAGE_IPADRESS_2>"
+STORAGE_USERNAME="<STORAGE_USERNAME>"
+STORAGE_PASSWORD="<STORAGE_PASSWORD>"
+STORAGE_POOL_ID="<STORAGE_POOL_ID>"
+
+##########################################
+#DO NOT REMOVE THIS LINE
+##########################################
+# LDAP Details
+LDAP="<OAM_Service_Primary_NODE_HOSTNAME>"
+LDAP_IP="<OAM_Service_Primary_NODE_IP>"
+LDAP_HOSTNAME="<OAM_Service_Primary_NODE_HOSTNAME>.<OAM_Service_Primary_NODE_DOMAIN>"
+LDAP_DOMAIN="<SSO_LDAP_DOMAIN>"
+LDAP_PWD="<SSO_LDAP_PASSWORD>"
+
+# OSS Details
+OMSAS="<OMSAS_NODE_HOSTNAME>"
+UAS="<UAS1_NODE_HOSTNAME>"
+PIB_UAS_IP="<UAS1_NODE_IP>"
+PIB_OSS="<SSO_ADMIN_OSS_FS>.<OAM_Service_Primary_NODE_DOMAIN>"
+PIB_PUBLISHED_APP_SUFFIX="<SSO_CITRIX_FARM>"
+ADMIN1_HOSTNAME="<ADMIN1_NODE_HOSTNAME>"
+ADMIN1_NODE_IP="<ADMIN1_NODE_IP>"
+ADMIN1_NODE_DOMAIN="<ADMIN1_NODE_DOMAIN>"
+ADMIN1_NODE_GATEWAY="<ADMIN1_NODE_GATEWAY>"
+ADMIN2_HOSTNAME="<ADMIN2_NODE_HOSTNAME>"
+ADMIN2_NODE_IP="<ADMIN2_NODE_IP>"
+ADMIN2_NODE_DOMAIN="<ADMIN2_NODE_DOMAIN>"
+ADMIN2_NODE_GATEWAY="<ADMIN2_NODE_GATEWAY>"
+OMSAS_HOSTNAME="<OMSAS_NODE_HOSTNAME>"
+OMSAS_NODE_IP="<OMSAS_NODE_IP>"
+OMSAS_NODE_DOMAIN="<OMSAS_NODE_DOMAIN>"
+OMSAS_NODE_GATEWAY="<OMSAS_NODE_GATEWAY>"
+
+APACHE_FQDN="<ip_httpd_su_0_APACHE_FQDN>"
+##########################################
+###DO NOT REMOVE THIS LINE
+##########################################
+
+# Extra parameters added by me
+# VCS Parameters
+vcs_csgvip="<MS_CSG_IP>"
+vcs_csgnic="<MS_CSG_NIC>"
+vcs_lltlinklowpri1="<MS_LLT_LOW_PRI>"
+vcs_lltlink2="<MS_LLT_LINK2>"
+vcs_lltlink1="<MS_LLT_LINK1>"
+vcs_csgnetmask="<MS_CSG_NETMASK>"
+vcs_clusterid="<MS_VCS_NETID>"
+vcs_gconetmask="<MS_GCO_NETMASK>"
+vcs_gconic="<MS_GCO_NIC>"
+vcs_gcovip="<MS_GCO_IP>"
+gco="1"
+
+TOR_REL="<TOR_VERSION>"
+
+ntp_ipaddress="<MS_NODE_NTP_IPADDRESS>"
+
+# JBOSS Clusters
+# MCUI IP/PORT INFORMATION
+MCUI_messaging_group_address="<MCUI_MESSAGING_GROUP_ADDRESS>"
+MCUI_default_multicast="<MCUI_DEFAULT_MCAST_ADDRESS>"
+MCUI_messaging_group_port="<MCUI_MESSAGING_GROUP_PORT>"
+MCUI_jgroups_mping_mcast_addr="<MCUI_GROUP_MPING_ADDRESS>"
+MCUI_jgroups_mping_mcast_port="<MCUI_GROUP_MPING_PORT>"
+MCUI_jgroups_udp_mcast_addr="<MCUI_UDP_MCAST_ADDRESS>"
+MCUI_jgroups_udp_mcast_port="<MCUI_UDP_MCAST_PORT>"
+# FMPMMS IP/PORT INFORMATION
+FMPMMS_messaging_group_address="<FMPMMS_MESSAGING_GROUP_ADDRESS>"
+FMPMMS_default_multicast="<FMPMMS_DEFAULT_MCAST_ADDRESS>"
+FMPMMS_messaging_group_port="<FMPMMS_MESSAGING_GROUP_PORT>"
+FMPMMS_jgroups_mping_mcast_addr="<FMPMMS_GROUP_MPING_ADDRESS>"
+FMPMMS_jgroups_mping_mcast_port="<FMPMMS_GROUP_MPING_PORT>"
+FMPMMS_jgroups_udp_mcast_addr="<FMPMMS_UDP_MCAST_ADDRESS>"
+FMPMMS_jgroups_udp_mcast_port="<FMPMMS_UDP_MCAST_PORT>"
+# SSO IP/PORT INFORMATION
+SSO_messaging_group_address="<SSO_MESSAGING_GROUP_ADDRESS>"
+SSO_default_multicast="<SSO_DEFAULT_MCAST_ADDRESS>"
+SSO_messaging_group_port="<SSO_MESSAGING_GROUP_PORT>"
+SSO_jgroups_mping_mcast_addr="<SSO_GROUP_MPING_ADDRESS>"
+SSO_jgroups_mping_mcast_port="<SSO_GROUP_MPING_PORT>"
+SSO_jgroups_udp_mcast_addr="<SSO_UDP_MCAST_ADDRESS>"
+SSO_jgroups_udp_mcast_port="<SSO_UDP_MCAST_PORT>"
+# FMPMServ IP/PORT INFORMATION
+FMPMServ_messaging_group_address="<FMPMServ_MESSAGING_GROUP_ADDRESS>"
+FMPMServ_default_multicast="<FMPMServ_DEFAULT_MCAST_ADDRESS>"
+FMPMServ_messaging_group_port="<FMPMServ_MESSAGING_GROUP_PORT>"
+FMPMServ_jgroups_mping_mcast_addr="<FMPMServ_GROUP_MPING_ADDRESS>"
+FMPMServ_jgroups_mping_mcast_port="<FMPMServ_GROUP_MPING_PORT>"
+FMPMServ_jgroups_udp_mcast_addr="<FMPMServ_UDP_MCAST_ADDRESS>"
+FMPMServ_jgroups_udp_mcast_port="<FMPMServ_UDP_MCAST_PORT>"
+
+# Service Group unit IP Address
+fmpm_service_unit_0_ip="<ip_FMPMServ_su_0_NODE_IP>"
+fmpm_service_unit_0_subnet="<ip_FMPMServ_su_0_NODE_SUBNET>"
+fmpm_service_unit_0_gateway="<ip_FMPMServ_su_0_NODE_GATEWAY>"
+
+fmpm_service_unit_1_ip="<ip_FMPMServ_su_1_NODE_IP>"
+fmpm_service_unit_1_subnet="<ip_FMPMServ_su_1_NODE_SUBNET>"
+fmpm_service_unit_1_gateway="<ip_FMPMServ_su_1_NODE_GATEWAY>"
+
+mspm_service_unit_0_ip="<ip_MSPM_su_0_NODE_IP>"
+mspm_service_unit_0_subnet="<ip_MSPM_su_0_NODE_SUBNET>"
+mspm_service_unit_0_gateway="<ip_MSPM_su_0_NODE_GATEWAY>"
+
+mspm_service_unit_1_ip="<ip_MSPM_su_1_NODE_IP>"
+mspm_service_unit_1_subnet="<ip_MSPM_su_1_NODE_SUBNET>"
+mspm_service_unit_1_gateway="<ip_MSPM_su_1_NODE_GATEWAY>"
+
+ui_service_unit_0_ip="<ip_UI_su_0_NODE_IP>"
+ui_service_unit_0_subnet="<ip_UI_su_0_NODE_SUBNET>"
+ui_service_unit_0_gateway="<ip_UI_su_0_NODE_GATEWAY>"
+
+ui_service_unit_1_ip="<ip_UI_su_1_NODE_IP>"
+ui_service_unit_1_subnet="<ip_UI_su_1_NODE_SUBNET>"
+ui_service_unit_1_gateway="<ip_UI_su_1_NODE_GATEWAY>"
+
+mspm_add_unit_0_ip="<ip_MSPM_ADD_su_0_NODE_IP>"
+mspm_add_unit_0_subnet="<ip_MSPM_ADD_su_0_NODE_SUBNET>"
+mspm_add_unit_0_gateway="<ip_MSPM_ADD_su_0_NODE_GATEWAY>"
+
+mspm_add_unit_1_ip="<ip_MSPM_ADD_su_1_NODE_IP>"
+mspm_add_unit_1_subnet="<ip_MSPM_ADD_su_1_NODE_SUBNET>"
+mspm_add_unit_1_gateway="<ip_MSPM_ADD_su_1_NODE_GATEWAY>"
+
+msfm_unit_0_ip="<ip_MSFM_su_0_NODE_IP>"
+msfm_unit_0_subnet="<ip_MSFM_su_0_NODE_SUBNET>"
+msfm_unit_0_gateway="<ip_MSFM_su_0_NODE_GATEWAY>"
+
+msfm_unit_1_ip="<ip_MSFM_su_1_NODE_IP>"
+msfm_unit_1_subnet="<ip_MSFM_su_1_NODE_SUBNET>"
+msfm_unit_1_gateway="<ip_MSFM_su_1_NODE_GATEWAY>"
+
+MedCore_unit_0_ip="<ip_MedCore_su_0_NODE_IP>"
+MedCore_unit_0_subnet="<ip_MedCore_su_0_NODE_SUBNET>"
+MedCore_unit_0_gateway="<ip_MedCore_su_0_NODE_GATEWAY>"
+
+MedCore_unit_1_ip="<ip_MedCore_su_1_NODE_IP>"
+MedCore_unit_1_subnet="<ip_MedCore_su_1_NODE_SUBNET>"
+MedCore_unit_1_gateway="<ip_MedCore_su_1_NODE_GATEWAY>"
+
+sso_unit_0_ip="<ip_SSO_su_0_NODE_IP>"
+sso_unit_0_subnet="<ip_SSO_su_0_NODE_SUBNET>"
+sso_unit_0_gateway="<ip_SSO_su_0_NODE_GATEWAY>"
+
+sso_unit_1_ip="<ip_SSO_su_1_NODE_IP>"
+sso_unit_1_subnet="<ip_SSO_su_1_NODE_SUBNET>"
+sso_unit_1_gateway="<ip_SSO_su_1_NODE_GATEWAY>"
+
+httpd_unit_0_ip="<ip_httpd_su_0_NODE_IP>"
+httpd_unit_0_subnet="<ip_httpd_su_0_NODE_SUBNET>"
+httpd_unit_0_gateway="<ip_httpd_su_0_NODE_GATEWAY>"
+
+httpd_unit_1_ip="<ip_httpd_su_1_NODE_IP>"
+httpd_unit_1_subnet="<ip_httpd_su_1_NODE_SUBNET>"
+httpd_unit_1_gateway="<ip_httpd_su_1_NODE_GATEWAY>"
+
+logstash_unit_0_ip="<ip_Logstash_su_0_NODE_IP>"
+logstash_unit_0_subnet="<ip_Logstash_su_0_NODE_SUBNET>"
+logstash_unit_0_gateway="<ip_Logstash_su_0_NODE_GATEWAY>"
+
+logstash_unit_1_ip="<ip_Logstash_su_1_NODE_IP>"
+logstash_unit_1_subnet="<ip_Logstash_su_1_NODE_SUBNET>"
+logstash_unit_1_gateway="<ip_Logstash_su_1_NODE_GATEWAY>"
+
+ssologger_unit_0_ip="<ip_ssologger_su_0_NODE_IP>"
+ssologger_unit_0_subnet="<ip_ssologger_su_0_NODE_SUBNET>"
+ssologger_unit_0_gateway="<ip_ssologger_su_0_NODE_GATEWAY>"
+
+ssologger_unit_1_ip="<ip_ssologger_su_1_NODE_IP>"
+ssologger_unit_1_subnet="<ip_ssologger_su_1_NODE_SUBNET>"
+ssologger_unit_1_gateway="<ip_ssologger_su_1_NODE_GATEWAY>"
+
+FMPMCMServ_unit_0_ip="<ip_FMPMCMServ_su_0_NODE_IP>"
+FMPMCMServ_unit_0_subnet="<ip_FMPMCMServ_su_0_NODE_SUBNET>"
+FMPMCMServ_unit_0_gateway="<ip_FMPMCMServ_su_0_NODE_GATEWAY>"
+
+FMPMCMServ_unit_1_ip="<ip_FMPMCMServ_su_1_NODE_IP>"
+FMPMCMServ_unit_1_subnet="<ip_FMPMCMServ_su_1_NODE_SUBNET>"
+FMPMCMServ_unit_1_gateway="<ip_FMPMCMServ_su_1_NODE_GATEWAY>"
+
+MSCM_unit_0_ip="<ip_MSCM_su_0_NODE_IP>"
+MSCM_unit_0_subnet="<ip_MSCM_su_0_NODE_SUBNET>"
+MSCM_unit_0_gateway="<ip_MSCM_su_0_NODE_GATEWAY>"
+
+MSCM_unit_1_ip="<ip_MSCM_su_1_NODE_IP>"
+MSCM_unit_1_subnet="<ip_MSCM_su_1_NODE_SUBNET>"
+MSCM_unit_1_gateway="<ip_MSCM_su_1_NODE_GATEWAY>"

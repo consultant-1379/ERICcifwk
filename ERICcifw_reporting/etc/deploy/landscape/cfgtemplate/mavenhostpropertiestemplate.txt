@@ -1,0 +1,7 @@
+-Dhost.ms1.ip=<MS_NODE_IP>
+-Dhost.sc1.ip=<SC-1_NODE_IP>
+-Dhost.sc2.ip=<SC-2_NODE_IP>
+-Dhost.sc1.node.PMServ_si_0_jee_instance.ip=<ip_FMPMServ_su_0_NODE_IP>
+-Dhost.sc1.node.PMMed_si_0_jee_instance.ip=<ip_FMPMServ_su_1_NODE_IP>
+-Dhost.sc2.node.PMServ_si_1_jee_instance.ip=<ip_MSPM_ADD_su_0_NODE_IP>
+-Dhost.sc2.node.PMMed_si_1_jee_instance.ip=<ip_MSPM_ADD_su_1_NODE_IP>

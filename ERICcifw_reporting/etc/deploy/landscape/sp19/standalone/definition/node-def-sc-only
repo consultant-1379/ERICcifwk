@@ -1,0 +1,10 @@
+<INCLUDE NODE: SC ::: NOT INCLUDE SC-1 > 
+      <litp:node-def id="<NODE_ID>">
+        <nodetype><NODE_TYPE></nodetype>
+        <Append Here File: source-container-jee-only>
+        <Append Here File: node-def-container-jee-only-<NODE_ID>>
+        <litp:solution-ref id="<NODE_SOLUTION_ID>">
+          <solution-name><NODE_SOLUTION_DEF_NAME></solution-name>
+        </litp:solution-ref>
+      </litp:node-def>
+

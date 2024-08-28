@@ -1,0 +1,17 @@
+<INCLUDE NODE: help >
+  <litp:component-def id="help">
+    <litp:cmw-bundle-def id="pkg">
+      <bundle_name>ERIChelp_CXP9030287-<PACKAGE_VERSION></bundle_name>
+      <bundle_type>rpm</bundle_type>
+      <version>1</version>
+    </litp:cmw-bundle-def>
+    <litp:file-def id="help">
+      <ensure>directory</ensure>
+      <mode>755</mode>
+      <name>dms_help</name>
+      <path>/var/www/html/apps</path>
+      <recurse>true</recurse>
+      <source>/opt/ericsson/com.ericsson.nms.pres.TorHelp/html/apps</source>
+    </litp:file-def>
+  </litp:component-def>
+

@@ -1,0 +1,964 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}KGB-Package Metrics{% endblock %}
+
+{% block content %}
+    <script>
+$(document).ready(function () {
+
+   function clear(){
+      packages_select_box.empty();
+      parents_select_box.empty() ;
+      childs_select_box.empty();
+      drops_select_box.empty();
+      $("#allchilds").prop('checked',false) ;
+      $("#allpackages").prop('checked',false) ;
+      $("#allparents").prop('checked',false) ;
+      $('#packages').removeAttr('disabled');
+      $('#startDate').val('');
+      $('#endDate').val('');
+    }
+
+    function packageselectclear(){
+        packages_select_box.empty() ;
+        $('#packages').hide();
+        $('#loader').show();
+        $('#packages').removeAttr('disabled');
+        $("#packages option[value = 'All']").hide();
+        $('#allpackages').prop('checked', false);
+    }
+
+    var labels_names = [];
+    var labels_select_box = $('#labels');
+    function populate_labels_select(labels){
+        if (!labels){
+            $('#products option').each(function(){
+                product = $(this).val() ;
+                if(product != "All"){
+                    $.ajax({
+                        url: "/" + product + "/getProductLabels/.json/",
+                        dataType: "json",
+                        success: function (json) {
+                            $.each(json.Label, function (i, item) {
+                                if(!(item.name in labels_names)){
+                                    if(item.name !== "None"){
+                                        labels_select_box.append('<option value="' + item.name + '" id="' + item.name + '">' + item.name + '</option>');
+                                        label = item.name
+                                        labels_names.push(label);
+                                    }
+                                }
+                            });
+                            labels_select_box.prop("disabled", false);
+                            $("#labels option:first").attr('selected','selected');
+                            $("#parentLabel").text("Select "  + $('#labels').val() + " from List:");
+                            $("#selectParent").text("Select All "  + $('#labels').val());
+                        },
+
+                        error: function (xhr, textStatus, errorThrown) {
+                            genericDialog("Issue retrieving the {{ product }} Label list: " + (errorThrown ? errorThrown : xhr.status));
+                            return;
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    $('#labels').change(function(){
+        var $this = $(this);
+        $("#parentLabel").text("Select "  + $('#labels').val() + " from List:");
+        $("#selectParent").text("Select All "  + $('#labels').val());
+        $("#childLabel").text("Select from List:");
+        $("#selectChild").text("Select All");
+        clear();
+        var promises = [] ;
+        $('#products option:selected').each(function(i){
+            promises.push(populate_products_select($(this).val()));
+        });
+        $.when.apply($,promises).then(function(json) {
+            $('#products').css({"pointer-events": "auto"});
+        });
+    });
+
+    $('#options').change(function(){
+        clear();
+        $("#products option:selected").prop("selected", false);
+        $("#childLabel").text("Select from List:");
+        $("#selectChild").text("Select All");
+        if ($(this).children('option:selected').val() === "standard") {
+            advancedKGB = false ;
+            $("#componentsDiv").hide() ;
+            $("#labelsDiv").hide() ;
+            return;
+        }
+        else if($(this).children('option:selected').val() === "advanced") {
+            advancedKGB = true ;
+            labels_select_box.empty();
+            $("#componentsDiv").show();
+            $("#labelsDiv").show();
+            populate_labels_select(0);
+            return;
+        }
+     });
+
+    var filteroptionselected = false;
+    var dropfilter = false;
+    $('#filter-options').change(function(){
+          clear();
+          populate_products_select(0);
+          if ($(this).children('option:selected').val() === "drop-option") {
+             $('#droploader').hide();
+             filteroptionselected = true;
+             dropfilter = true;
+             drops_select_box.empty();
+             $("#dateDiv").hide();
+             $("#dropDiv").show();
+             return;
+         }
+         else if($(this).children('option:selected').val() === "date-option") {
+             filteroptionselected = true;
+             dropfilter = false;
+             $("#dropDiv").hide();
+             $("#dateDiv").show();
+             return;
+         }
+    });
+
+    $('#startDate').datetimepicker({
+        format: 'Y-m-d H:i',
+        onShow: function (ct) {
+            if ($('#endDate').val()) {
+                dateTime = $('#endDate').val();
+                dateTime = dateTime.substring(0, 10);
+                dateTime = dateTime.replace(/[-]/g,'/');
+                this.setOptions({
+                    maxDate: dateTime
+                });
+            } else {
+                this.setOptions({
+                    maxDate: '0'
+                });
+            }
+        }
+
+    });
+    $('#endDate').datetimepicker({
+        format: 'Y-m-d H:i',
+        onShow: function (ct) {
+            if ($('#startDate').val()) {
+                dateTime = $('#startDate').val();
+                dateTime = dateTime.substring(0, 10);
+                dateTime = dateTime.replace(/[-]/g,'/');
+                this.setOptions({
+                    minDate: dateTime
+                });
+            } else {
+                this.setOptions({
+                    minDate: '2014/09/10'
+                });
+            }
+            this.setOptions({
+                    maxDate: '0'
+                });
+
+        },
+
+        onChangeDateTime: function (dp, $input) {
+            var enddateinput = $input.val();
+        }
+    });
+
+    var parent_names = [];
+    var parent_child_map = {};
+    var child_names = [];
+    var product_names = [];
+    var package_names = [];
+    var drop_names = [];
+    var product_select_box = $('#products');
+    product_select_box.change(getSelectedProducts);
+    $('#search_button').click(displaySummary);
+    $('#products').click(function() {
+        product_click();
+        product_select_box.prop("disabled", false);
+    });
+
+    $('#parentComponents').click(function() {
+        parent_component_click() ;
+    });
+
+    $('#childComponents').click(function() {
+        if (!dropfilter){
+           child_component_click();
+        }
+        if($('#drops option:selected').length){
+           child_component_drop_packages();
+        }
+    });
+
+    $('#drops').click(function() {
+        if(!advancedKGB){
+           populate_drop_packages();
+        } else {
+           if($('#childComponents option:selected').length){
+                child_component_drop_packages();
+           }
+       }
+    });
+
+
+    $("#allpackages").change(searchAllPackages);
+    $("#allparents").change(selectParentComponents) ;
+    $("#allchilds").change(selectChildComponents) ;
+
+    var parents_select_box = $('#parentComponents') ;
+    var childs_select_box = $('#childComponents') ;
+    var drops_select_box = $('#drops');
+    var packages_select_box = $('#packages');
+
+    var advancedKGB = false ;
+
+    function product_click(){
+        product_select_box.prop("disabled", true);
+        parents_select_box.prop("disabled", false);
+        childs_select_box.prop("disabled", false);
+        $("#allchilds").prop('checked',false);
+        $("#allparents").prop('checked',false);
+        $("#allpackages").prop('checked',false);
+        packages_select_box.empty();
+        if(!filteroptionselected){
+            alert("Please Select Filter Option: 'Drop' or 'Date Range'");
+            populate_products_select(0);
+            return;
+        }
+        if(!advancedKGB && !dropfilter) {
+            $('#loader').show();
+        }
+        if(advancedKGB){
+            $('#parentComponents').hide();
+            $('#parentloader').show();
+        }
+        $('#products').css({"pointer-events": "none"});
+        var promises = []
+        $('#products option:selected').each(function(i){
+            promises.push(populate_products_select($(this).val()));
+        });
+        $.when.apply($,promises).then(function(json) {
+            $('#products').css({"pointer-events": "auto"});
+        });
+    }
+
+    function parent_component_click()
+    {
+        var promises = []
+        childs_select_box.empty() ;
+        child_names = [] ;
+        $('#childComponents').css({"pointer-events": "none"});
+        $('#parentComponents').css({"pointer-events": "none"});
+        $('#parentComponents option:selected').each(function(i){
+            option = $(this).val() ;
+            if(option in parent_child_map) {
+                $("#parentLabel").text("Select "  + $('#labels').val() + " from List:");
+                $("#selectParent").text("Select All "  + $('#labels').val());
+                var listStr = String(parent_child_map[option]) ;
+                var list = listStr.split(",") ;
+                for(var item in list){
+                    if(!(list[item] in child_names)){
+                        if(list[item] != "No Data") {
+                            childs_select_box.append('<option value="'+ list[item] + '" id="' + list[item] + '">' + list[item] + '</option>') ;
+                            child_names.push(list[item]) ;
+                        }
+                    }
+                }
+            }
+            packages_select_box.empty();
+            if (!dropfilter){
+                 promises.push(populate_components_select(option));
+            }
+        });
+        $.when.apply($,promises).then(function(json) {
+            $('#childComponents').css({"pointer-events": "auto"});
+            $('#parentComponents').css({"pointer-events": "auto"});
+        });
+    }
+
+    function child_component_click(){
+        var promises = []
+        packages_select_box.empty() ;
+        $('#loader').show();
+
+        $('#childComponents option:selected').each(function(i){
+            option = $(this).val() ;
+            promises.push(populate_components_select(option));
+        });
+        $.when.apply($,promises).then(function(json) {
+            $('#childComponents').css({"pointer-events": "auto"});
+            $('#parentComponents').css({"pointer-events": "auto"});
+        });
+        $('#parentComponents option:selected').each(function(i){
+            option = $(this).val() ;
+            promises.push(populate_components_select(option));
+        });
+        $.when.apply($,promises).then(function(json) {
+            $('#childComponents').css({"pointer-events": "auto"});
+            $('#parentComponents').css({"pointer-events": "auto"});
+            $('#loader').hide() ;
+        });
+    }
+    function populate_products_select(product) {
+        $('#packages').removeAttr('disabled');
+        $("#allpackages").prop('checked',false);
+        if (!product){
+            product_select_box.empty();
+            packages_select_box.empty();
+            parents_select_box.empty() ;
+            childs_select_box.empty() ;
+
+            return $.ajax({
+                url: "/metrics/allProducts/.json/",
+                dataType: "json",
+                success: function (json) {
+                    package_names = [];
+                    product_select_box.empty();
+                    packages_select_box.empty();
+                    $.each(json.Products, function (i, item) {
+                        product_select_box.append('<option value="' + item.name + '" id="' + item.name + '">' + item.name + '</option>');
+                        product_names.push(item.name);
+
+                    });
+                    product_select_box.prop("disabled", false);
+                    packages_select_box.prop("disabled", false);
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving the product list: " + (errorThrown ? errorThrown : xhr.status));
+                }
+            });
+            } else {
+                parents_select_box.empty();
+                childs_select_box.empty() ;
+                parent_child_map = {} ;
+                var promises = [];
+                if (dropfilter){
+                   promises.push(populate_drops(product));
+                }
+                if (!dropfilter){
+                   if (!$("#packages option[class='"+product+"']").length && advancedKGB == false ){
+                       promises.push(populate_packages_no_components(product)) ;
+                   }
+                }
+                if (!$("#packages option[class='"+product+"']").length && advancedKGB == true){
+                    return $.ajax({
+                        url: "/metrics/GetComponentsFromProducts/",
+                        dataType: "json",
+                        data: {"product": product},
+                        success: function (json) {
+                            packages_select_box.empty();
+                            parent_names = [];
+                            $.each(json.Components, function (i, item) {
+                                if (!$("#components option[id='"+item.element+"']").length) {
+                                    if (item.element == "No Data"){
+                                        parents_select_box.prop("disabled", true);
+                                        childs_select_box.prop("disabled", true);
+                                        parents_select_box.append('<option value="' + "None" + '" id="' + "None" + '">' + "None" + '</option>');
+                                        childs_select_box.append('<option value="' + "None" + '" id="' + "None" + '">' + "None" + '</option>');
+                                        if(!dropfilter){
+                                           $('#loader').show();
+                                           var promises = []
+                                            $('#products option:selected').each(function(i){
+                                                promises.push(populate_packages_no_components($(this).val())) ;
+                                            });
+                                            $.when.apply($,promises).then(function(json) {
+                                                $('#products').css({"pointer-events": "auto"});
+                                            });
+                                        }
+                                    }
+                                    if(item.parent == "None"){
+                                        if(item.label == $('#labels').val())  {
+                                            parents_select_box.append('<option value="' + item.element + '" id="' + item.element + '">' + item.element + '</option>');
+                                            parent_names.push(item.element);
+                                            $('#parentloader').hide();
+                                        }
+                                    }
+                                    else{
+                                        if(item.element != "No Data"){
+                                            if(item.parentLabel == $('#labels').val())  {
+                                                $("#childLabel").text("Select "  + item.label + " from List:");
+                                                $("#selectChild").text("Select All "  + item.label );
+                                            }
+                                            var index = item.parent.indexOf("-> ") + 3  ;
+                                            var parentStr = item.parent.slice(index, item.parent.length) ;
+                                            if(item.parent in parent_child_map){
+                                                parent_child_map[parentStr].push(item.element) ;
+                                            }
+                                            else {
+                                                if(parent_child_map[parentStr]){
+                                                    if(!(item.element in  parent_child_map[parentStr])){
+                                                        parent_child_map[parentStr].push(item.element) ;
+                                                    }
+                                                }
+                                                else{
+                                                    parent_child_map[parentStr] = [item.element] ;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                            $('#parentloader').hide();
+                            $('#parentComponents').show();
+
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            alert("Issue retrieving packages delivered to "+product+": " + (errorThrown ? errorThrown : xhr.status));
+                        }
+                    });
+                }
+                return promises;
+        }
+    }
+   function populate_packages(){
+        packageselectclear();
+        $.ajax({
+                url: "/metrics/AllPackages/.json/",
+                dataType: "json",
+                success: function (json) {
+                    product_select_box.append('<option value="All" id="All">All</option>');
+                    $("#products option[value = 'All']").prop('selected', true);
+                    $('#products option[id="All"]').hide();
+                    package_names = [];
+                    $.each(json.packagesJson, function (i, item) {
+                        packages_select_box.append('<option class="All" value="' + item + '">' + item + '</option>');
+                        package_names.push(item);
+                    });
+                    product_select_box.prop("disabled", false);
+                    packages_select_box.prop("disabled", false);
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving the All Package list: " + (errorThrown ? errorThrown : xhr.status));
+                    }
+        });
+        $('#loader').hide();
+        $('#packages').show();
+    }
+
+
+    function populate_drops(product){
+        $('#drops').hide();
+        $('#droploader').show();
+        drops_select_box.empty();
+        return $.ajax({
+            url: "/dropsInProduct/.json/",
+            dataType: "json",
+            data: {"products": product},
+            success: function (json) {
+                drop_names = [];
+                $.each(json.Drops, function (i, item) {
+                if (!$("#drops option[id='"+item+"']").length) {
+                        drops_select_box.append('<option class="' + product + '" value="' + item + '" id="' + item + '">' + item + '</option>');
+                        drop_names.push(item);
+                    }
+                });
+                $('#droploader').hide();
+                $('#drops').show();
+            },
+
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Issue retrieving drops from "+product+": " + (errorThrown ? errorThrown : xhr.status));
+            }
+        });
+    }
+
+
+   function populate_drop_packages(){
+        packageselectclear();
+        var drops = [];
+        $('#drops option:selected').each(function () {
+             drops.push($(this).text());
+        });
+        return $.ajax({
+                url: "/revisionsReleasedInDrop/.json/",
+                dataType: "json",
+                data: {"drops": drops.toString()},
+                success: function (json) {
+                    package_names = [];
+                    if(!jQuery.isEmptyObject(json.Packages)){
+                      $.each(json.Packages, function (i, item) {
+                        if (!$("#packages option[id='"+item+"']").length) {
+                            packages_select_box.append('<option class="' + item + '" value="' + item + '" id="' + item + '">' + item + '</option>');
+                            package_names.push(item);
+                        }
+                      });
+                   }
+                    $('#loader').hide();
+                    $('#packages').show();
+                },
+
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving the Packages list for drop(s): " + (errorThrown ? errorThrown : xhr.status));
+           }
+        });
+    }
+
+    function child_component_packages_collect(){
+        var component_package_names = [];
+        $('#childComponents option:selected').each(function(i){
+               $.ajax({
+                url: "/metrics/GetPackagesFromComponent",
+                dataType: "json",
+                data: {"component": $(this).text()},
+                success: function (json) {
+                    $.each(json.Packages, function (i, item) {
+                        if (!$("#components option[id='"+item+"']").length) {
+                            if(item != "No Data"){
+                                if(!(item in component_package_names)){
+                                    component_package_names.push(item);
+                                }
+                            }
+                        }
+                    });
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving packages delivered to "+component+": " + (errorThrown ? errorThrown : xhr.status));
+                }
+            });
+        });
+       return component_package_names;
+     }
+
+     function child_component_drop_packages(){
+        packageselectclear();
+        var drops = [];
+        $('#drops option:selected').each(function () {
+             drops.push($(this).text());
+         });
+        var component_package_names = child_component_packages_collect();
+        return $.ajax({
+                url: "/revisionsReleasedInDrop/.json/",
+                dataType: "json",
+                data: {"drops": drops.toString()},
+                success: function (json) {
+                    package_names = [];
+                    if(!jQuery.isEmptyObject(json.Packages)){
+                       $.each(json.Packages, function (i, item) {
+                        if (!$("#packages option[id='"+item+"']").length) {
+                            if (jQuery.inArray(item, component_package_names) != -1){
+                                packages_select_box.append('<option class="' + item + '" value="' + item + '" id="' + item + '">' + item + '</option>');
+                                package_names.push(item);
+                            }
+                        }
+                    });
+                  }
+                   $('#loader').hide();
+                   $('#packages').show();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving the Packages list for drop(s) and child component(s): " + (errorThrown ? errorThrown : xhr.status));
+           }
+        });
+
+    }
+
+    function populate_packages_no_components(product){
+        packageselectclear();
+        return $.ajax({
+            url: "/packagesInProduct/",
+            dataType: "json",
+            data: {"product": product},
+            success: function (json) {
+                $('#loader').hide();
+                $('#packages').show();
+                package_names = [];
+                $.each(json.Packages, function (i, item) {
+                    if (!$("#packages option[id='"+item+"']").length) {
+                        packages_select_box.append('<option class="' + product + '" value="' + item + '" id="' + item + '">' + item + '</option>');
+                        package_names.push(item);
+                    }
+                });
+            },
+
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Issue retrieving packages delivered to "+product+": " + (errorThrown ? errorThrown : xhr.status));
+            }
+        });
+    }
+
+    function populate_components_select(component) {
+        packageselectclear();
+        if (!$("#components option[class='"+component+"']").length && advancedKGB == true){
+            return $.ajax({
+                url: "/metrics/GetPackagesFromComponent",
+                dataType: "json",
+                data: {"component": component},
+                success: function (json) {
+                    package_names = [];
+                    $.each(json.Packages, function (i, item) {
+                        if (!$("#components option[id='"+item+"']").length) {
+                            if(item != "No Data"){
+                                if(!(item in package_names)){
+                                    packages_select_box.append('<option class="' + component + '" value="' + item + '" id="' + item + '">' + item + '</option>');
+                                    package_names.push(item);
+                                }
+                            }
+                        }
+                    });
+                $('#loader').hide();
+                $('#packages').show();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Issue retrieving packages delivered to "+component+": " + (errorThrown ? errorThrown : xhr.status));
+                }
+            });
+        }
+    }
+
+    function getSelectedProducts() {
+        $('#products option:not(:selected)').each(function () {
+            $('#packages .' + $(this).text()).hide();
+            $('#packages .' + $(this).text()).attr('disabled', 'disabled');
+        });
+        $('#products option:selected').each(function () {
+            $('#packages .' + $(this).text()).show();
+            $('#packages .' + $(this).text()).attr('disabled', false);
+        });
+        $('#packages option').prop('selected', false);
+        $('#packages option:enabled').prop('selected', true);
+    }
+
+    function displaySummary() {
+        var finalarr = [];
+        var packagearr = [];
+        var productarr = [];
+        $('#packages option:selected').each(function () {
+             packagearr.push({
+                "name": $(this).text()
+            });
+        });
+
+        $('#products option:selected').each(function () {
+              productarr.push({
+                 "name": $(this).text()
+              });
+        });
+        if (packagearr.length === 0) {
+            alert("Please select a Package from the list or use Select All Packages checkbox");
+            return;
+        }
+        finalarr = packagearr;
+        if (!dropfilter){
+            if (!$('#startDate').val()||!$('#endDate').val()) {
+                 alert("Please select a date range");
+                 return;
+            }
+            var start = ($('#startDate').val()+':00');
+            var end = ($('#endDate').val()+':00');
+            $('div#dynamic').html('<img src = "/static/images/loading.gif" >');
+            doRest(finalarr, start, end);
+            $("#kgbRunsNote").show();
+        }else{
+             var dropsarr = [];
+             $('#drops option:selected').each(function () {
+                 dropsarr.push({
+                 "name": $(this).text()
+               });
+            });
+            $('div#dynamic').html('<img src = "/static/images/loading.gif" >');
+            doDropRest(finalarr, dropsarr);
+            $("#kgbRunsNote").show();
+        }
+    }
+
+
+    function doRest(finalarr, start, end) {
+        $('#search_button').attr('disabled', 'disabled');
+        $.ajax({
+            type: "POST",
+            url: "/metrics/kgbmetrics/",
+            data: {
+                "packageList": JSON.stringify(finalarr),
+                "startTime": start,
+                "endTime": end
+            },
+            success: function (json) {
+                var tester = json;
+                doBuildInfoRequest(tester, start, end);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Could not retrieve query result: " + (errorThrown ? errorThrown : xhr.status));
+            },
+            dataType: "json"
+        });
+    }
+
+
+    function doBuildInfoRequest(tester, start, end) {
+        $.ajax({
+            type: 'POST',
+            url: "/metrics/showKgbMetricData/",
+            dataType: "html",
+            data: {
+                "json": JSON.stringify(tester),
+                "start": JSON.stringify(start),
+                "end": JSON.stringify(end)
+            },
+            success: function (html) {
+                $('div#dynamic').html(html);
+                $('#search_button').attr('disabled', false);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                if (xhr.status !== 0) {
+                    alert("Unable to load summary table: " + (errorThrown ? errorThrown : xhr.status));
+                }
+            }
+        });
+    }
+
+   function doDropRest(finalarr, dropsarr) {
+        $('#search_button').attr('disabled', 'disabled');
+        $.ajax({
+            type: "POST",
+            url: "/metrics/kgbmetrics/",
+            data: {
+                "packageList": JSON.stringify(finalarr),
+                "drops": JSON.stringify(dropsarr)
+            },
+            success: function (json) {
+                var tester = json;
+                doDropBuildInfoRequest(tester, dropsarr);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Could not retrieve query result: " + (errorThrown ? errorThrown : xhr.status));
+            },
+            dataType: "json"
+        });
+    }
+
+
+    function doDropBuildInfoRequest(tester, dropsarr) {
+        $.ajax({
+            type: 'POST',
+            url: "/metrics/showKgbMetricData/",
+            dataType: "html",
+            data: {
+                "json": JSON.stringify(tester),
+                "drops": JSON.stringify(dropsarr)
+            },
+            success: function (html) {
+                $('div#dynamic').html(html);
+                $('#search_button').attr('disabled', false);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                if (xhr.status !== 0) {
+                    alert("Unable to load summary table: " + (errorThrown ? errorThrown : xhr.status));
+                }
+            }
+        });
+    }
+
+
+    function searchAllPackages() {
+        if ($("#allpackages").is(":checked")) {
+             $('#packages').attr('disabled', 'disabled');
+             $('#packages option').prop('selected', true);
+             $("#packages option[value = 'All']").prop('selected', true);
+             $('#packages').change();
+             getSelectedProducts();
+         } else {
+           $('#packages').removeAttr('disabled');
+           $("#packages option[value = 'All']").hide();
+           $("#packages option").prop('selected', false);
+         }
+    }
+
+    function selectParentComponents() {
+        if ($("#allparents").is(':checked')) {
+            $('#allchilds').prop('checked', false);
+            $('#childComponents').removeAttr('disabled');
+            $("#childComponents option[value = 'All']").hide();
+            $('#parentComponents').attr('disabled', 'disabled');
+            $("#parentComponents option").prop('selected', true);
+            $("#parentComponets option[value = 'All']").prop('selected', true);
+            $('#parentComponents').change();
+            parent_component_click() ;
+        } else {
+            if ($("#allchilds").is(':checked')) {
+                $('#childComponents').removeAttr('disabled');
+                $("#childComponents option[value = 'All']").hide();
+                $('#allchilds').prop('checked', false);
+                $("#childComponents option").prop('selected', false);
+            }
+            if ($("#allpackages").is(':checked')) {
+                $('#packages').removeAttr('disabled');
+                $("#packages option[value = 'All']").hide();
+                $('#allpackages').prop('checked', false);
+                $("#packages option").prop('selected', false);
+            }
+            childs_select_box.empty();
+            packages_select_box.empty();
+            $('#parentComponents').removeAttr('disabled');
+            $("#parentComponents option[value = 'All']").hide();
+            $("#parentComponents option").prop('selected', false);
+        }
+    }
+
+    function selectChildComponents() {
+        if ($("#allchilds").is(':checked')) {
+            $('#childComponents').attr('disabled', 'disabled');
+            $("#childComponents option").prop('selected', true);
+            $("#childComponents option[value = 'All']").prop('selected', true);
+            $('#childComponents').change();
+            if (!dropfilter){
+                child_component_click() ;
+            }
+            if($('#drops option:selected').length){
+                child_component_drop_packages();
+            }
+        } else {
+            if ($("#allpackages").is(':checked')) {
+                $('#packages').removeAttr('disabled');
+                $("#packages option[value = 'All']").hide();
+                $('#allpackages').prop('checked', false);
+                $("#packages option").prop('selected', false);
+            }
+            packages_select_box.empty();
+            $('#childComponents').removeAttr('disabled');
+            $("#childComponents option[value = 'All']").hide();
+            $("#childComponents option").prop('selected', false);
+        }
+    }
+
+    populate_products_select(0);
+    $(function() {
+        $("#options").val('standard');
+        $("#allchilds").prop('checked',false);
+        $("#allparents").prop('checked',false);
+        $("#allpackages").prop('checked',false);
+        $('#loader').hide() ;
+        $('#parentloader').hide();
+        $('#droploader').hide();
+        $("#dateDiv").hide();
+        $("#dropDiv").hide();
+        $("#componentsDiv").hide();
+        $("#labelsDiv").hide();
+        $("#kgbRunsNote").hide();
+        $("#filter-options").val('select-option');
+    });
+});
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">KGB Metrics
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/KGB+Metrics" title="KGB Metrics Help" target="_blank">
+            <img src="/static/images/question.png"/>
+        </a>
+    </h2>
+    <div class="generic-sub-title" style = "float:left; display:inline-block; width:100%;">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="well kgb-options">
+                    <label>Select Option:</label>
+                    <br>
+                    <select id="options">
+                       <option value="standard">Standard KGB Metrics</option>
+                       <option value="advanced">Advanced KGB Metrics</option>
+                    </select>
+                    <br>
+                </div>
+            </div>
+            <div id="labelsDiv" class="col-sm-3">
+                <div class="well kgb-options">
+                    <label>Select Label:</label>
+                    <br>
+                    <select id="labels">
+                    </select>
+                    <br>
+                </div>
+            </div>
+            <div id='filter' class="col-sm-3">
+                <div class="well kgb-options">
+                    <label>Select Filter Option:</label>
+                    <br>
+                    <select id="filter-options">
+                        <option value="select-option">-- Select a Filter --</option>
+                        <option value="drop-option">Drop</option>
+                        <option value="date-option">Date Range</option>
+                    </select>
+                    <br>
+                </div>
+            </div>
+            <div id='dateDiv' class="col-sm-3">
+                <div class="well kgb-options">
+                    <label>Select Date Range:</label>
+                    <br>
+                    <div style="overflow: hidden;">
+                        <div style="float: left;">
+                            <input placeholder="Start date" size="14px" name="startDate" id="startDate">
+                        </div>
+                        <div style="float: right;">
+                            <input placeholder="End date" size="14px" name="endDate" id="endDate">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="float:left; display:inline-block; width:100%;">
+            <div id="productDiv" class="well kgb-content">
+                <div>
+                    <br>
+                    <label>Select Product from List:</label>
+                    <br>
+                    <select id="products" multiple style="height:150px; width:90%; margin:10px;">
+                    </select>
+                </div>
+            </div>
+            <div id="componentsDiv">
+                <div class="well kgb-content">
+                    <img id ='parentloader' class="loader-kgb" src = "/static/images/processing.gif" alt="processing">
+                    <label id="selectParent">Select All</label>
+                    <input type="checkbox" id="allparents" name="parentradios"/>
+                    <br>
+                    <label id="parentLabel"></label>
+                    <br>
+                    <select id="parentComponents" size="10" multiple style="height:150px; width: 90%;margin:10px;">
+                    </select>
+                </div>
+                <div class="well kgb-content">
+                    <label id="selectChild">Select All</label>
+                    <input type="checkbox" id="allchilds" name="childradios"/>
+                    <br>
+                    <label id="childLabel">Select from list</label>
+                    <br>
+                    <select id="childComponents" size="10" multiple style="height:150px; width:90%;margin:10px">
+                    </select>
+                </div>
+            </div>
+             <div id="dropDiv" class="well kgb-content">
+                <img id ='droploader' class="loader-kgb" src = "/static/images/processing.gif" alt="processing">
+                <div>
+                    <br>
+                    <label>Select Drop from List:</label>
+                    <br>
+                    <select id="drops" multiple style="height:150px; width:90%; margin:10px;">
+                    </select>
+                </div>
+            </div>
+            <div class="well kgb-content">
+                <img id ='loader' class="loader-kgb" src = "/static/images/processing.gif" alt="processing">
+                <label>Select All Packages</label>
+                <input type="checkbox" id="allpackages" name="packageradios"/>
+                <br>
+                <label for="packages">Select Package from List:</label>
+                <br>
+                <select id="packages" multiple style="height:150px; width:90%; margin:10px"></select>
+            </div>
+            <div style="float:left;margin:10px; width:100%">
+                <input type="button" id="search_button" value="Display Summary"/>
+            </div>
+        </div>
+        <div id='kgbRunsNote' class="generic-text">
+            <b>* Note: Only one (the latest) KGB Run result is recorded against a package version published on CI Portal</b>
+        </div>
+        <div id='dynamic'></div>
+    </div>
+</div>
+{% endblock %}

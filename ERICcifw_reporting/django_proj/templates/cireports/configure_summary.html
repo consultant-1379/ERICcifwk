@@ -1,0 +1,98 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Configure Summary Page{% endblock %}
+{% block content %}
+
+
+<script language="JavaScript">
+$(document).ready(function validate() {
+        $("#clearselections").change(disabletable);
+
+   function disabletable() {
+
+        if ($("#clearselections").is(':checked')) {
+            $('.reldrop_1').attr('disabled', 'disabled');
+            $('.reldrop_2').attr('disabled', 'disabled');
+            $('.reldrop_3').attr('disabled', 'disabled');
+            $('.reldrop_4').attr('disabled', 'disabled');
+            $('.number_1').attr('disabled', 'disabled');
+            $('.number_2').attr('disabled', 'disabled');
+            $('.number_3').attr('disabled', 'disabled');
+            $('.number_4').attr('disabled', 'disabled');
+        }else{
+            $('.reldrop_1').attr('disabled', false);
+            $('.reldrop_2').attr('disabled', false);
+            $('.reldrop_3').attr('disabled', false);
+            $('.reldrop_4').attr('disabled', false);
+            $('.number_1').attr('disabled', false);
+            $('.number_2').attr('disabled', false);
+            $('.number_3').attr('disabled', false);
+            $('.number_4').attr('disabled', false);
+        }
+
+    }
+})
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">
+        {% if allSumData %}
+           Currently selected for the {{ product }} Summary page
+        {% else %}
+           Please add Selections to display in the {{ product }} Product and Product Set Summary page
+        {% endif %}
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Configure+Product+and+Product+Set+Summary" title="Configure Help" target="_blank"><img src="/static/images/question.png"/></a>
+   </h2>
+   <form enctype="multipart/form-data" name="ProductConfigForm" method="post" action="">{% csrf_token %}
+    <table class='general-table'>
+    {% if allList %}
+      {% if allSumData %}
+        {% for item in allSumData %}
+            {% if item.num != 0 %}
+                <b>Release Selected :</b> {{ item.choice }} <b>Latest drops in this Release to Display:</b> {{ item.num }}
+            {% else %}
+                <b>Drop Selected :</b> {{ item.choice }}
+            {% endif %}
+            <br>
+        {% endfor %}
+        <b>Clear selections and revert to displaying the latest four drops for {{product}}:   <input type="checkbox" value="True" name="defbehav" id="clearselections"></b>
+        <br>
+    {% endif %}
+    <br>
+    {% if allSumData %}
+      To edit the selections for the {{ product }} Summary page please choose below
+      <br> <br>
+    {% endif %}
+     <th>Release or Drop</th><th>Number of drops to display in Release</th>
+       {% for count in list %}
+         <tr>
+            <td>
+                <select class= "reldrop_{{count}}" name="{{count}}_reldrop" id=count_reldrop>
+                    <option value="select" selected>---Select---</option>
+                    {%for item in allList%}
+                        <option value="{{ item }}">{{item}}</option>
+                    {%endfor%}
+                </select>
+            </td>
+            <td>
+                <select class= "number_{{count}}" name="{{count }}_number" id=count_number>
+                    <option value="0" selected>---Select---</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </td>
+
+         </tr>
+      {% endfor %}
+    </table>
+    <br>
+    <input name="Submit" type="submit" value="Submit" title="Submit">
+    <a href="/"><input name="Cancel" type="button" value="Cancel"/></a>
+    </form>
+</div>
+{% else %}
+No information found ..
+{% endif %}
+{% endblock %}
+

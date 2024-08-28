@@ -1,0 +1,33 @@
+{% load guardian_tags %}
+{% load setVar %}
+{% block content %}
+{% if clue %}
+    <table class='status-summary'>
+        <tr>
+            <th>Code Review</th>
+            <th>Unit</th>
+            <th>BIT</th>
+            <th>Publish</th>
+        </tr>
+            {% get_obj_perms user for clue.package as "pkg_perms" %}
+            <tr> 
+                <td align=center class="compile"><p align="center"><img id="codeReview" src="/static/images/{{clue.codeReview}}.png" alt="{{clue.codeReview}}" width="40" height="40"></p></td>
+                <td align=center class="compile"><p align="center"><img id="unit" src="/static/images/{{clue.unit}}.png" alt="{{clue.unit}}" width="40" height="40"></p></td>
+                <td align=center class="compile"><p align="center"><img id="acceptance" src="/static/images/{{clue.acceptance}}.png" alt="{{clue.acceptance}}" width="40" height="40"></p></td>
+                <td align=center class="compile"><p align="center"><img id="release" src="/static/images/{{clue.release}}.png" alt="{{clue.release}}" width="40" height="40"></p></td>
+            </tr>
+            <tr> 
+                <td align=center class="compile">{{clue.codeReviewTime}}</td>
+                <td align=center class="compile">{{clue.unitTime}}</td>
+                <td align=center class="compile">{{clue.acceptanceTime}}</td>
+                <td align=center class="compile">{{clue.releaseTime}}</td>
+            </tr>
+        </table>
+{% else %}
+    <table class="package-buildinfo">
+        <tr>
+            <td><p><center>No Information Currently Available</center></p></td>
+        </tr>
+    </table>
+{% endif %}
+{% endblock %}

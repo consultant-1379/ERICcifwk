@@ -1,0 +1,74 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}{{ product }} Component to Package Mapping{% endblock %}
+
+{% block content %}
+<link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+<script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src='/static/componentEntryAAM.js'></script>
+<div id="hidden_product_div" style="display:none">{{ product }}</div>
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title">
+            {{ product }} Artifact Association Management
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Artifact+Association+Management" title="Component Help" target="_blank"><img src="/static/images/question.png"/></a>
+        </h2>
+            <br>
+            <div class="component-delete">
+                <label>Select Option</label>
+                <select id="options">
+                        <option value="add">Add/Edit</option>
+                        <option value="remove">Remove</option>
+                </select>
+            </div>
+            <div class="component-delete">
+                <label>Select Label</label>
+                <select id="labels">
+                </select>
+            </div>
+            <div class="component-delete">
+                <label>Select Package Type</label>
+                <select id="packageType">
+                    <option value="package">Package</option>
+                    <option value="testware">Testware</option>
+                </select>
+            </div>
+        <div class="component-container">
+            <br>
+            <div class="component-content">
+                <label id="parentLabel"></label>
+                <br>
+                <select id="parentComponent" size="5" class="parent-component-box">
+                </select>
+            </div>
+            <div class="component-content">
+                <label id="childLabel"></label>
+                <br>
+                <select id="childComponent" size="5" class="child-component">
+                </select>
+            </div>
+
+            <div class="component-content-packages">
+                <div id ='loader' class="component-packages-box-loader">
+                </div>
+                <label for="packages">Select Package from List:</label>
+                <br>
+                <select id="packages" size="5" multiple class="component-packages-box">
+                </select>
+            </div>
+
+            <br>
+            <div class="component-buttons">
+                <input type="button" id="save_button" value="Submit">
+                <input type="button" id="clear_button" value="Clear">
+            </div>
+            <div id='dynamic' class="generic-text"></div>
+            <div id="dialog-alert" title="Form Alert">
+                 <div id="dialog-alert-textarea"></div>
+            </div>
+            <div id="dialog-confirm" title="Confirm DB Update">
+                <div id="dialog-confirm-textarea"></div>
+            </div>
+        </div>
+        <div id='overview' class="component-overview"><div>
+    </div>
+{% endblock %}

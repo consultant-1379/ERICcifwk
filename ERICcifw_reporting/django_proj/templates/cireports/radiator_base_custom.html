@@ -1,0 +1,44 @@
+{% block content %}
+<html lang="en">
+    <head>
+        <link rel=StyleSheet href="/static/radiator.css" type="text/css" />
+        <link href="/static/radiator/nv.d3.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="/static/d3/d3.v2.js"></script>
+        <script src="/static/nvd3/nv.d3.js"></script>
+        <script src="/static/nvd3/src/utils.js"></script>
+        <script src="/static/nvd3/src/models/axis.js"></script>
+        <script src="/static/nvd3/src/tooltip.js"></script>
+        <script src="/static/nvd3/src/models/legend.js"></script>
+        <script src="/static/nvd3/src/models/axis.js"></script>
+        <script src="/static/nvd3/src/models/scatter.js"></script>
+        <script src="/static/nvd3/src/models/pie.js"></script>
+        <script src="/static/nvd3/src/models/pieChart.js"></script>
+        <script src="/static/nvd3/src/models/multiBar.js"></script>
+        <script src="/static/nvd3/src/models/multiBarChart.js"></script>
+        <script src="/static/nvd3/src/models/stackedArea.js"></script>
+        <script src="/static/nvd3/src/models/stackedAreaChart.js"></script>
+        <script type="text/javascript" src="/static/radiator/radiator.js"></script>
+    </head>
+    <body>
+        <div id="wrapper"> <!-- div to center the view -->
+            <div id="title">
+                <div id="text-container">
+                    &nbsp;
+                </div>
+                <div id="logo-container">
+                    <img src="/static/images/econ.svg" />
+                </div>
+            </div>
+            <div id="content">
+                <div class="element" id="content-view">
+                    <script type="text/javascript">
+                        window.onload = function() {
+                            rotateCustomWidgets("#content-view", "{{ customView }}");
+                        }
+                        </script>
+                </div>
+            </div>
+        </div> <!-- wrapper -->
+    </body>
+</html>
+{% endblock %}

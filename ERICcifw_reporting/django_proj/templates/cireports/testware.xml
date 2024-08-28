@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+{% load replaceDot %}
+
+{% if testwareArtifacts %}
+<latest-testware>
+    {% for artifact in testwareArtifacts %}
+    <testwareArtifact>
+    <groupId>{{ artifact.groupId }}</groupId>
+    <artifactId>{{ artifact.artifactId }}</artifactId>
+    <version>{{ artifact.version }}</version>
+    <dateCreated>{{ artifact.dateCreated }}</dateCreated>
+    <testPom>
+    {% if artifact.armRepo != None %}{{nexusUrl}}/{{ artifact.armRepo }}{% else %}{{nexusUrlPublic}}{% endif %}/{{ artifact.executionGroupId|replaceDot }}/{{ artifact.executionArtifactId }}/{{ artifact.executionVersion }}/{{ artifact.executionArtifactId }}-{{ artifact.executionVersion }}.pom
+</testPom>
+    </testwareArtifact>
+    {% endfor %}
+</latest-testware>
+{% else %}
+    <tr><td><p>No testware found <p></td></tr>
+{% endif %}

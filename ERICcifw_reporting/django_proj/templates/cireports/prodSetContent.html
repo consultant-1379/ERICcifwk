@@ -1,0 +1,173 @@
+{% extends "base_newlookandfeel.html" %}
+{% block content %}
+   <script type="text/javascript">
+            (function($) {
+             var timeout = 60000;
+             $(document).ready(function() {
+                 function doCDBInfoRequest() {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/productsetcdbstatus/{{ drop }}/{{ productSetVersion }}/?prodSetRelNum={{ productSetNumber }}",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table.drop-cdbs').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                            $('table.drop-cdbs').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                        });
+                 }
+                   doCDBInfoRequest();
+                 });
+            })(jQuery);
+            $(function() {
+             $("#accordion_deploy_mapping").accordion({
+                 collapsible:true,
+                 active:false,
+                 heightStyle: "content"
+             });
+        });
+   </script>
+        <div class="general-container">
+            <h2 class="generalPageNewLook-title">Integrated, vENM & VIO Product Set Content <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+Set+Drop" title="Product Set Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        {% if not message %}
+        <div class="layout-bar">
+            <a href="/{{ productSet }}/dropMedia/{{ drop }}">Drop:{{ drop }}</a> |
+            <a href="/{{ productSet }}/historicalContent/{{ drop }}">Historical Versions</a> |
+            <a href="/{{ productSet }}/{{ drop }}/setCautionStatus/{{ productSetVersion }}/'productSet'/?artifactId={{ productSetNumber }}&groupId='na'">Set Caution Status</a> |
+            {% if productSet == 'ENM' %}
+            <a href="/api/getReleaseNote/{{ productSet }}/{{ productSetVersion }}/?format=json" target="_blank">Generate MRRN</a>
+            {% endif %}
+        </div>
+        {% if inactiveMedia %}
+          <br>
+          <div class="inactive_media">
+             Media Artifact version(s) in this Product Set version is no longer available to download from Nexus
+          </div>
+        {% endif %}
+        <br>
+        <table class="general-table" style="width:30%;">
+            <tr>
+                <td width="50%"><b>Number:</b></td><td>{{ productSetNumber }}</td>
+            </tr>
+            <tr>
+                <td width="50%"><b>Version:</b></td><td>{{ productSetVersion }}</td>
+            </tr>
+            {% if cnProductSetVersion %}
+            <tr>
+                <td width="50%"><b>cENM PS Version:</b></td><td><a href="/cloudnative/getCloudNativeProductSetContent/{{ drop }}/{{ cnProductSetVersion.product_set_version }}/">{{ cnProductSetVersion.product_set_version }}</a></td>
+            </tr>
+            {% endif %}
+        </table>
+        <br>
+        <div class="sub-title"><b>Current Status</b></div>
+        <br>
+            <table class="drop-cdbs status-summary">
+                <tr><td> Loading Data ... </td></tr>
+            </table>
+        {% if deploymentUtils %}
+         <div id="accordion">
+            <h2>Deployment Utilities</h2>
+            <div>
+                <table class="general-table">
+                   {% for item in deploymentUtils %}
+                      <tr>
+                        {% if item.utility_version__utility_label %}
+                            <th>{{ item.utility_version__utility_label }}</th>
+                        {% else %}
+                            <th>{{ item.utility_version__utility_name__utility }}</th>
+                        {% endif %}
+                           <td>{{ item.utility_version__utility_version }}</td>
+                      </tr>
+                   {% endfor %}
+                </table>
+            </div>
+        </div>
+        <br>
+       {% endif %}
+       {% if deployMappings %}
+         <div id="accordion_deploy_mapping">
+            <h2>Auto Deployment Mappings</h2>
+            <div>
+                <table class="general-table">
+                    <tr>
+                       <th>Name</th>
+                       <th>Version</th>
+                       <th>Deploy Type</th>
+                    </tr>
+                    {% for item in deployMappings %}
+                      <tr>
+                         <td>{{ item.mediaArtifactVersion__mediaArtifact__name }}</td>
+                         <td>{{ item.mediaArtifactVersion__version }}</td>
+                         <td>{{ item.mediaArtifactVersion__mediaArtifact__deployType__type }}</td>
+                      </tr>
+                   {% endfor %}
+                </table>
+            </div>
+        </div>
+        <br>
+       {% endif %}
+       {% if contents %}
+       <table class="general-table">
+          <br>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Number</th>
+                    <th>Version</th>
+                    <th>Type</th>
+                    <th>RState</th>
+                    <th>Category</th>
+                    <th>Build Date</th>
+                    <th>Built For</th>
+                    <th>Delivered to</th>
+                    <th>Download</th>
+                    <th>Status</th>
+            </tr>
+            </thead>
+            {% for item in contents %}
+            <tr>
+                <td><a href="/{{ item.mediaArtifactVersion.drop.release.product.name }}/{{ item.mediaArtifactVersion.drop.name }}/media/">{{ item.mediaArtifactVersion.mediaArtifact.name }}</a></td>
+                <td>{{ item.mediaArtifactVersion.mediaArtifact.number }}</td>
+                <td><a href="/{{ item.mediaArtifactVersion.drop.release.product.name }}/{{ item.mediaArtifactVersion.drop.name }}/mediaContent/{{ item.mediaArtifactVersion.mediaArtifact.name }}/{{ item.mediaArtifactVersion.version }}">{{item.mediaArtifactVersion.version }}</a></td>
+                <td>{{ item.mediaArtifactVersion.mediaArtifact.mediaType }}</td>
+                <td>{{ item.mediaArtifactVersion.getRState }}</td>
+                <td>{{ item.mediaArtifactVersion.mediaArtifact.category.name }}</td>
+                <td>{{ item.mediaArtifactVersion.build_date }}</td>
+                <td>{{ item.mediaArtifactVersion.drop.name }}</td>
+                <td>{{ item.productSetVersion.drop.name }}</td>
+                <td>
+                   {% if item.mediaArtifactVersion.active == 1 %}
+                      <a href="{{item.mediaArtifactVersion.getHubIsoUrl}}/{{ item.mediaArtifactVersion.mediaArtifact.name}}/{{ item.mediaArtifactVersion.version }}/{{item.mediaArtifactVersion.mediaArtifact.name}}-{{ item.mediaArtifactVersion.version  }}.{{ item.mediaArtifactVersion.mediaArtifact.mediaType }}">E2C</a>
+                      {% if item.mediaArtifactVersion.drop.release.product.name in athloneProxyProducts %}
+                         {% if item.mediaArtifactVersion.drop.release.product.name == "TOR" or item.mediaArtifactVersion.drop.release.product.name == "ENM" %}
+                         | <a href="{{enmLocalNexus}}/{{item.mediaArtifactVersion.getGroupIdForUrl}}/{{item.mediaArtifactVersion.mediaArtifact.name}}/{{item.mediaArtifactVersion.version}}/{{item.mediaArtifactVersion.mediaArtifact.name}}-{{item.mediaArtifactVersion.version}}.{{item.mediaArtifactVersion.mediaArtifact.mediaType }}">Athlone Proxy</a>
+                         {% else %}
+                         | <a href="{{item.mediaArtifactVersion.getLocalIsoUrl}}/{{item.mediaArtifactVersion.mediaArtifact.name}}/{{item.mediaArtifactVersion.version}}/{{item.mediaArtifactVersion.mediaArtifact.name}}-{{item.mediaArtifactVersion.version}}.{{item.mediaArtifactVersion.mediaArtifact.mediaType }}">Athlone Proxy</a>
+                         {% endif %}
+                      {% endif %}
+                   {% else %}
+                      <b>No longer available</b>
+                   {% endif %}
+               </td>
+                <td align=center class="compile"><p align="center"><img src="/static/images/{{item.status}}.png" id="{{item.status}}" alt="{{item.status}}" width="40" height="40"></p></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div id="generic-sub-title">
+            <br>No Information in Database for {{ productSetVersion }}
+        </div>
+        {% endif %}
+
+{% else %}
+        <div id="generic-sub-title">
+            <br><br>{{ message }}
+        </div>
+{% endif %}
+</div>
+{% endblock %}

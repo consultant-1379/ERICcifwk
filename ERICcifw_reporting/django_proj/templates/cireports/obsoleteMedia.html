@@ -1,0 +1,38 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Obsolete Media Artifact Version Confirmation{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(link) {
+            window.location = link;
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">Obsolete Media Artifact Version Confirmation</h2>
+    <table class="general-table" style="width: 40%">
+        <tr>
+            <td> <b>Media Artifact:</b></td><td> {{ mediaArt }} </td>
+        </tr>
+        <tr>
+            <td> <b>Version:</b></td><td>{{ version }} </td>
+        </tr>
+        <tr>
+            <td> <b>Drop:</b></td><td> {{ drop }} </td>
+        </tr>
+        <tr>
+            <td> <b>Product Set:</b></td><td> {{ productSet }} </td>
+        </tr>
+                <form enctype="multipart/form-data" name="obsoleteform" method="post" action="/{{ productSet }}/{{ drop }}/obsoleteMediaVersion/">{% csrf_token %}
+                    <input type="hidden" name="id" value='{{ id }}'>
+                    <input type="hidden" name="mediaArtifact" value='{{ mediaArt }}'>
+                    <input type="hidden" name="version" value='{{ version }}'>
+                    <input type="hidden" name="productSetRelease" value='{{ prodSetRel }}'>
+                    <tr><td><b>Email:  </b></td><td><input name="email" ></input></td></tr>
+                    <tr><td><b>Reason: </b></td><td><textarea type="text" style="width: 200px height: 200px" name ="reason" value =''></textarea></td></tr>
+                    <tr><td colspan=2><input type="submit" value="Obsolete" title="Obsolete"></input>
+                        <input type="button" value="Cancel" onClick="checkAction('/{{ productSet }}/dropMedia/{{ drop }}/')" title="Cancel"></input></td></tr>
+                </form>
+   </table>
+
+</div>
+{% endblock %}

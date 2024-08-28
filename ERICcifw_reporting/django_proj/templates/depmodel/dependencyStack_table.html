@@ -1,0 +1,44 @@
+{% extends "cireports/base.html" %}
+    {% block content %}
+            <div id="generic-title">
+                <div id="text-container">{{ artifact }} Stacked Artifact Dependencies <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Dependency+Modelling+and+Management" title="Artifact Dependencies Help" target="_blank"><img src="/static/images/question.png"/></a></div>
+            </div>
+
+    {% if doesNotExistFlag == "doesNotExist" %}
+        <div id="delivery-form-text">
+            <br>
+            Sorry there are no Dependency Items associated with this Artifact {{ artifact }}
+        </div>
+
+    {% else %}
+        <div class='my-legend-Stack'>
+            <div class='legend-scale'>
+                <div class='legend-scale'>
+                    <ul class='legend-labels'>
+                        <li><span style='background:#d62728;'></span>Artifacts that I depend on</li>
+                        <!-- li><span style='background:#2ca02c;'></span>Reason I Depend on You, Internal Build Dependency</li-->
+                        <li><span style='background:#0000FF;'></span>I Depend on You, External(3PP) Dependency</li>
+                    </ul>
+              </div>
+            </div>
+        </div>
+
+        <div id="canvas">
+        </div>
+        <script type="text/javascript" src="/static/d3.v3.min.js"></script>
+        <script type="text/javascript">
+            var links = [
+              {% for depArtifact in artifactNameList %}
+                {source: "{{ artifact }}", target: "{{ depArtifact }}", type: "RPMDependency"},
+              {% endfor %}
+              //{% for artifactName,depArtifact in artifactBuildDict.items %}
+              //  {source: "{{ artifactName }}", target: "{{ depArtifact }}" , type: "BuildDependency"},
+              //{% endfor %}
+              {% for artifactThirdParty in artifactThirdPartyList %}
+                {source: "{{ artifact }}", target: "{{ artifactThirdParty }}", type: "ThirdPPDependency"},
+              {% endfor %}
+            ];
+        </script>
+        <script type="text/javascript" src="/static/forcedDirectionalChartStack.js"></script>
+    {% endif %}
+{% endblock %}

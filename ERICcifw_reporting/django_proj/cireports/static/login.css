@@ -1,0 +1,156 @@
+@font-face {
+    font-family: EricssonCapitalTT;
+    src: url('/static/fonts/EricssonCapitalTT.ttf') format('truetype');
+}
+
+#container {
+    position: absolute;
+    height: 200px;
+    width: 600px;
+    margin: -100px 0 0 -200px;
+    top: 50%;
+    left: 45%;
+}
+
+.login {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    width: 600px;
+    height: 400px;
+    padding: 20px;
+    background-color: #E9E9E9;
+    min-height: 350px;
+    box-shadow: #999 0 1px 3px;
+    border-radius: 10px;
+
+}
+
+.login-inner {
+    min-height: 350px;
+}
+.login-inner {
+    position: relative;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    padding-left: 2px;
+}
+
+
+.login-ericsson-logo {
+    background: url('/static/images/elogo.png') 30px 20px no-repeat;
+    height: 100px;
+    width: 100%;
+}
+
+.login-title {
+    vertical-align: middle;
+    font-family: EricssonCapitalTT, Arial, sans-serif;
+    font-weight: normal;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    line-height: 2.5rem;
+    color: #333;
+    margin-left: 25px;
+    margin-bottom: 20px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: -webkit-linear-gradient(left, #a2c517 10%, #009046 30%, #0082b6 50%, #151f77 70%, #db0050 100%);
+    background-image: -webkit-gradient(linear, left top, right top, color-stop(0.1, #a2c517), color-stop(0.3, #009046), color-stop(0.5, #0082b6), color-stop(0.7, #151f77), color-stop(1, #db0050));
+    background-image: linear-gradient(left, #a2c517 10%, #009046 30%, #0082b6 50%, #151f77 70%, #db0050 100%);
+}
+
+form {
+    margin-right: 20px;
+    padding: 0;
+    width: 95%;
+}
+
+form label {
+    font-weight: normal;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 10px;
+    padding-right: 10px;
+    line-height: 26px;
+}
+
+form input {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: left;
+    font-size: 0.8rem;
+    width: 140px;
+    font-family: Arial, Helvetica, sans-serif;
+    height: 1.8rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #b3b3b3;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 0 0 #cccccc;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    vertical-align: middle;
+}
+
+#login-submit {
+    left: 75%;
+    background-image: url('/static/images/ArrowRightSmall_black_16px.svg');
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.6rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #ffffff;
+    width: 40px;
+    height: 1.4rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #b3b3b3;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 0 0 #cccccc;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+}
+
+#login-submit:hover  {
+    background: #d3d3d3 url('/static/images/ArrowRightSmall_black_16px.svg') no-repeat center;
+}
+
+#login-failure {
+    font-family: Arial, Helvetica, sans-serif;
+    position: relative;
+    text-align: center;
+    margin: auto;
+    width: 450px;
+    white-space: nowrap;
+    pointer-events: auto;
+    border: 1px solid;
+    border-radius: 3px;
+    background-color: #fce9e8;
+    border-color: #ee7a75;
+    color: #c70000;
+    padding: 3px;
+    margin: 5px;
+    left:10%;
+}
+

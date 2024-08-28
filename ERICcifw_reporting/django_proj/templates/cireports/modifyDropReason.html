@@ -1,0 +1,53 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+{% block title %}{{ product.name }} Drop {{ drop.name }} Current Information {% endblock %}
+{% block content %}
+<script type="text/javascript">
+    $(document).ready(function () {
+                    $("#limitedReason").val('{{ dropActivity.limitedReason }}');
+
+                    });
+
+    function validateForm() {
+        var y = document.forms["ModifyDropForm"]["reason"].value;
+        if (y == null || y == "") {
+            alert("The reason for modifying this drop must be completed");
+            return false;
+        }
+    }
+</script>
+  <div class="general-container">
+         <h2 class="generalPageNewLook-title">Modify Reason for Drop Activity <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Opening,+Closing+and+Limiting+Drops" title="Drop Info" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <div style="width:250px" >
+        <form enctype="multipart/form-data" name="ModifyDropForm" onsubmit="return validateForm()" method="post">{% csrf_token %}
+        <table class='general-table'>
+        <tr>
+            <th colspan="2">Edit Reason</th>
+        </tr>
+        <tr>
+                <td>
+                    <input type="text" name="reason" size="55" value="{{ dropActivity.desc }}">
+                </td>
+               <td>
+                    {% if dropActivity.action == "limited" %}
+                        <select id="limitedReason" name="limitedreason" selected="{{ dropActivity.limitedReason }}">
+                        {% for reason in limitedReasons %}
+                            <option value="{{reason}}" > {{reason}}</option>
+                        {% endfor %}
+                    {% endif %}
+                 </select>
+
+             </td>
+         </tr>
+          <tr>
+              <td colspan="2">
+                  <input name="Save" type="submit" value="Save" title="Save">
+                  <input name="Back" type="button" value="Back" onclick="history.go(-1);">
+              </td>
+         </tr>
+        </table>
+      </form>
+    </div>
+   </div>
+ {% endblock %}
+{% endif %}

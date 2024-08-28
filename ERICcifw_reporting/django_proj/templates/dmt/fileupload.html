@@ -1,0 +1,49 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %} {% endblock %}
+
+{% block content %}
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Pre-Commit Staging Area
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Pre+Commit+Staging+Area" title="Auto-Deployment Explained" target="_blank"><img src="/static/images/question.png"/></a>
+
+</h2>
+{% if fileName %}
+ <div>File uploaded Successfully - Link: <a href="{{uploadUrl}}/{{ dateTimeNow }}/{{fileName}}">{{uploadUrl}}/{{ dateTimeNow }}/{{fileName}}</a>
+ </div>
+ {% endif %}
+<div>
+    <form method='POST' action='/dmt/uploadSnapshot/' enctype="multipart/form-data">
+        {% csrf_token %}
+        <h3>Please select file to upload: </h3>
+        <input type="file" name="file" size="40"><br>
+        <input type="submit" value="Upload" title="Upload File" onclick="$('body').addClass('loading');">
+        <br>
+    </form>
+</div>
+<div class="generic-text">
+    <table class="general-table">
+        <tr>
+            <th>Content of Temporary Upload Area -- Files older than 21 days will be removed</th>
+        </tr>
+        {% if dirList %}
+            {% for dir in dirList %}
+                <tr>
+                    <td>
+                        <a href="/static/tmpUploadSnapshot/{{ dir }}">{{ dir }}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td>
+                    No File(s) Uploaded
+                </td>
+            </tr>
+
+        {% endif %}
+    </table>
+</div>
+<div class="modal"></div>
+{% endblock %}

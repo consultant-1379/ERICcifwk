@@ -1,0 +1,42 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} Docker Images {% endblock %}
+{% block content %}
+<!--script type="text/javascript" src='/static/dockerImages.js'></script-->
+<!--<script>-->
+        <!--function checkAction(link) {-->
+            <!--window.location = link;-->
+        <!--}-->
+
+<!--</script>-->
+<script src="/static/commonFunctions.js"></script>
+<script type="text/javascript">
+    $(document).ready(function()
+    {
+        $(".tablesort").tablesorter({widgets: ['zebra']});
+    });
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Docker Images
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Fast+Commit" title="Fast Commit Info"
+               target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <table class="general-table">
+        {% if images %}
+        <thead>
+            <tr>
+                <th>Image</th>
+            </tr>
+        </thead>
+        {% for image in images %}
+            <tr>
+                <td align="left">
+                    <a href="/dockerimages/{{ image.name }}/">{{ image.name }}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No Data Found!</p>
+    {% endif %}
+</div>
+{% endblock %}

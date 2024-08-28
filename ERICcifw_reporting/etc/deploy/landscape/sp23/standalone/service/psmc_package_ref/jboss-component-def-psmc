@@ -1,0 +1,9 @@
+<INCLUDE NODE: psmc >
+  <litp:component-def id="psmc">
+    <litp:cmw-bundle-def id="pkg">
+      <bundle_name>ERICpsmc_CXP9030290-<PACKAGE_VERSION></bundle_name>
+      <bundle_type>rpm</bundle_type>
+      <version>1</version>
+    </litp:cmw-bundle-def>
+  </litp:component-def>
+

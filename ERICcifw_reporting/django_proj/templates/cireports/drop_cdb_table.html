@@ -1,0 +1,46 @@
+{% load guardian_tags %}
+{% load setVar %}
+{% block content %}
+{% if cdbs %}
+         <table class="drop-cdbs status-summary">
+            <tr>
+                {% for cdb in cdbs %}
+                <td>
+                    <p align="center">
+                    <b>{{ cdb.cdb_type_name }}</b>
+                    <br>
+                    <br>
+                    {% if cdb.test_report_link %}
+                        <a class="img" href="{{ cdb.test_report_link }}">
+                    {% endif %}
+                    <img src="/static/images/{{cdb.status}}.png" alt="{{cdb.status}}" width="40" height="40">
+                    {% if cdb.test_report_link %}
+                        </a>
+                    {% endif %}
+                    <br>
+                    <br>
+                    {% if cdb.started_date %}
+                        Started: {{ cdb.started_date }}
+                        <br>
+                    {% endif %}
+                    {% if cdb.ended_date %}
+                        {% if cdb.status == 'caution' or cdb.status == 'passed_manual' %}
+                        Since: 
+                        {% else %}
+                        Finished: 
+                        {% endif %}
+                        {{ cdb.ended_date }}
+                    {% endif %}
+                    </p>
+                </td>
+                {% endfor %}
+            </tr>
+        </table>
+    {% else %}
+        <table class="drop-cdbs">
+            <tr>
+                <td><p><center>No status information currently found</center></p></td>
+            </tr>
+        </table>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,46 @@
+#!/bin/bash -a
+#
+# Deployment script for AVS REST service
+#
+
+#
+# usage:
+# Print out the usage for this script
+#
+usage() {
+    $_CAT <<EOF
+    USAGE: $0 <avs-rest version>
+        deploy the provided version of the AVS REST service to the avs-tomcat instance
+EOF
+    exit 1
+}
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+[ "$#" -eq 1 ] || usage
+AVS_REST_VER=$1
+
+DL_URL=https://arm1s11-eiffel004.eiffel.gic.ericsson.se:8443/nexus/service/local/repositories/releases/content/com/ericsson/cifwk/avs-rest-service
+FULL_URL=${DL_URL}/${AVS_REST_VER}/avs-rest-service-${AVS_REST_VER}.war
+OPFILE=/tmp/avs-rest-service-${AVS_REST_VER}.war
+
+AVS_TOMCAT=${BASEDIR}/etc/init.d/avs-tomcat
+log "Downloading war file"
+# retrieve the requested file
+wget -O ${OPFILE} ${FULL_URL} || error "Could not retrieve file"
+log "stopping tomcat service"
+# stop the running service
+${AVS_TOMCAT} stop || error "Could not stop tomcat service"
+log "removing old war files"
+# remove the existing war file
+rm -rf /var/cifwk/avs/webapps/avs-rest-service*
+log "deploying new war file"
+# copy in the new one
+mv ${OPFILE} /var/cifwk/avs/webapps/avs-rest-service.war || error "Could not deploy war file"
+log "starting tomcat again"
+# restart the service
+${AVS_TOMCAT} start || error "Could not restart tomcat"

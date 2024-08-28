@@ -1,0 +1,40 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}CIFWK Excellence Model Question Data{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(msg, link) {
+        var go = confirm(msg);
+        if (go == true) {
+            window.location = link;
+        }
+    }
+</script>
+
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Question Information
+        <a class="img" href="/excellence/addQuestion/" title="Add Question"><img src="/static/images/create.png"/></a>
+    </h2>
+    <br>
+    <table class="general-table">
+        {% if questions %}
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Category And Version</th>
+                    <th>Enabled?</th>
+                    <th>Low Level</th>
+                </tr>
+            </thead>
+            {% for question in questions %}
+                <tr>
+                    <td>{{ question.question }}</td>
+                    <td>{{ question.category }}</td>
+                    <td>{{ question.enable }}</td>
+                    <td>{{ question.low_level }}</td>
+                </tr>
+                {% endfor %}
+        {% endif %}
+    </table>
+</div>
+{% endblock %}

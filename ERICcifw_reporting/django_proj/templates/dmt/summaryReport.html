@@ -1,0 +1,39 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Summary Report{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/jQueryUI/jquery-ui.css">
+<script src="/static/jQueryUI/jquery-ui.js"></script>
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Summary Report for Deployments Updated<a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Updated+Deployments+Reports" title="Deployment Summary Report Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+    <div class="layout-bar"><a href="/dmt/deploymentsSummaryReports/">Return To Summary Reports</a></div>
+    <h3><b>Date:</b> {{report.createdDate }}<br><b>Deployment Description Version:</b> {{report.dd_version__version}}</h3>
+    <br>
+    {% if deploymentsReport %}
+       <div id="accordion">
+       {% for deployment in deploymentsReport %}
+       <h2 {% if deployment.status %}
+           class="update_deployment_{{deployment.status}}"
+           {% endif %}
+           >{{deployment.cluster__name}} - ID: {{deployment.cluster__id}}  Updated at {{deployment.createdDate }} - DD: {{deployment.deployment_description__name}}</h2>
+            <div>
+                <div class="layout-bar"><a href="/dmt/clusters/{{ deployment.cluster__id }}/">Go To Deployment</a></div>
+                <table class="general-table">
+                    <tr>
+                        <th>Result</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            {% autoescape off %}
+                            {{ deployment.log }}
+                            {% endautoescape %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+      </div> 
+    {% else %}
+        <span>No Deployments Report Found</span>
+    {% endif %}
+</div>
+{% endblock %}

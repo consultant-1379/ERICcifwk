@@ -1,0 +1,69 @@
+{% extends "base_newlookandfeel.html" %}
+{% load setVar %}
+{% block content %}
+    <div class="general-container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">Product Set Content <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Product+Sets" title="Product Set Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        {% if not message %}
+        <table class="general-table" style="width: 100%;">
+            <thead>
+            <tr>
+                <th>Version</th>
+                <th>Integrated, vENM & VIO Working Baseline</th>
+                {% if inactiveMedia %}
+                <th>Contains Media Artifact(s)</th>
+                {% endif %}
+                {% if allCNVersions %}
+                <th>cENM Version</th>
+                <th>cENM Working Baseline</th>
+                {% endif %}
+            </tr>
+            </thead>
+            {% for item in allVersions %}
+            <tr>
+                <td><a href="/{{ productSet }}/content/{{ drop.name }}/{{ item.version }}">{{ item.version }}</a></td>
+                {% if item.current_status|length >= 1 %}
+                    {% set overallWeigthedStatus = item.getOverallWeigthedStatus %}
+                    <td align="center" class="compile"><p align="center"><a href="/{{ productSet }}/content/{{ drop.name }}/{{ item.version }}"><img src="/static/images/{{ overallWeigthedStatus }}.png" alt="{{ overallWeigthedStatus }}" width="40" height="40"></a><span style="display:none">{{ overallWeigthedStatus }}</span></p></td>
+                {% else %}
+                    <td align="center" class="compile"><p align="center"><a href="/{{ productSet }}/content/{{ drop.name }}/{{ item.version }}"><img src="/static/images/{{ item.status.state }}.png" alt="{{ item.status.state }}" width="40" height="40"></a><span style="display:none">{{item.status.state}}</span></p></td>
+                {% endif %}
+                {% if inactiveMedia %}
+                <td align="center">
+                    {% if item.id in inactiveMedia %}
+                    <b> No longer available </b>
+                    {% endif %}
+                </td>
+                {% endif %}
+                {% if allCNVersions  %}
+                <td align="center">
+                    {% for cn_product_set_version, cn_product_set_obj in allCNVersions.items %}
+                        {% if cn_product_set_version == item.version %}
+                            {% if cn_product_set_obj.active %}
+                                <a href="/cloudnative/getCloudNativeProductSetContent/{{drop.name}}/{{ cn_product_set_obj.product_set_version }}">{{ cn_product_set_obj.product_set_version }}</a>
+                            {% endif %}
+                            {% if '-' in cn_product_set_obj.product_set_version %}
+                                <br><a href="/cloudnative/historicalProductSetVersions/{{ productSet }}/{{drop.name}}/{{ cn_product_set_version }}/">Historical Versions</a>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td align="center">
+                    {% for cn_product_set_version, cn_product_set_obj in allCNVersions.items %}
+                        {% if cn_product_set_version == item.version %}
+                            {% if cn_product_set_obj.active %}
+                                <p align="center"><img src="/static/images/{{ cn_product_set_obj.overall_status }}.png" alt="{{ cn_product_set_obj.overall_status }}" width="40" height="40"><span style="display:none">{{ cn_product_set_obj.overall_status }}</span></p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div id="generic-sub-title">
+            {{ message }}
+        </div>
+        {% endif %}
+   </div>
+{% endblock %}

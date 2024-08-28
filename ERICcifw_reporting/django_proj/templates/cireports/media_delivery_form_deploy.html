@@ -1,0 +1,46 @@
+{% extends "base_newlookandfeel.html" %}
+   {% block title %}Delivery Information {% endblock %}
+   {% block content %}
+   <link rel=StyleSheet href="/static/jquery/js/css/jquery-ui.css" type="text/css" />
+   <script type="text/javascript" src="/static/jquery/js/jquery-ui.min.js"></script>
+   <script type="text/javascript" src='/static/mediaDelivery.js'></script>
+   <link rel=StyleSheet href="/static/mediaDelivery.css" type="text/css" />
+   <div class="general-container">
+       <h2 class="generalPageNewLook-title">{{ productSet }} Media Artifact Delivery Page <a class="img" style="padding-left:5px;" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/ENM+Media+Artifact+Delivery+Form" title="{{ media.drop.release.product.name }} Media Artifact Delivery Help" target="_blank"><img src="/static/images/question.png"/></a></h2>
+        <div class="delivery-info">
+            <br>
+             <table class='general-table'>
+               <tr>
+                   <th>Product:</th> <td><a href="/{{media.drop.release.product.name}}/releases/"><b>{{media.drop.release.product.name}}</b></a></td>
+               </tr>
+               <tr>
+                   <th>Media Artifact:</th> <td><a href="/{{ media.drop.release.product.name }}/{{ media.drop.name }}/media/"><b>{{media.mediaArtifact.name}}</b></a></td>
+               </tr>
+               <tr>
+                   <th>Version:</th> <td> <a href="/{{ media.drop.release.product.name }}/{{ media.drop.name }}/mediaContent/{{ media.version }}"><b>{{ media.version }}</b></a></td>
+               </tr>
+           </table>
+       </div>
+       <div id="empty_form">
+         <br>
+         <label for='email' style="padding-right: 5px;">Email:</label>
+         <input id="email_input" name="email">
+         <br>
+         <input id="signum_input" type="hidden" name="signum" value='{{ signum }}'>
+         <input id="product_set_input" type="hidden" name="productSet" value='{{ productSet }}'>
+         <input id="media_artifact_input" type="hidden" name="mediaArtifact" value='{{media.mediaArtifact.name}}'>
+         <input id="media_artifact_version_input" type="hidden" name="version" value='{{media.version}}'>
+         <input id="product_input" type="hidden" name="product" value='{{media.drop.release.product.name}}'>
+         <label for='drop'>Drop:</label>
+         <select id='drop' class="delivery_form_drop"></select>
+      </div>
+      <div class="delivery-info">
+         <h3>Select Auto Deployment Mappings:</h3>
+         <div class="deploy_options">
+        </div>
+      </div>
+      <br>
+     <input type="button" class="btn-default" value="Submit" id="add_to_psdrop">
+    </div>
+    <div class="modal"></div>
+  {% endblock %}

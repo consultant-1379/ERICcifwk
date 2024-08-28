@@ -1,0 +1,31 @@
+<INCLUDE NODE: prescontainer >
+  <litp:component-def id="prescontainer">
+    <litp:cmw-bundle-def id="pkg">
+      <bundle_name>ERICprescontainer_CXP9030205-<PACKAGE_VERSION></bundle_name>
+      <bundle_type>rpm</bundle_type>
+      <version>1</version>
+    </litp:cmw-bundle-def>
+    <litp:file-def id="container">
+      <ensure>directory</ensure>
+      <mode>755</mode>
+      <name>pres_container</name>
+      <path>/var/www/html/container</path>
+      <recurse>true</recurse>
+      <source>/opt/ericsson/com.ericsson.nms.pres.TorContainer/html/container</source>
+    </litp:file-def>
+    <litp:file-def id="index_html">
+      <mode>755</mode>
+      <name>index.html</name>
+      <path>/var/www/html/index.html</path>
+      <source>file:///opt/ericsson/com.ericsson.nms.pres.TorContainer/html/index.html</source>
+    </litp:file-def>
+    <litp:file-def id="login">
+      <ensure>directory</ensure>
+      <mode>755</mode>
+      <name>presentation_login</name>
+      <path>/var/www/html/login</path>
+      <recurse>true</recurse>
+      <source>/opt/ericsson/com.ericsson.nms.pres.TorContainer/html/login</source>
+    </litp:file-def>
+  </litp:component-def>
+

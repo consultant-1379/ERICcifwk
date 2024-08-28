@@ -1,0 +1,148 @@
+{% extends "base_newlookandfeel.html" %}
+{% block ng_app %}baseline.app.basic{% endblock %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular-route.min.js"></script>
+<script type="text/javascript" src="/static/angular-resource.min.js"></script>
+<script type="text/javascript" src="/static/js/script.js"></script>
+<script type="text/javascript" src="/static/js/chartController.js"></script>
+<link rel=StyleSheet href="/static/jquery/datetimepicker/jquery.datetimepicker.css" type="text/css" />
+<link rel=StyleSheet href="/static/jquery/dropdown/multiple-select.css" type="text/css" />
+<script type="text/javascript"  href="/static/js/ui-bootstrap-tpls-0.13.3.min.js"></script>
+<script type="text/javascript"  href="/static/js/angular-messages.js"></script>
+<script type="text/javascript"  href="/static/bootstrap/js/bootstrap.min.js"></script>
+<link rel=stylesheet href="/static/css/buildlogStyle.css" type="text/css" />
+<link rel=stylesheet href="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" type="text/css" />
+<base href="/">
+<div class="general-container">
+ <h2><span class="generalPageNewLook-title">Physical Build Log</span>&nbsp;&nbsp;<a title="Build Log Help" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/ENM+MTG+Buildlog"><img src="/static/images/question.png"></a></h2>
+ <div ng-controller="AppController">
+  <iframe id="CsvExpFrame" style="display: none"></iframe>
+  <div id='buildLogError' class='loadBox'>Physical Build log not available. <br>No data seems to be available for this drop.<br> You can attempt to troubleshoot, see help link above.</div>
+  <div id="container" class="buildlogContainer" ng-show="baselineLength > 0">
+    <div id="buildlogTopPanel" class="buildlogTopPanel">
+      <a href="#" title="Export to CSV" class="export buildlogLabel"><img height="30px" width="30px" src="/static/images/download.svg"></a>
+        <div id="buildlogSearch" class="buildlogLabel">
+          Search:<input type="text" class="form-control" ng-model="search" autofocus/>
+        </div>
+        <div id="itemsPerPage" class="buildlogLabel">
+          Show last:<input type="text" class="form-control form-control2" ng-model="itemsPerPage"/>
+        </div>
+        <div ng-click="toggle()" class="buildlogLabel">Show columns<img src="/static/images/downarrow.svg"></div>
+        <div ng-show="showOptions" class="checkBoxDropdown">
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.status" ng-init="ModelData.status=true"/> Status</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.slot" ng-init="ModelData.slot=true"/> Slot</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.testEnv" ng-init="ModelData.testEnv=true"/> Test Env</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.jenkinsJob" ng-init="ModelData.jenkinsJob=true"/> Jenkins Job</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.fromISO" ng-init="ModelData.fromISO=true"/> from ISO</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.ISO" ng-init="ModelData.ISO=true"/> ISO</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.deployTime" ng-init="ModelData.deployTime=true"/> Deploy Time</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.productSet" ng-init="ModelData.productSet=true"/> Product Set</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.deliveryGroup" ng-init="ModelData.deliveryGroup=true"/> Delivery Group Δ</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.RFA250" ng-init="ModelData.RFA250=true"/> RFA250</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.upgradePerformance" ng-init="ModelData.upgradePerformance=true"/> Upgrade Performance</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.upgradeAvailability" ng-init="ModelData.upgradeAvailability=true"/> Upgrade Availability</div>
+            <div><input type="checkbox" class="checkBox" ng-model="ModelData.comment" ng-init="ModelData.comment=true"/> Comment</div>
+        </div>
+      </div>
+    </div>
+      <div id="buildlogContent" class="buildlogContent">
+        <table id='buildLogTable' class='buildLogContent blTable'>
+          <thead>
+            <tr class="BLTR">
+              <th class="tableHeader blTH jenkinsJob" ng-if="ModelData.status" title="Status/progression of the build">Status</th>
+              <th class="tableHeader blTH RFA250" ng-if="ModelData.slot" title="Week.Day.Slot (slot represents the build number for that day)">Slot</th>
+              <th class="tableHeader blTH jenkinsJob" ng-if="ModelData.testEnv" title="Environment that was used for the build with link the cluster details in CI portal">Test Env</th>
+              <th class="tableHeader blTH jenkinsJob" ng-if="ModelData.jenkinsJob" title="Timestamp when the build was kicked off with a link to the Jenkins Job">Jenkins Job</th>
+              <th class="tableHeader blTH ISO" ng-if="ModelData.fromISO" title="For upgrade, the ISO being upgraded from (i.e. the one that is initially on the system before the upgrade occurs)">from ISO</th>
+              <th class="tableHeader blTH ISO" ng-if="ModelData.ISO" title="The ISO under test">ISO</th>
+              <th class="tableHeader blTH ISO" ng-if="ModelData.deployTime" title="Amount of time the system took to deploy in (days), hours and minutes">Deploy<br>Time</th>
+              <th class="tableHeader blTH ISO" ng-if="ModelData.productSet" title="The product set used for the build">Product Set</th>
+              <th class="tableHeader blTH delGroup" ng-if="ModelData.deliveryGroup" title="Delivery groups delta, showing groups added (+green)/obsoleted (-red)">Delivery Group Δ</th>
+              <th class="tableHeader blTH RFA250" ng-if="ModelData.RFA250" title="Link to the RFA 250 Report">RFA250</th>
+              <th class="tableHeader blTH upgradePerf" ng-if="ModelData.upgradePerformance" title="Link to the Upgrade Performance Report">Upgrade Performance</th>
+              <th class="tableHeader blTH upgradeAvil" ng-if="ModelData.upgradeAvailability" title="Link to the Upgrade Availability Report">Upgrade Availability</th>
+              <th class="tableHeader blTH previous" ng-if="ModelData.comment" title="Show previous comments">Previous Comment</th>
+              <th class="tableHeader blTH" ng-if="ModelData.comment" title="Optional manual entry which can be edited via text field on clicking an edit button associated with that build">Add New Comment</th>
+            </tr>
+          </thead>
+          <tbody id="dataContent">
+            <tr class="BLTR" ng-repeat="(index,baseline) in baselines | orderByDrop | orderBy:'createdAt':true | filter:search:strict" ng-show="$index<itemsPerPage" ng-init="$last && hideLoad()">
+              <td ng-if="ModelData.status" id='status' class="BLTD" ng-class="{'busyCell' : baseline.status.indexOf('BUSY')!=-1 , 'passedCell' : baseline.status.indexOf('PASSED')!=-1, 'failedCell' : baseline.status.indexOf('FAILED')!=-1, 'quarantineCell' : baseline.status.indexOf('QUARANTINE')!=-1}">{[{::baseline.status}]}</td>
+              <td ng-if="ModelData.slot" class="BLTD">{[{::baseline.descriptionDetails}]}</td>
+              <td ng-if="ModelData.testEnv" class='BLTD'><a ng-if='baseline.clusterName.indexOf("cloud") == -1' ng-href="{{STATIC_URL}}/dmt/clusters/{[{::baseline.clusterID}]}" target="_self">{[{::baseline.clusterName}]}</a><div ng-if='baseline.clusterName.indexOf("cloud") !== -1'>{[{::baseline.clusterName}]}</div></td>
+              <td ng-if="ModelData.jenkinsJob" class='BLTD' title="{[{::baseline.createdAt | date:'yyyy-MM-dd HH:mm:ss'}]}"><a href="{[{::baseline.buildURL}]}" target="_self">{[{::baseline.createdAt | date:'yyyy-MM-dd'}]}<br/> {[{::baseline.createdAt | date:'HH:mm:ss'}]}</a></td>
+              <td ng-if="ModelData.fromISO" class='BLTD' title='to the ISO in CI Portal'><a href="{{STATIC_URL}}/ENM/{[{::baseline.fromISODrop}]}/mediaContent/ERICenm_CXP9027091/{[{::baseline.fromISO}]}" target="_self">{[{::baseline.fromISO}]}</a></td>
+              <td ng-if="ModelData.ISO" class='BLTD' title='to the ISO in CI Portal'><a href="{{STATIC_URL}}/ENM/{[{::baseline.dropName}]}/mediaContent/ERICenm_CXP9027091/{[{::baseline.mediaArtifact}]}" target="_self">{[{::baseline.mediaArtifact}]}</a></td>
+              <td ng-if="ModelData.deployTime" class='BLTD' title="{[{baseline.deploytime}]}">{[{baseline.deploytime}]}</td>
+              <td ng-if="ModelData.productSet" class="BLTD ISO" title="OS: {[{::baseline.osDetails}]} LITP: {[{::baseline.litpVersion}]} Patch: {[{::baseline.patches}]} ENMISO: {[{::baseline.mediaArtifact}]}"><a href="{{STATIC_URL}}/ENM/content/{[{::baseline.dropName}]}/{[{::baseline.productset_id}]}" target="_self" >{[{::baseline.productset_id}]}</a></td>
+              <td ng-if="ModelData.deliveryGroup" class="BLTD">
+                <div class="delGroup">
+                  <span ng-repeat='dGroup in baseline.deliveryGroup track by $index'>
+                    <span class='textBlack' ng-if='dGroup.indexOf("D") !== -1'></span>
+                    <a class='textRed' ng-if='dGroup.indexOf("-") !== -1  && dGroup.indexOf("tw") == -1' ng-href="{{STATIC_URL}}/ENM/queue/{[{::baseline.dropName}]}/{[{dGroup|slice:1}]}/?section=obsoleted" target="_self"> &nbsp;{[{dGroup}]}</a>
+                    <a class='textRed' ng-if='dGroup.indexOf("-") !== -1 && dGroup.indexOf("tw") !== -1' ng-href="{{STATIC_URL}}/ENM/queue/{[{::baseline.dropName}]}/{[{dGroup|slice:1:-4}]}/?section=obsoleted" target="_self"> &nbsp;{[{dGroup}]}</a>
+                    <a class='textGreen' ng-if='dGroup.indexOf("+") !== -1 && dGroup.indexOf("D") == -1 && dGroup.indexOf("tw") == -1' ng-href="{{STATIC_URL}}/ENM/queue/{[{::baseline.dropName}]}/{[{dGroup|slice:1}]}/?section=delivered" target="_self"> {[{dGroup}]}</a>
+                    <a class='textGreen' ng-if='dGroup.indexOf("+") !== -1 && dGroup.indexOf("D") == -1 && dGroup.indexOf("tw") !== -1' ng-href="{{STATIC_URL}}/ENM/queue/{[{::baseline.dropName}]}/{[{dGroup|slice:1:-4}]}/?section=delivered" target="_self"> {[{dGroup}]}</a>
+                  </span>
+                </div>
+              </td>
+              <td ng-if="ModelData.RFA250" class="BLTD">
+                <div ng-if="baseline.rfaResult !== ''" class="textLeft">RFA250: </div>
+                <div class="textRight">
+                  <a ng-if="baseline.rfaResult !== ''" ng-class="{'passedCellLink' : baseline.rfaPercent.indexOf('100')!=-1, 'failedCellLink' : baseline.rfaPercent.indexOf('100')!=1}" ng-href="{[{::baseline.rfaResult}]}" target="_self"> {[{::baseline.rfaPercent}]}</a>
+                </div><br style="clear:both;" />
+                <div ng-if="baseline.rfaStagingResult !== ''" class="textLeft">Staging: </div>
+                <div class="textRight">
+                  <a ng-if="baseline.rfaStagingResult !== ''" ng-class="{'passedCellLink' : baseline.upgradeTestingStatus.indexOf('100')!=-1, 'failedCellLink' : baseline.upgradeTestingStatus.indexOf('100')!=1}" ng-href="{[{::baseline.rfaStagingResult}]}" target="_self"> {[{::baseline.upgradeTestingStatus}]}</a>
+                </div>
+              </td>
+              <td ng-if="ModelData.upgradePerformance" class="BLTD upgradePerf">
+                <a ng-if="baseline.teAllureLogUrl !== '' && baseline.upgradePerformancePercent == '100%'" class='passedCellLink' ng-href="{[{baseline.teAllureLogUrl}]}" target="_self">Passed</a>
+                <a ng-if="baseline.teAllureLogUrl !== '' && baseline.upgradePerformancePercent !== '100%'" class='failedCellLink' ng-href="{[{baseline.teAllureLogUrl}]}" target="_self">Failed</a>
+              </td>
+              <td ng-if="ModelData.upgradeAvailability" class="BLTD upgradeAvil">
+                <div ng-if="baseline.upgradeAvailabilityResult !== ''" class="textCentre">
+                  <a class='passedCellLink' ng-href="{[{::baseline.upgradeAvailabilityResult}]}" target="_self" ng-if='baseline.success'>Passed</a>
+                  <a class='failedCellLink' ng-href="{[{::baseline.upgradeAvailabilityResult}]}" target="_self" ng-if='!baseline.success'>Failed</a>
+                </div>
+              </td>
+              <td ng-if="ModelData.comment" class='BLTD previousComment'>
+                  <div class="previousComment">
+                      {[{::baseline.comment}]}
+                  </div>
+              </td>
+              <td ng-if="ModelData.comment" class='BLTD comment'>
+                <div class="commentForm">
+                  <div id='theComment{[{baseline.id}]}' style="text-align:left; white-space:pre-wrap" ng-hide="editing">
+                    <div id="pen" class="pen" ng-init="currentUser='{{user.username}}'" ng-click="editing = true">
+                    </div>
+                  </div>
+                  <form id="commentEd" name="commentEd" ng-show="editing">
+                      <textarea id='area{[{baseline.id}]}' name='area' class="commentTextArea" type="html" ng-required></textarea>
+                    <br/>
+                    <button type="submit" class='savebutton' ng-click="appendUser(currentUser); updateComment(baseline.id,$index); editing=false; StartTimer()">Save</button>
+                    <button type="button" class='cancelbutton' ng-click="cancelComment(baseline.id,formData,$index); editing=false">Cancel</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+   </div>
+</div>
+<div class="modal"></div>
+{{block.super}}
+{% endblock %}
+{% block js %}
+{{ block.super }}
+<script>
+// Add the CSRF Token
+var app = angular.module('example.app.editor'); // Not including a list of dependent modules (2nd parameter to `module`) "re-opens" the module for additional configuration
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token|escapejs }}';
+}]);
+</script>
+
+{% endblock %}

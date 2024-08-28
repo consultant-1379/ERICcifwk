@@ -1,0 +1,88 @@
+#!/bin/bash -a
+
+# Script to modify IP address information in some relevant files
+# in a typical RHEL install using LVM on a raw disk image for use
+# with KVM
+
+# TODO: check that the expecte filesystems do not previously exist
+# and generally improve error handling.
+
+# The disk imnage to update
+DI=$1
+# The IP to update to
+IP=$2
+# The MAC address to update to
+HW=$3
+# The hostname to update to
+HN=$4
+
+MP=/tmp/mnt
+LF=/tmp/img-update.$(date "+%Y-%m-%d_%H:%M:%s")
+
+error() {
+    echo "ERROR: $0"
+    exit 1
+}
+
+progress() {
+    L="$(date "+%Y-%m-%d %H:%M:%s"): $1"
+    echo $L > ${LF}
+    echo $L
+}
+
+# mount the second partition on the image as an LVM
+# and then mount the root volume from that
+# Update any files containing the IP address
+
+progress "determining offset"
+START=$(fdisk -lu ${DI} 2> /dev/null | grep "${DI}2" | awk '{print $2}')
+
+if [ -z "${START}" ] ; then
+    error "could not determine filesystem start point"
+fi
+
+OFFSET=$(expr ${START} \* 512)
+
+# setup loopback device
+progress "setting up loopback device"
+losetup -o ${OFFSET} /dev/loop0 ${DI}
+[ $? -ne 0 ] && error "Could not create loopback device on offset ${OFFSET} for device ${DI}"
+
+# scan the volumes
+progress "scanning the volumes"
+lvm pvscan > ${LF} 2>&1
+# activate the volume groups
+progress "activating volume groups"
+lvm vgchange -ay > ${LF} 2>&1
+
+[ ! -d ${MP} ] && mkdir ${MP}
+
+MOUNT_NAME=$(lvm lvs 2> /dev/null | awk '$1 ~ /^lv_root$/ { print $2 ; exit ; }')
+[ -z "${MOUNT_NAME}" ] && error "Could not determine lv_root"
+[ ! -r /dev/mapper/${MOUNT_NAME}-lv_root ] && error "No such device: /dev/mapper/${MOUNT_NAME}-lv_root"
+progress "mounting logical volume"
+mount /dev/mapper/${MOUNT_NAME}-lv_root ${MP}
+
+[ $? -ne 0 ] && error "Could not mount /dev/mapper/vg_atrcx1933vm13-lv_root on ${MP}"
+
+# Update NIC config
+NIC_CFG=${MP}/etc/sysconfig/network-scripts/ifcfg-eth0
+progress "updating NIC config for eth0"
+awk -F= '$1 ~ /IPADDR/ { print $1 "=" ENVIRON["IP"] ; next ; } $1 ~ /HWADDR/ { print $1 "=" ENVIRON["HW"] ; next ; } { print $0 }' ${NIC_CFG} > ${NIC_CFG}.new
+mv ${NIC_CFG} ${NIC_CFG}.old
+mv ${NIC_CFG}.new ${NIC_CFG}
+# unmount FS
+
+progress "updating hostname"
+HOST_CFG=${MP}/etc/sysconfig/network
+awk -F= '$1 ~ /HOSTNAME/ { print $1 "=" ENVIRON["HN"] ; next ; } { print $0 }' ${HOST_CFG} > ${HOST_CFG}.new
+mv ${HOST_CFG} ${HOST_CFG}.old
+mv ${HOST_CFG}.new ${HOST_CFG}
+
+progress "unmounting FS"
+umount ${MP}
+progress "removing logical volumes"
+lvm vgchange -an > ${LF} 2>&1
+progress "deleting loopback device"
+losetup -d /dev/loop0
+progress "Done"

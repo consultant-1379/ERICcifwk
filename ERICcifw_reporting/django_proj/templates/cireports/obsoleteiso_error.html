@@ -1,0 +1,22 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Obsolete Package Error{% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">Obsolete Package Failure Information</h2>
+     <div class="layout-bar"><a href="/{{ product }}/drops/{{ drop }}/">Drop:{{drop}}</a></div>
+
+    <br>
+    You are trying to remove Package: {{ package }} (Version {{version}}) from Drop {{drop}} in the {{ product }} Product
+    <br>
+    <br>
+    {{ error }}
+    <br>
+    <br>
+    <p>
+        For more information please contact the CI Execution/Maintrack Team on getting the CDB status changed to Caution, to allow the package version to be obsolete.
+        <br>
+        <b>Note for CI Execution/Maintrack Team:</b> Set Caution Status functionality is found on the Media Artifact Version Content page and Product Set Version Content page.
+    </p>
+</div>
+{% endblock %}

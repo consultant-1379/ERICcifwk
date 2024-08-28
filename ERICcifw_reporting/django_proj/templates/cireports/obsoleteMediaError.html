@@ -1,0 +1,33 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %}Obsolete Package Error{% endblock %}
+{% block content %}
+<div class="general-container">
+  <h2 class="generalPageNewLook-title">Obsolete Package Failure Information</h2>
+  <div>
+    <p>
+    You are trying to remove Media Artifact: {{ mediaArt }} (Version {{version}}) from Drop {{ drop.name }} in the {{ productSet }} Product Set <br>
+    <br>
+    {% if different %}
+      The Drop where Media Artifact: {{ mediaArt }} (Version {{version}}) was delivered is {{ different}}.
+    {% elif data  %}
+        Media Artifact: {{ mediaArt }} (Version {{version}}) is in Product Set Version:
+        <ul>
+            {% for d in data  %}
+            {% if d.productSetVersion.status.state == "passed" %}
+            <li>{{ d.productSetVersion}} - Passed Testing  </li>
+            {% else %}
+            <li>{{ d.productSetVersion}} - Testing in Progress </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% else %}
+      The Drop where Media Artifact: {{ mediaArt }} (Version {{version}}) was delivered is now a frozen Drop {{ frozen.name }}.<br>
+    {% endif %}
+     <br>
+     You cannot remove a Media Artifact Version from this Drop.
+     <br>
+     For more information please contact your support team
+ </div>
+</div>
+{% endblock %}
+

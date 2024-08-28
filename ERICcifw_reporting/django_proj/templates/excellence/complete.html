@@ -1,0 +1,114 @@
+{% extends "excellence/base.html" %}
+
+{% block title %}CIFWK Excellence Model{% endblock %}
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">CI Excellence Self Assessment Feedback
+        </div>
+    </div>
+    <div class="excellenceResult-details">
+        {% if scoreDict  %}
+            <table>
+                <tr>
+                    <h2><u>Section Result Breakdown:</u></h2>
+                </tr>
+                {% for category,result in scoreDict.items %}
+                    <tr>
+                        <h4>{{ category }} Score: <font color="blue">{{ result }} %</font></h4>
+                        <br>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <h3>Overall Score: <font color="red"> {{ overallScore }} % </font></h3>
+                    (Non-Agile 0-30%, Established 30-60%, Performing 60-80%, High Performing 80-100%)
+                </tr>
+            </table>
+            <br>
+            <h2><u>Section Actions Summary:</u></h2>
+            <div class="full-details">
+                <table width="100%">        
+                    {% for category in categoryOrdered %}
+                        <tr>
+                            <h3>Section {{ forloop.counter }}: {{ category }} Results:</u></h3>
+                        </tr>
+                </table>
+                <div class="full-details">
+                    <table width="100%">
+                        {% for tuple in resultTuple %}
+                            {% if category == tuple.0 and tuple.3 <= 2 %} 
+                                <tr>
+                                    <td>
+                                        <font size="3" color="blue"><b>Question:</b></font>{{ tuple.1 }}<br>
+                                        <font size="3" color="blue"><b>Answer:</b></font> {{ tuple.2 }}<br>
+                                        <br>
+                                        <font size="4" color="red"><b>Action:</b></font> {{ tuple.4 }}<br>
+                                        <br>
+                                        {% if  tuple.5  != "" %}
+                                            <font size="3" color="green"><b>Discussion Item(s):</b></font> {{ tuple.5 }}<br>
+                                            <br>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+                    {% endfor %}
+            </div>    
+            <h2><u>All Discussion Items:</u></h2>
+                <div class="full-details">
+                    <table width=100%">
+                        {% for tuple in resultTuple %}
+                            {% if  tuple.5  != "" %}
+                                <tr><td><li>{{ tuple.5 }}</li></td></tr>
+                            {% endif %}
+                        {% endfor %}  
+                        <tr><td><font size="2" color="red">Note: </font><font size="2"><u>Empty list if no discssion item(s) registered</u></font></td<></tr>
+                    </table>
+                </div>
+            <h2><u>Self Assessment feedback:</u></h2>
+            <div class="full-details">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <a href="mailto:PDLCORECIF@ex1.eemea.ericsson.se?subject=CI Excellence Model Feedback">Please Send your Feedback or Comments Via this email link</a>
+                        </td>
+                    </tr>
+                    <tr><td>(OR)</td></tr>
+                    <tr><td><b>Submit Below Form</b></td></tr>
+                    <form enctype="multipart/form-data" name="CI Excellence Model Feedback Form" method="post">{% csrf_token %}
+                        <tr>
+                            <td>
+                                Email Address:<input type="text" name="email" maxlength="100" required></input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea name="feedback" rows="3" cols="110" required><Feedback></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="submit" name="Submit" value="Submit Feedback" />
+                            </td>
+                        </tr>
+                    </form>
+                </table>
+            </div>
+            <br>
+            {% elif userResponse %}
+                <tr>
+                    <th>
+                       There was an error retrieving results
+                    </th>
+                </tr>
+
+        {% else %}
+            <tr>
+                <th>
+                    Sorry You did not take this questionnaire therefore you are not party to these Results
+                </th>
+            </tr>
+        {% endif %}
+    </div>
+{% endblock %}

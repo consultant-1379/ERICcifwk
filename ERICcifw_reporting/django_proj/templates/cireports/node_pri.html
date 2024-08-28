@@ -1,0 +1,47 @@
+{% extends "base_newlookandfeel.html" %}
+{% block title %} Node PRI Information {% endblock %}
+{% block content %}
+<div class="general-container">
+    <h2 class="generalPageNewLook-title" id="text-container">{{ product }} {{ drop.name }} Node PRI Information
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Document+Baseline+Page#DocumentBaselinePage-NodePRI" title="Node PRI Help Page" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+    <div class="full-details">
+        <br>
+        {% if priObj %}
+            <table id="documents-table" class="general-table tablesort">
+                <thead>
+                    <tr>
+                        <th>Package Name</th>
+                        <th>Package CXC</th>
+                        <th>Fault Summary</th>
+                        <th>Fault Description</th>
+                        <th>Fault Type</th>
+                        <th>Fault Status</th>
+                        <th>Fault Version</th>
+                        <th>Fault Priority</th>
+                    </tr>
+                </thead>
+                {% for priItem in priObj %}
+                    <tr>
+                        <td><a href="/{{ product }}/packages/{{ priItem.pkgver.artifactId }}/">{{ priItem.pkgver.package.name }}</a></td>
+                        <td>{{ priItem.pkgver.package.package_number }}</td>
+                        <td><a href="https://jira-oss.seli.wh.rnd.internal.ericsson.com/browse/{{ priItem.fault_id }}">{{ priItem.fault_id }}</a></td>
+                        <td>{{ priItem.fault_desc }}</td>
+                        <td>{{ priItem.fault_type }}</td>
+                        {% if item.status == "null" %}
+                            <td>Open</td>
+                        {% else %}
+                            <td>{{ priItem.status }}</td>
+                        {% endif %}
+                        <td>{{ priItem.pkgver.version }}</td>
+                        <td>{{ priItem.priority }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div id="delivery-form-text">
+                Sorry there are no PRI Items associated with Drop {{ drop.name }}.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

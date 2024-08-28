@@ -1,0 +1,7 @@
+                    <h3>Failed Jobs</h3>
+                    <script type="text/javascript">
+d3.json("https://atrcx1933vm2.athtem.eei.ericsson.se/fem/failedJobs", function(json) {
+    var data = json;
+    var list = d3.select("#failed-jobs").selectAll("div").data(data).enter().append("div").text(function(d) { return d; });
+});
+                     </script>

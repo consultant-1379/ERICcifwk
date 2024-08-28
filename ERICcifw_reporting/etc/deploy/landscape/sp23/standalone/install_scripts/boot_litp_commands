@@ -1,0 +1,4 @@
+#### Command : Expected Output : Sucess Comment : Error Comment : Time given before expect timeout
+#### Boot the mgt Server
+#### Please note the pause function should be deleted from the bootmgr.sh script if not already
+/opt/ericsson/nms/litp/bin/cifw_autodeploy/bootmgr.sh : ]\# : Booting the LMS Server : Unable to Boot LMS Server : 720

@@ -1,0 +1,80 @@
+{% extends "base_newlookandfeel.html" %}
+{% if product %}
+{% block title %} Delivery Statistics {% endblock %}
+{% block content %}
+<script type="text/javascript" src="/static/toggleTabsOnClick.js"></script>
+<script type="text/javascript">
+            $(document).ready(function () {
+                $( "#tabs" ).tabs();
+                buildDeliveryPackagesStats();
+
+                function buildDeliveryPackagesStats(){
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/deliver_stats/{{ release }}/{{ drop }}/packages/xml",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table#delivery-package-stats').replaceWith(html);
+                            buildDeliveryTestwareStats();
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                                $('table#delivery-package-stats').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                            buildDeliveryTestwareStats();
+                        },
+                   });
+                }
+                function buildDeliveryTestwareStats(){
+                    $.ajax({
+                        type: 'GET',
+                        url: "/{{ product }}/deliver_stats/{{ release }}/{{ drop }}/testware/xml",
+                        dataType: 'html',
+                        cache: false,
+                        success: function(html, textStatus) {
+                            $('table#delivery-testware-stats').replaceWith(html);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            if (xhr.status != 0)
+                            {
+                                $('table#delivery-testware-stats').replaceWith("<p />An error occurred: " + ( errorThrown ? errorThrown : xhr.status ));
+                            }
+                        },
+                   });
+                }
+            });
+        </script>
+    <div class="general-container">
+       <h2 class="generalPageNewLook-title">
+            {% if drop and drop != "None" %}
+                <div id="text-container"> Drop: {{ drop }} - {{ count }} deliveries <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Statistics" target="_blank"><img src="/static/images/question.png"/></a></div>
+            {% else %}
+                <div id="text-container"> Release: {{ release }} - {{ count }} deliveries <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Delivery+Statistics" target="_blank"><img src="/static/images/question.png"/></a></div>
+            {% endif %}
+        </h2>
+        <div class="layout-bar">
+            <a href="/{{ product.name }}/drops/{{ drop }}">Drop: {{ drop }}</a> |
+            <a href="/{{ product }}/full_deliver_info/{{ release }}/{{ drop }}/details"> Full List </a>
+        </div>
+        <br>
+        <div class="tablinksborder">
+            <ul class="tab">
+                <li><a id="packages-tab" class="tablinks" href="javascript:void(0);">Packages</a></li>
+                <li><a id="testware-tab" class="tablinks" href="javascript:void(0);">Testware</a></li>
+            </ul>
+        </div>
+            <div id="packages" class="tabcontent" >
+                <table class="general-table" id="delivery-package-stats" >
+                    <tr><td> Loading Data ... </td></tr>
+                </table>
+            </div>
+            <div id="testware" class="tabcontent" >
+                <table class="general-table" id="delivery-testware-stats" >
+                    <tr><td> Loading Data ... </td></tr>
+                </table>
+            </div>
+    </div>
+    {% endblock %}
+{% endif %}

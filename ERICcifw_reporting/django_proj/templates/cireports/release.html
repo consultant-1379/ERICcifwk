@@ -1,0 +1,23 @@
+{% extends "cireports/base.html" %}
+
+{% block title %}TOR Release {{ name }} {% endblock %}
+
+{% block content %}
+<div class=detailsWidgets>
+<table>
+    <thead>{{ name }}</thead>
+    {% if drops %}
+        <tr>
+            <th>Drop</th>
+        </tr>
+        {% for item in drops %}
+        <tr> 
+            <td><a href="/drops/{{ item.name }}">{{ item.name }}</a></td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <p>No information is available yet for this Release</p>
+    {% endif %}
+</table>
+</div>
+{% endblock %}

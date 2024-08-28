@@ -1,0 +1,48 @@
+{% extends "excellence/base.html" %}
+
+{% block title %}CIFWK Excellence Model Questionnaire{% endblock %}
+{% block content %}
+    <div id="generic-title">
+        <div id="text-container">CIFWK Excellence Model Questionnaire
+        </div>
+    </div>
+    <div class="full-details">
+    <form enctype="multipart/form-data" name="CI Excellence Model Web Form" method="post">{% csrf_token %}
+        <br>
+        <div id="excellenceHRwithText">
+            <span>
+                <b>&nbsp;&nbsp; {{ categoryName }} Section &nbsp;&nbsp;</b>
+            </span>
+        </div>
+        {% for question in questionList %}
+            <div id="excellenceModel-text">
+                <br>
+                <table>
+                    <tr>
+                        <b>Question {{ forloop.counter }}: {{ question.question }}?</b><br>
+                    </tr>
+                    <tr>
+                        {% for answer in answers %}
+                            <input type="radio" name="{{ question.question }}" value="{{ answer.value }}" required>{{ answer.answer }}<br>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td>Question {{ forloop.counter }}: Discussion Item(s)</td>
+                        <td><textarea name="{{ question.question }}" rows="3" cols="120"></textarea></td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+        <div id="excellenceModel-text">
+        <br>
+            <table>
+                <tr>
+                    <td>
+                        <input type="submit" name="Next" value="Save and Continue" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</div>
+{% endblock %}

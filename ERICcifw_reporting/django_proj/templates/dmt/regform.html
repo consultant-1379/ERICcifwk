@@ -1,0 +1,57 @@
+{% extends "base_newlookandfeel.html" %}
+{% load passwordHide %}
+
+{% block content %}
+    <div class="deployment_container">
+        <h2 class="generalPageNewLook-title" style="vertical-align: left; margin-left: 0px;">{{ title }}
+            {% if docLink %}
+                <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com{{docLink}}" title="Information" target="_blank"><img src="/static/images/question.png"/></a>
+            {% else %}
+                <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Register+a+Deployment" title="Deployment info" target="_blank"><img src="/static/images/question.png"/></a>
+            {% endif %}
+        </h2>
+        {% if subTitle %}
+            <h5 class="sub-title">{{ subTitle }}</h5>
+            <hr>
+        {% endif %}
+        {% if status %}
+           {{ status }}
+        {% endif %}
+        <form enctype="multipart/form-data" name="dmt_mgmtServerReg" method="post" >{% csrf_token %}
+            <table class="deployment-table">
+                <h3> <font color="red">{{ message }}</font></h3>
+                {{ form.as_table }}
+                <tr>
+                    {% for question in form.Question.field.questions %}
+                        {{ question }}
+                    {% endfor %}
+                    <td>
+                        {% if button4 != "False" %}
+                            <input type="submit" name = "{{ button4 }}" value="{{ button4 }}"/>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if button != "False" %}
+                            {% if "Download" in button %}
+                                <input type="submit" name = "{{ button }}" value="{{ button }}"/>
+                            {% else %}
+                                <input type="submit" name = "{{ button }}" value="{{ button }}" onclick="$('body').addClass('loading');"/>
+                            {% endif %}
+                        {% endif %}
+                        {% if button2 != "False" %}
+                            <input type="submit" name = "{{ button2 }}" value="{{ button2 }}"/>
+                        {% endif %}
+                        {% if button5 != "False" %}
+                            <input type="submit" name = "{{ button5 }}" value="{{ button5 }}"/>
+                        {% endif %}
+                    </td>
+            </tr>
+            </table>
+            <br>
+            {% if button3 != "False" %}
+                <input type="submit" name = "{{ button3 }}" value="{{ button3 }}"/>
+            {% endif %}
+        </form>
+    </div>
+    <div class="modal"></div>
+{% endblock %}

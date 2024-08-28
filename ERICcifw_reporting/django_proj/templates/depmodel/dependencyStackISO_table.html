@@ -1,0 +1,79 @@
+{% extends "cireports/base.html" %}
+    {% block content %}
+            <div id="generic-title">
+                <div id="text-container">{{ artifact }} Stacked Dependencies <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Dependency+Modelling+and+Management" title="Artifact Dependencies Help" target="_blank"><img src="/static/images/question.png"/></a></div>
+            </div>
+    {% if doesNotExistFlag == "doesNotExist" %}
+        <div id="delivery-form-text">
+            <br>
+            Sorry there are no Dependency Items associated with this Artifact {{ artifact }}
+        </div>
+
+    {% else %}
+
+        <div id="canvas">
+        </div>
+        <script type="text/javascript" src="/static/d3.v3.min.js"></script>
+        </script>
+        <script type="text/javascript" src="/static/dagre/dagre-d3.js"></script>
+        <style>
+            g.type-TK  rect {
+              fill: #00ffd0;
+            }
+
+            svg {
+              overflow: hidden;
+              height: 100em;
+              width: 100%;
+            }
+
+            .node rect {
+              stroke: #999;
+              stroke-width: 1px;
+              fill: #fff;
+            }
+
+            .edgeLabel rect {
+              fill: #fff;
+            }
+
+            .edgePath path {
+              stroke: #333;
+              stroke-width: 1.5px;
+              fill: none;
+            }
+        </style>
+
+        <div id="attach">
+        
+          <svg id="svg-canvas">
+            <g transform="translate(50, 50)"/>
+          </svg>
+        </div> 
+
+        <script>
+            var g = new dagreD3.Digraph();
+            var test ={{ nodeString|safe }}
+            {{ edgeString }} 
+
+            var renderer = new dagreD3.Renderer();
+            var oldDrawNodes = renderer.drawNodes();
+                renderer.drawNodes(function(graph, root) {
+            var svgNodes = oldDrawNodes(graph, root);
+                svgNodes.each(function(u) { d3.select(this).classed(graph.node(u).nodeclass, true); });
+                return svgNodes;
+            });
+            var layout = dagreD3.layout()
+                .nodeSep(5)
+                .rankDir("LR");
+                renderer.layout(layout).run(g, d3.select("svg g"));
+            var svg = d3.select("svg")
+               .call(d3.behavior.zoom().on("zoom", function() {
+            var ev = d3.event;
+                 svg.select("g")
+                .attr("transform", "translate(" + ev.translate + ") scale(" + ev.scale + ")");
+               }));   
+        </script>
+    {% endif %}
+{% endblock %}
+

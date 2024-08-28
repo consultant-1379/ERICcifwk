@@ -1,0 +1,58 @@
+#!/bin/bash -a
+#
+# script for CI Framework
+#
+
+# Find my current dir
+BASEDIR=$(/usr/bin/dirname $0)
+# NOTE: This behaviour relies on shell builtins for cd and pwd
+BASEDIR=$(cd ${BASEDIR}/.. ; pwd)
+[ -f ${BASEDIR}/etc/global.env ] && . ${BASEDIR}/etc/global.env
+
+#
+# findVersion:
+# Find the version from the Maven pom file
+#
+findVersion() {
+    if [ -f ${POM} ] ; then
+        log "Checking for version"
+        VER=$(echo "cat //*[local-name()='project']/*[local-name()='version']" | xmllint --shell pom.xml | sed '/^\/ >/d' | sed 's/<[^>]*.//g' | sed -e "s/xmlns/ignore/" -e "s/-SNAPSHOT//")
+    else
+        error "${POM} NOT found !!"
+    fi
+}
+
+#
+# updateSql:
+# Append the maven version to the migrate.sql if it exists
+#
+updateSql() {
+    if [ -f ${MIGRATESQL} ] ; then
+        log "Checking & Removing any other instance of ${VER} in migrate.sql"
+        $_SED "/^-- END ${VER}$/d" ${MIGRATESQL} > tmp.sql
+        $_MV tmp.sql ${MIGRATESQL}
+
+        log "Appending version ${VER} to migrate.sql"
+        $_ECHO >> ${MIGRATESQL}
+        $_ECHO "-- END ${VER}" >> ${MIGRATESQL}
+    else
+        error "${MIGRATESQL} NOT found !!"
+    fi
+}
+
+#
+# commitChanges:
+# If all is OK then commit the changes to the GIT repo
+#
+commitChanges() {
+    log "Committing changes to GIT"
+    $_GIT add ${MIGRATESQL} || error "Could not perform git add of ${MIGRATESQL}"
+    $_GIT commit -m "Updated sql file with version ${VER} as part of automated build" || error "Could not perform git commit with version ${VER}"
+    $_GIT push || error "Could not perform git push"
+}
+
+MIGRATESQL=ERICcifw_reporting/sql/migrate.sql
+POM=${BASEDIR}/pom.xml
+findVersion
+updateSql
+commitChanges

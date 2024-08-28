@@ -1,0 +1,198 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %} {% endblock %}
+
+{% block content %}
+<script>
+    $( document ).ready(function() {
+        formNumUser = 0;
+        function removeUserAction(id){
+            var proceed = confirm("Do you really want to remove this User Input?");
+            if (proceed) {
+                $("#userDiv_"+id).remove();
+                var userFound = 0;
+                for (var i = 0; i<formNumUser; i++) {
+                     var user = $('#user_'+i).val();
+                     if (typeof user === 'undefined'){
+                         continue;
+                     }else{
+                         userFound = 1;
+                     }
+                }
+            }
+        }
+        $('#addToPostData').click(addPostData);
+        var versions = [];
+        var versionSelectBox;
+
+        $('#sedVersion').one('change', function optionalDD(){
+            var divDDFormStr = "";
+            divDDFormStr = divDDFormStr + "<div style='margin-left:2%' id=emptyDDForm><br><b class='table-title'>Enter Deployment Description Version Information</b><br><br><table class='general-table' style='width:49%'><tr><td width='30%'><b class='table-title' style='margin:10px'>Version</b></td><td width='49%'><select id='depDescVersion' style='height:70%; width:90%;margin:10px'>";
+             {% for version in ddVersions %}
+              divDDFormStr =  divDDFormStr +  "<option value='{{ version }}'>{{ version }}";
+              {% if version == latestVersion %}
+              divDDFormStr =  divDDFormStr + "  - Latest Good";
+              {% endif %}
+              divDDFormStr =  divDDFormStr + "</option>";
+            {% endfor %}
+            divDDFormStr =  divDDFormStr + "</select></td> </tr> <tr> <td width='30%'><b class='table-title' style='margin:10px'>Type</b></td> <td width='49%'><select id='depDescType' style='height:70%; width:90%;margin:10px'>";
+            {% for ddType in ddTypes %}
+               divDDFormStr =  divDDFormStr + "<option value='{{ ddType.dd_type }}'>{{ ddType.dd_type }}</option>";
+            {% endfor %}
+            divDDFormStr =  divDDFormStr +"</select> </tr> <tr> <td width='30%'><b class='table-title' style='margin:10px'>File Name</b></td><td width='49%%'><select id='depDescFileName' style='height:70%; width:90%;margin:10px'> </select></td> </tr></table><br>";
+            $("#emptyDDForm").append(divDDFormStr);
+            $('#depDescVersion').val('{{latestVersion}}');
+            populate_deployment_descriptions_select();
+            $('#depDescVersion').change(function () {
+                populate_deployment_descriptions_select();
+            });
+            $('#depDescType').change(function () {
+                populate_deployment_descriptions_select();
+            });
+        });
+        function populate_deployment_descriptions_select() {
+          var dd_select_box = $("#depDescFileName");
+          $.ajax({
+           url: "/api/deployment/deploymentDescriptions/version/" + $('#depDescVersion').val() + "/type/" + $('#depDescType').val()+"/",
+           dataType: "json",
+           success: function(json) {
+               var dd_items = [];
+               dd_select_box.find('option').remove();
+               $.each(json.deploymentDescription, function(i, item) {
+                    dd_select_box.append('<option value="' + item.name + '" id="' + item.name + '">' + item.name + '</option>');
+                    dd_items.push(item.name);
+               });
+           },
+           error: function(xhr, textStatus, errorThrown) {
+               dd_select_box.find('option').remove();
+               dd_select_box.append('<option value="" id="">No Data</option>');
+               alert("Issue retrieving the list of Deployment Descriptions: " + (errorThrown ? errorThrown : xhr.status));
+           }
+         });
+        }
+
+        function addPostData() {
+            var sedVersionData =  $('#sedVersion').val().split(' ')[0];
+
+            if ( sedVersionData == "None") {
+                sedVersionData = "";
+            }
+            var deploymentId = $('#deploymentId').val();
+            var proceed = "";
+            var msg = "";
+            var userItems = [];
+            if (deploymentId == "") {
+                alert("Please choose a Deployment ID.");
+                $('#addToPostData').attr('disabled', false);
+                return
+            }
+            if (sedVersionData == "") {
+                alert("Please select the option, \"Select a SED Template Version\"");
+                $('#addToPostData').attr('disabled', false);
+                return
+            }
+            var depDescVersion = $('#depDescVersion').val();
+            var depDescType = $('#depDescType').val();
+            var depDescFileName = $('#depDescFileName').val();
+            if ( depDescVersion === undefined || depDescVersion == "None") {
+                alert("Please choose a deployment description version.");
+                return
+            }
+            if ( depDescType === undefined || depDescType == "None") {
+                alert("Please choose a deployment description type.");
+                return
+            }
+            var depDescFileName = $('#depDescFileName').val();
+            if ( depDescFileName === undefined || depDescFileName == "") {
+                alert("Please choose a deployment description file.");
+                return
+            }
+            var revisions = {
+                'deploymentId':deploymentId,
+                'sedVersion':sedVersionData,
+                'users' :userItems,
+                'loginUser' : {{ loginUser }},
+                'depDescVersion' : depDescVersion,
+                'depDescType' : depDescType,
+                'depDescFileName' : depDescFileName,
+                'depDescPackage' : '{{ deploymentTemplatePackage }}',
+                'file' : '',
+                'populateDDorSED' : '',
+                'populateDnsorMan': 'populateDNSIP'
+
+            };
+            msg = "This action is going to perform a check against the deployment to see does all the service vms within your deployment match the service in the defined deployment description\n\nNOTHING WILL BE CHANGED ON THE DEPLOYMENT\n\nDo you want to proceed?"
+            proceed = confirm(msg);
+
+            if (proceed) {
+              $('.overlay').show();
+              $('#addToPostData').attr('disabled', true);
+              $('body').addClass('loading');
+              $.ajax({
+                    type: "POST",
+                    url: "/dmt/verify/deployment/execute/",
+                    datatype: "json",
+                    data: JSON.stringify(revisions),
+                    success: function (json, status, xhr) {
+                        var ct = xhr.getResponseHeader("content-type") || "";
+                        if (ct.indexOf('json') > -1) {
+                            $('.overlay').hide();
+                            window.alert(json['ERROR'])
+                            location.reload();
+                        }
+                        else{
+                            $('body').removeClass('loading');
+                            $('div#mainWindow').html(json);
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert("Issue submitting deployment information, Internal Server Error.\n\nPlease Contact an Administrator.");
+                        $('body').removeClass('loading');
+                        location.reload();
+                    }
+              });
+            }else{
+                location.reload();
+            }
+        }
+    });
+</script>
+
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Verify Deployment Service VMs
+            <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Verify+a+SED+template+against+a+Deployment+Description" title="Verify Deployment Service VMs" target="_blank"><img src="/static/images/question.png"/></a>
+    </h2>
+<div id='mainWindow'>
+        <table class="general-table" style="width:50%">
+            <tr>
+                <td width="50%"><b class="table-title" style='margin:10px'>Deployment ID</b></td>
+                <td width="50%">
+                {% if deploymentId %}
+                    <input style='margin:10px' value="{{ deploymentId }}" id="deploymentId" disabled="disabled">
+                {% else %}
+                    <input style='margin:10px' id="deploymentId">
+                {% endif %}
+                </td>
+            </tr>
+        </table>
+        <br>
+        <table class="general-table" style="width:50%">
+           <tr>
+               <td width="50%"><b class="table-title" style='margin:10px'>Select a SED Template Version</b></td>
+               <td width="50%">
+                   <select id="sedVersion" style='height:70%; width:90%;margin:10px'>
+                       <option value="None">Select Version</option>
+                       {% for version in sedTemplateVersions %}
+                            <option value="{{ version }}">{{ version }}</option>
+                       {% endfor %}
+                   </select>
+              </td>
+           </tr>
+       </table>
+       <br>
+       <div id=emptyDDForm class="generic-text" style = "float:left; display:inline-block; width:100%;">
+       </div>
+       <input type="button"  id="addToPostData" value="Submit" />
+</div>
+<div class="modal"></div>
+{% endblock %}

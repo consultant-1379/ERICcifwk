@@ -1,0 +1,3 @@
+        <litp:component-ref id="vcsr">
+          <component>vcsr</component>
+        </litp:component-ref>

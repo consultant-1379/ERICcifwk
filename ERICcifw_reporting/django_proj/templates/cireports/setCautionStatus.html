@@ -1,0 +1,69 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Confirmation Setting Caution Status{% endblock %}
+{% block content %}
+<script language="JavaScript">
+    function checkAction(link) {
+            window.location = link;
+    }
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Caution Status Confirmation
+       <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Manual+Caution+Status" title="Caution Status Help" target="_blank"><img src="/static/images/question.png"/></a>
+   </h2>
+   <div class="caution-form-size">
+    <table class='general-table'>
+        {% if product != "None" %}
+            <tr>
+                <th>Product:</th><td>{{ product }} </td>
+            </tr>
+             <tr>
+                 <th>Media Artifact:</th><td>{{ artifactId }}</td>
+             </tr>
+
+        {% else %}
+           <tr>
+               <th>Product Set:</th><td>{{ productSet }}</td>
+           </tr>
+           <tr>
+               <th>Number:</th><td>{{ artifactId }}</td>
+           </tr>
+        {% endif %}
+        <tr>
+            <th>Version:</th><td>{{ version }}</td>
+        </tr>
+        <tr>
+            <th>Drop:</th><td>{{ drop }}</td>
+        </tr>
+        <tr>
+           <td colspan=2>
+            <form enctype="multipart/form-data" name="obsoleteform" method="post"
+              {% if product != "None" %}
+                  action="/{{ product}}/{{ drop }}/setCautionStatus/{{ version }}/{{type}}/"
+              {% else %}
+                  action="/{{ productSet }}/{{ drop }}/setCautionStatus/{{ version }}/{{type}}/"
+              {% endif %}
+              >{% csrf_token %}
+                 <input type="hidden" name="artifactId" value='{{ artifactId }}'/>
+                 <input type="hidden" name="groupId" value='{{ groupId }}' />
+                 {% if message %}
+                 <b>{{ message }}</b><br>
+                 {% endif %}
+                 <b>Comments:</b><textarea type="text" rows="2" cols="52"  name ="comment" value =''></textarea>
+                 <br>
+                 <br>
+                 <input type="submit" value="Submit" title="Submit"/>
+                 <input type="button" value="Cancel"
+                 {% if product != "None" %}
+                    onClick="checkAction('/{{ product}}/{{ drop }}/mediaContent/{{ artifactId }}/{{ version }}/')"
+                 {% else %}
+                    onClick="checkAction('/{{ productSet }}/content/{{ drop }}/{{ version }}')"
+                 {% endif %}
+                 title="Cancel">
+            </form>
+          </td>
+       </tr>
+   </table>
+  </div>
+</div>
+{% endblock %}

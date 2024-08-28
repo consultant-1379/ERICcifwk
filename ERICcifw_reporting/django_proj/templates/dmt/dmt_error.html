@@ -1,0 +1,12 @@
+{% extends "base_newlookandfeel.html" %}
+{% load passwordHide %}
+
+{% block title %}Deployment Management Tool Issue{% endblock %}
+
+{% block content %}
+<div class="deployment_container">
+    <h2 class="generalPageNewLook-title">Error</h2>
+    <h5 class=error>{{ error }}</h5>
+    <FORM><INPUT Type="button" VALUE="Return To Previous" onClick="history.go(-1);return true;"></FORM>
+</div>
+{% endblock %}

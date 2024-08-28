@@ -1,0 +1,37 @@
+#### Command : Sucess Comment : Error Comment
+#### Remove Backup Directory if it already exists
+[ -d /var/tmp/JBOSS_BACKUP ] && mv /var/tmp/JBOSS_BACKUP /var/tmp/JBOSS_BACKUP_`date '+%Y%m%d-%H:%M'` : \# :  Rename Backup Directory to /var/tmp/JBOSS_BACKUP_`date '+%Y%m%d-%H:%M'` : Unable to rename Backup Directory
+[ -d /var/tmp/JBOSS_BACKUP ] && rm -rf /var/tmp/JBOSS_BACKUP : \# : Remove Backup Directory : Unable to remove Backup Directory
+#### Make and save copies of the original files
+mkdir -p /var/tmp/JBOSS_BACKUP : \# : Create Backup Directory : Unable to Create Backup Directory
+cp /etc/init.d/jboss-eap /var/tmp/JBOSS_BACKUP/jboss-eap_backup : \# : Backing up jboss-eap to /var/tmp/JBOSS_BACKUP/ : Unable to Backup jboss-eap 
+cp /opt/jboss-eap/bin/standalone.conf /var/tmp/JBOSS_BACKUP/standalone.conf_backup : \# : Backing up standalone.conf to /var/tmp/JBOSS_BACKUP/ : Unable to Backup standalone.conf
+cp /opt/jboss-eap/standalone/configuration/standalone-full-ha.xml /var/tmp/JBOSS_BACKUP/standalone-full-ha.xml_backup : \# : Backing up standalone-full-ha.xml to /var/tmp/JBOSS_BACKUP/ : Unable to Backup standalone-full-ha.xml
+#### Stop Puppet and jboss-eap 
+service puppet stop : \# : Stopping Puppet : Unable to Stop Puppet 
+#### Added a while loop to ensyre the jboss-eap is stopped
+while x=1; do notstopped=$( service jboss-eap status | awk '{print $3}' ); if [[ "$notstopped" == "running" ]]; then service jboss-eap stop; else break; fi; done; : \# : Stopping jboss-eap : Unable to Stop jboss-eap
+[ -f /var/run/jboss-eap/jboss-eap.pid ] && \rm /var/run/jboss-eap/jboss-eap.pid : \# : Deleting jboss-eap.pid : Unable to deleted jboss-eap.pid
+chmod -x /etc/init.d/jboss-eap : \# : Changing permission on jboss-eap : Unable to change Permission on jboss-eap file 
+chown jboss-eap:jboss-eap /opt/jboss-eap : \# : Changing Ownership : Unable to change ownership
+#### Kill all Standalone Processes
+while x=1; do killprocess=$(ps -ef | grep standalone | grep -v grep | awk '{print $2}'); if [[ ${killprocess} != "" ]]; then for i in ${killprocess}; do kill -9 $i; done; else break; fi; done; : \# : Killing all Standalone Processes : Unable to Kill Standalone Processes
+#### Clean up all Areas
+rm -rf /opt/jboss-eap/standalone/data : \# : Cleaning up the standalone data area : Unable to Cleanup standalone data area 
+rm -rf /opt/jboss-eap/standalone/tmp : \# : Cleaning up the standalone tmp area : Unable to Cleanup standalone tmp areas 
+rm -f /opt/jboss-eap/standalone/deployments/*failed : \# : Cleaning up the standalone deployments area (failed files) : Unable to Cleanup standalone deployments areaai (failed files)
+rm -f /opt/jboss-eap/standalone/deployments/*deployed : \# : Cleaning up the standalone deployments area : Unable to Cleanup standalone deployments area (deployed area)
+#### PM Config
+mkdir -p /opt/ericsson/sdk/config : \# : Creating PM Config Directory : Unable to Create PM Config Directory
+\mv /tmp/pm_config/* /opt/ericsson/sdk/config/ : \# : Moving PM Config Files : Unable to Move PM Config Files
+#### create root & guest users in JBOSS per Node
+/opt/jboss-eap/bin/add-user.sh root shroot : \# : Creating the root user for JBOSS (Management) : Unable to Create root user for Jboss (Management)
+/opt/jboss-eap/bin/add-user.sh guest guestp : \# : Creating the guest user for JBOSS (Management) : Unable to Create root user for Jboss (Management)
+/opt/jboss-eap/bin/add-user.sh -a guest guestp : \# : Creating the guest user for JBOSS (Application) : Unable to Create root user for Jboss (Application)
+chmod +x /etc/init.d/jboss-eap : \# : Changing permission on jboss-eap : Unable to change Permission on jboss-eap file 
+#### Restart JBOSS and deploy available EAR's
+service jboss-eap start : \# : Starting jboss-eap : \# : Unable to Start jboss-eap
+while x=1; do notstopped=$( service puppet status | awk '{print $3}' ); if [[ "$notstopped" == "stopped" ]]; then service puppet start; else break; fi; done; : \# : Starting Puppet : Unable to Start Puppet
+/opt/jboss-eap/bin/jboss-cli.sh --connect --user=jboss-eap --password=jboss-eap -c "deploy /opt/jboss-eap/standalone/deployments/MediationCore.ear, deployment-info --name=MediationCore.ear" : \# : Deploying MediationCore.ear : Unable to Deployed MediationCore.ear
+/opt/jboss-eap/bin/jboss-cli.sh --connect --user=jboss-eap --password=jboss-eap -c "deploy /opt/jboss-eap/standalone/deployments/MediationService.ear, deployment-info --name=MediationService.ear" : \# : Deploying MediationService.ear : Unable to Deployed MediationService.ear
+/opt/jboss-eap/bin/jboss-cli.sh --connect --user=jboss-eap --password=jboss-eap -c "deploy /opt/ericsson/com.ericsson.nms.services.PMService/PMService.ear, deployment-info --name=PMService.ear" : \# : Deploying PMService.ear : Unable to Deployed PMService.ear

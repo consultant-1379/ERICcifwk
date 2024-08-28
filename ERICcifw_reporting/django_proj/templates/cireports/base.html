@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block releases %}
+    {%spaceless%}
+        {% ifnotequal product|stringformat:"s" "None" %}
+        <li><a id="release_menu" href="#">{{ product.name }} Releases</a>
+            <ul>
+            <li><a id="releases_link" href="/{{ product.name }}/releases">Releases</a></li>
+            {% if product.name == "ENM" %}
+                <li><a href="/{{ product.name }}/queue/">Latest Delivery Queue</a></li>
+            {% endif %}
+            <li><a id="pkgs_link"  href="/{{ product.name }}/packages">Packages & Testware</a></li>
+            <li><a href="/{{ product.name }}/testware">Mapped TestWare</a></li>
+            <li><a href="/{{ product.name }}/unmappedtestware">Unmapped TestWare</a></li>
+            <li><a href="/{{ product.name }}/testware/mapping">TestWare mapping</a></li>
+            <li><a href="/{{ product.name }}/primOptions/">PRIM</a></li>
+            <li><a href="/{{ product.name }}/viewComponentEntryPoint/">Artifact Association Management</a></li>
+            </ul>
+        </li>
+        {% endifnotequal %}
+    {% endspaceless %}
+{% endblock %}
+{% block fem %}
+    {%spaceless%}
+        {% ifnotequal product|stringformat:"s" "None" %}
+        <li><a href="#">{{ product.name }} Jenkins</a>
+            <ul>
+                {% if femObj %}
+                    {% for object in femObj %}
+                        {% if object.product.name == product.name %}
+                            <li><a href="{{ object.fem_link }}">{{ object.name }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <li><a href="/{{ product.name }}/releases/">No Information</a></li>
+                {% endif %}
+            </ul>
+        <li>
+        {% endifnotequal %}
+    {% endspaceless %}
+{% endblock %}
+

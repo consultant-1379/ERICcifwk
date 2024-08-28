@@ -1,0 +1,182 @@
+@font-face {
+    font-family: EricssonCapitalTT;
+    src: url('/static/fonts/EricssonCapitalTT.ttf') format('truetype');
+}
+
+.landingPage-title {
+    vertical-align: middle;
+    text-align:center;
+    font-family: EricssonCapitalTT, Arial, sans-serif;
+    font-weight: normal;
+    font-size: 4.2rem;
+    text-transform: uppercase;
+    line-height: 4.6rem;
+    color: #333;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    left: 0; 
+    right: 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: -webkit-linear-gradient(left, #a2c517 10%, #009046 30%, #0082b6 50%, #151f77 70%, #db0050 100%);
+    background-image: -webkit-gradient(linear, left top, right top, color-stop(0.1, #a2c517), color-stop(0.3, #009046), color-stop(0.5, #0082b6), color-stop(0.7, #151f77), color-stop(1, #db0050));
+    background-image: linear-gradient(left, #a2c517 10%, #009046 30%, #0082b6 50%, #151f77 70%, #db0050 100%);
+}
+
+.quickLink-title {
+    font-family: EricssonCapitalTT, Arial, sans-serif;
+    font-weight: normal;
+    font-size: 2.0rem;
+    text-transform: uppercase;
+    line-height: 1.9rem;
+    color: #333;
+    margin-bottom: 20px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: -webkit-linear-gradient(left, #a2c517 10%, #009046 30%, #0082b6 50%, #151f77 70%, #db0050 100%);
+    background-image: -webkit-gradient(linear, left top, right top, color-stop(0.1, #a2c517), color-stop(0.3, #009046), color-stop(0.5, #0082b6), color-stop(0.7, #151f77), color-stop(1, #db0050));
+    background-image: linear-gradient(left, #a2c517 10%, #009046 30%, #0082b6 50%, #151f77 70%, #db0050 100%);
+}
+
+.container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 500px;
+    width: 80%;
+    top: 20%;
+}
+
+.container table {
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+}
+
+.quickLinkBox {
+    top: 0;
+    bottom: 0;
+    width: 330px;
+    height: 180px;
+    margin: auto;
+    margin-top: 30px;
+    margin-left:  15px;
+    margin-right: 15px;
+    padding: 10px;
+    background-color: #f2f2f2;
+    box-shadow: #999 0 1px 3px;
+    border-color: #cccccc;
+    border-style: solid;
+    border-width: 10px;
+    border-radius: 10px;
+}
+
+.dropbtn {
+    left: 0;
+    background-color: #fff;
+    padding: 8px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    box-shadow: #999 0 1px 3px;
+}
+
+.dropdown {
+    float: left;
+    display: inline-block;
+    text-align:left;
+}
+
+.dropdown-content, .cn-dropdown-content {
+    display: none;
+    font-size: 12px;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 80px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-content li, .cn-dropdown-content li {
+    color: black;
+    padding: 6px 8px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content li:hover, .cn-dropdown-content li:hover {
+    background-color: #f1f1f1
+}
+
+.dropdown:hover .dropdown-content, .dropdown:hover .cn-dropdown-content  {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #f9f9f9;
+}
+
+.products-dropdown-content {
+    display: none;
+    font-size: 12px;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 80px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.products-dropdown-content li {
+    color: black;
+    padding: 6px 8px;
+    text-decoration: none;
+    display: block;
+}
+
+.products-dropdown-content li:hover {
+    background-color: #f1f1f1
+}
+
+.dropdown:hover .products-dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #f9f9f9;
+}
+
+.submitButton {
+    left: 90%;
+    background-image: url('/static/images/search_black_16px.svg');
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.6rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #ffffff;
+    width: 30px;
+    height: 2.4rem;
+    margin: 0.2rem 0.3rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #b3b3b3;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 0 0 #cccccc;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+}
+
+.submitButton:hover {
+    background: #d3d3d3 url('/static/images/search_black_16px.svg') no-repeat center;
+}
+
+.landingPage-table {
+    position: relative;
+}

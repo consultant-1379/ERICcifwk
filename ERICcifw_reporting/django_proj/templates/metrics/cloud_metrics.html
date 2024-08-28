@@ -1,0 +1,378 @@
+{% extends "base_newlookandfeel.html" %}
+
+{% block title %}Cloud Metrics{% endblock %}
+
+{% block content %}
+    <script>
+$(document).ready(function () {
+
+    $('#startDate').datetimepicker({
+        format: 'Y-m-d H:i',
+        minDate: '2014/09/10',
+        onShow: function (ct) {
+            if ($('#endDate').val()) {
+                dateTime = $('#endDate').val()
+                dateTime = dateTime.substring(0, 10);
+                dateTime = dateTime.replace(/[-]/g,'/');
+                this.setOptions({
+                    maxDate: dateTime
+                });
+            }
+
+        }
+
+    });
+    $('#endDate').datetimepicker({
+        format: 'Y-m-d H:i',
+        onShow: function (ct) {
+            if ($('#startDate').val()) {
+                dateTime = $('#startDate').val()
+                dateTime = dateTime.substring(0, 10);
+                dateTime = dateTime.replace(/[-]/g,'/');
+                this.setOptions({
+                    minDate: dateTime 
+                });
+            } else {
+                this.setOptions({
+                    minDate: '2014/09/10'
+                });
+            }
+            this.setOptions({
+                    maxDate: '0'
+                });
+
+        },
+
+        onChangeDateTime: function (dp, $input) {
+            var enddateinput = $input.val();
+        }
+
+    });
+    
+    //When SPP Server is changed clean up previous seleted option, summary table and dowload option from web page.
+    $('#sppServer').change(function(){
+        $('#metrics-summary').remove();
+        $('#download_csv').remove();
+        $('input[name=degradios]').attr('checked', false);
+        $('input[name=centerradios]').attr('checked', false);
+        $('#startDate').val("");
+        $('#endDate').val("");
+        populate_degs_select();
+        populate_event_types();
+});
+
+    var degArray;
+
+    var deg_select_box = $('#degs');
+    deg_select_box.change(getSelectedDegs);
+    $('#search_button').click(displaySummary);
+    $("#alldegs").change(searchAll);
+    $("#allcenters").change(searchAllCenters);
+    $("#allevents").change(searchAllEvents);
+
+    var datacenters_select_box = $('#datacenters');
+    var eventtypes_select_box = $('#eventtypes');
+
+    function populate_event_types() {
+        eventtypes_select_box.empty();
+        eventtypes_select_box.append('<option value="0">Loading...</option>');
+
+        $.ajax({
+            url: "/metrics/GetEventList/",
+            dataType: "json",
+            success: function (json) {
+                var eventtype_names = [];
+                eventtypes_select_box.empty();
+                $.each(json, function (i, item) {
+                    eventtypes_select_box.append('<option value="' + item.eventNameDb + '" id="' + item.eventNameDb + '">' + item.eventName + '</option>');
+                    eventtype_names.push(item.eventName);
+                });
+                eventtypes_select_box.prop("disabled", false);
+            },
+
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Issue loading Event List: "+ (errorThrown ? errorThrown : xhr.status));
+            }
+
+        });
+    }
+
+    function populate_degs_select() {
+        deg_select_box.empty();
+        datacenters_select_box.empty();
+        deg_select_box.append('<option value="0">Loading...</option>');
+        datacenters_select_box.append('<option value="0">Loading...</option>');
+        var sppPortalURL = $('#sppServer').val() + 'MigRas/index_with_orgvdcs.json';
+
+        $.ajax({
+            url: sppPortalURL,
+            dataType: "json",
+            success: function (json) {
+                degArray = json.MigRas;
+                var deg_names = [];
+                var datacenter_names = [];
+                deg_select_box.empty();
+                datacenters_select_box.empty();
+                $.each(json.MigRas, function (i, item) {
+                    deg_select_box.append('<option value="' + item.MigRa.id + '" id="' + item.MigRa.name + '">' + item.MigRa.name + '</option>');
+                    deg_names.push(item.MigRa.name);
+
+                    $.each(item.OrgVdc, function (i, item2) {
+                        datacenters_select_box.append('<option class="' + item.MigRa.name + '" value="' + item2.name + '" id="' + item2.name + '">' + item2.name + '</option>');
+                        datacenter_names.push(item2.name);
+                    });
+                });
+                deg_select_box.prop("disabled", false);
+
+
+                datacenters_select_box.prop("disabled", false);
+                getSelectedDegs();
+
+
+            },
+
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Issue connecting with the Cloud Portal: " + (errorThrown ? errorThrown : xhr.status));
+            }
+        });
+    }
+
+
+    function getSelectedDegs() {
+        $('#degs option:not(:selected)').each(function () {
+            $('#datacenters .' + $(this).text()).hide();
+            $('#datacenters .' + $(this).text()).attr('disabled', 'disabled');
+        });
+        $('#degs option:selected').each(function () {
+            $('#datacenters .' + $(this).text()).show();
+            $('#datacenters .' + $(this).text()).attr('disabled', false);
+        });
+        $('#datacenters option').prop('selected', false);
+        $('#datacenters option:enabled').prop('selected', true);
+    }
+
+    function displaySummary() {
+        var datacenterarr = [];
+        var degarr = [];
+        var eventarr = [];
+        $('#datacenters option:selected').each(function () {
+            datacenterarr.push({
+                "name": $(this).text()
+            });
+        });
+
+        $('#degs option:selected').each(function () {
+            degarr.push({
+                "name": $(this).text()
+            });
+        });
+
+
+        $('#eventtypes option:selected').each(function () {
+            eventarr.push({
+                "name": $(this).val()
+            });
+        });
+
+
+        if (!$('#startDate').val()) {
+            alert("Please select a date range");
+            return;
+        }
+        if (datacenterarr.length === 0) {
+            alert("Please select a Datacenter from the list or use Select All DataCenters checkbox");
+            return;
+
+        }
+
+        if (eventarr.length === 0) {
+            alert("Please select an Event from the list or use Select All Events checkbox");
+            return;
+
+        }
+
+        var start = $('#startDate').val();
+        var end = $('#endDate').val();
+        var finalarr = {
+            "dataCenters": datacenterarr,
+                "eventTypes": eventarr,
+                "startTime": [{
+                "time": $('#startDate').val() + ":00"
+            }],
+                "endTime": [{
+                "time": $('#endDate').val() + ":00"
+            }]
+        };
+            $('div#dynamic').html('<img src = "/static/images/loading.gif" >');
+            doRest(finalarr, start, end);
+
+
+    }
+
+
+    function doRest(finalarr, start, end) {
+        
+        $('#search_button').attr('disabled', 'disabled');
+        var sppPortalURL = $('#sppServer').val() + 'events/index/.json';
+        $.ajax({
+            type: "POST",
+            url: sppPortalURL,
+            data: finalarr,
+            success: function (json) {
+                var tester = json;
+                doBuildInfoRequest(tester, start, end);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Could not retrieve query result: " + (errorThrown ? errorThrown : xhr.status));
+            },
+            dataType: "json"
+        });
+    }
+
+    function doBuildInfoRequest(tester, start, end) {
+        $.ajax({
+            type: 'POST',
+            url: "/metricdata/",
+            dataType: "html",
+            data: {
+                "json": JSON.stringify(tester),
+                "start": JSON.stringify(start),
+                "end": JSON.stringify(end),
+                "degArray": JSON.stringify(degArray)
+            },
+            success: function (html) {
+                $('div#dynamic').html(html);
+                $('#search_button').attr('disabled', false);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                if (xhr.status !== 0) {
+                    alert("Unable to load summary table: " + (errorThrown ? errorThrown : xhr.status));
+                }
+            }
+        });
+    }
+
+    function searchAll() {
+
+        if ($("#alldegs").is(':checked')) {
+
+            $('#degs').attr('disabled', 'disabled');
+            $('#degs option').prop('selected', true);
+            $('#degs').trigger("change");
+        } else {
+            $('#degs').removeAttr('disabled');
+        }
+
+    }
+
+    function searchAllCenters() {
+        if ($("#allcenters").is(":checked")) {
+            $('#degs option:not(:selected)').each(function () {
+                $('#datacenters .' + $(this).text()).hide();
+                $('#datacenters .' + $(this).text()).attr('disabled', 'disabled');
+            });
+            $('#degs option:selected').each(function () {
+                $('#datacenters .' + $(this).text()).show();
+                $('#datacenters .' + $(this).text()).attr('disabled', false);
+            });
+            $('#datacenters option').prop('selected', false);
+            $('#datacenters option:enabled').prop('selected', true);
+            $('#datacenters').trigger("change");
+        } else {
+            $('#datacenters').removeAttr('disabled');
+
+        }
+    }
+
+    function searchAllEvents() {
+        if ($("#allevents").is(":checked")) {
+            $('#eventtypes').attr('disabled', 'disabled');
+            $('#eventtypes option').prop('selected', true);
+            $('#eventtypes').trigger("change");
+        } else {
+            $('#eventtypes').removeAttr('disabled');
+
+        }
+    }
+
+
+    populate_degs_select();
+    populate_event_types();
+});
+</script>
+<div class="general-container">
+    <h2 class="generalPageNewLook-title">Cloud Performance Metrics
+        <a class="img" href="https://confluence-oss.seli.wh.rnd.internal.ericsson.com/display/CIOSS/Cloud+Metrics" title="Cloud Help" target="_blank">
+            <img src="/static/images/question.png"/>
+        </a>
+    </h2>
+    <div class="generic-sub-title">
+        <div class="well" style="box-shadow: 3px 3px 15px #888888 !important;">
+            <label>Select SPP Server</label>
+            <select id="sppServer">
+                {% for key,value in serverDict.servers %}
+                <option value="{{ value }}">{{ key }}</option>
+                <br><br>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="well metrics-content">
+                    <label>Select All PDG's</label>
+                    <input type="checkbox" id="alldegs" name="degradios"/>
+                    <br>
+                    <br>
+                    <label>Select PDG from List:</label>
+                    <br>
+                    <select id="degs" multiple class="metrics-content-selectBox">
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="well metrics-content">
+                    <label>Select All DataCenters</label>
+                    <input type="checkbox" id="allcenters" name="centerradios"/>
+                    <br>
+                    <br>
+                    <label for="datacenters">Select DataCenter from List:</label>
+                    <br>
+                    <select id="datacenters" multiple class="metrics-content-selectBox">
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="well metrics-content">
+                    <label>Select All Event Types</label>
+                    <input type="checkbox" id="allevents" name="degradios"/>
+                    <br>
+                    <br>
+                    <label for="eventtypes">Select Event Type from List:</label>
+                    <br>
+                    <select id="eventtypes" multiple class="metrics-content-selectBox"></select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="well metrics-content">
+                    <label>Select Date Range:</label>
+                    <br>
+                    <label>Start Date:</label>
+                    <br>
+                    <input name="startDate" id="startDate" maxlength="19" size="15" type="text" style="margin:10px;">
+                    <br>
+                    <label>End Date:</label>
+                    <br>
+                    <input name="endDate" id="endDate" maxlength="19" size="15" type="text" style="margin:10px;">
+                </div>
+            </div>
+            <br>
+            <div style="float:left;margin:10px; width:100%">
+                <input type="button" id="search_button" value="Display Summary">
+            </div>
+            <div id='dynamic'>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
